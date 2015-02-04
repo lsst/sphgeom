@@ -1,9 +1,4 @@
-*.o
-*.so
-*.os
-*.pyc
-*_wrap.cc
-*Lib.py
+build
 *~
 core.*
 .sconf_temp
@@ -13,4 +8,5 @@ doc/doxygen.conf
 doc/html
 doc/xml
 doc/*.tag
-python/lsst/__init__.pyc
+include
+lib
