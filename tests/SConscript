@@ -1,0 +1,148 @@
+from __future__ import with_statement
+import os
+import re
+import subprocess
+import sys
+import traceback
+from SCons.Errors import StopError
+
+Import('env')
+
+if not GetOption('no_color'):
+    # If the terminal supports colored text, use it for test-case PASS/FAIL
+    # messages.
+    def _run(args):
+        try:
+            p = subprocess.Popen(args=args, stdout=subprocess.PIPE)
+            output, _ = p.communicate()
+            if not p.poll():
+                return output
+        except:
+            pass
+        return ''
+    _reset  = _run('tput sgr0'.split())
+    _dim    = _run('tput dim'.split())
+    _bold   = _run('tput bold'.split())
+    _red    = _bold + _run('tput setaf 1'.split())
+    _green  = _run('tput setaf 2'.split())
+    _yellow = _bold + _run('tput setaf 3'.split())
+    def red(text): return _red + text + _reset
+    def yellow(text): return _yellow + text + _reset
+    def green(text): return _green + text + _reset
+    def dim(text): return _dim + text + _reset
+else:
+    def red(text): return text
+    def yellow(text): return text
+    def green(text): return text
+    def dim(text): return text
+
+
+def runTest(target, source, env):
+    if len(target) != 1 or len(source) != 1:
+        raise StopError('runTest requires exactly one target and one source')
+    tgt = str(target[0])
+    src = str(source[0])
+    retcode = 0
+    output = ''
+    with open(tgt, 'w') as f:
+        try:
+            p = subprocess.Popen(args=src, stdout=subprocess.PIPE, stderr=f)
+            output, _ = p.communicate()
+            retcode = p.poll()
+        except:
+            retcode = 1
+            traceback.print_exc(file=f)
+    if retcode == 0:
+        print green(src + '\n\t' + output)
+    else:
+        env.Append(FAILED_TESTS=source)
+        os.rename(tgt, tgt + '.failed')
+        print >>sys.stderr, red(
+            '%s\n\t%s\t(see %s.failed for details)' % (src, output, tgt))
+    # Always indicate success by returning 0. This stops a unit test
+    # failure from aborting the build before other unit tests have
+    # been run.
+    return 0
+
+def colorize(fname):
+    """colorize imparts visual impact to weakly covered source files in
+       gcovr summary reports.
+    """
+    with open(fname, 'r') as f:
+        for line in f:
+            format = lambda x: x
+            # Choose a line color based on cover percentage,
+            # ranging from green (good) to red (bad).
+            m = re.search(r'\s([0-9-]+)%\s', line)
+            if m:
+                try:
+                    percentage = int(m.group(1))
+                except ValueError:
+                    format = dim
+                else:
+                    if percentage >= 90: format = green
+                    elif percentage >= 75: format = yellow
+                    else: format = red
+            sys.stdout.write(format(line))
+
+def runGcovr(f):
+    try:
+        args = ['gcovr', '-r', 'build/debug', '-p', '-e', '.*Test.*']
+        retcode = subprocess.call(args, stdout=f, stderr=f)
+        if retcode == 0:
+            args.append('-b')
+            retcode = subprocess.call(args, stdout=f, stderr=f)
+    except:
+        retcode = 1
+        traceback.print_exc(file=f)
+    return retcode == 0
+
+def summarizeTests(target, source, env):
+    """summarizeTests prints an overall test pass/fail count and aborts the
+       build if any unit tests failed. If coverage has been enabled, it also
+       displays code coverage summary statistics.
+    """
+    if len(target) != 1:
+        raise StopError('summarizeTests requires exactly one target')
+    tgt = str(target[0])
+    numTests = len(source)
+    numFailed = len(env.Flatten(env.get('FAILED_TESTS', [])))
+    with open(tgt, 'w') as f:
+        if GetOption('coverage'):
+            if runGcovr(f):
+                f.flush()
+                colorize(tgt)
+            else:
+                print >>sys.stderr, red(
+                    'Failed to run gcovr (see %s.failed)!' % tgt)
+                return 1
+        if numFailed:
+            msg = '%s/%s tests FAILED!' % (numFailed, numTests)
+        else:
+            msg = '%s/%s tests succeeded!' % (numTests, numTests)
+        f.write(msg)
+    if numFailed:
+        os.rename(tgt, tgt + '.failed')
+        print >>sys.stderr, red(msg)
+        return 1
+    print green(msg)
+
+env = env.Clone()
+env.Append(CPPPATH=['../src'])
+env.Append(LIBPATH=['../src'])
+env.Append(RPATH=[Dir('.').abspath + '/../src'])
+env.Prepend(LIBS=['sphgeom'])
+env.Append(BUILDERS={
+    'Test': Builder(action=runTest, suffix='.log'),
+    'TestSummary': Builder(action=summarizeTests),
+})
+tests = []
+for source in env.Glob('*Test.cc'):
+    t = env.Test(env.Program(source))
+    if GetOption('coverage'):
+        # Serialize unit test execution by telling SCons that all unit tests
+        # produce the same dummy file. This avoids potential corruption caused
+        # by parallel updates to gcov .gcda files.
+        env.SideEffect('serialize-tests', t)
+    tests.append(t)
+env.Alias('test', env.TestSummary('test-summary', tests))
