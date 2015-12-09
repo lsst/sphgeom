@@ -23,10 +23,10 @@
 /// \file
 /// \brief This file contains the NormalizedAngle class implementation.
 
-#include "NormalizedAngle.h"
+#include "lsst/sphgeom/NormalizedAngle.h"
 
-#include "LonLat.h"
-#include "Vector3d.h"
+#include "lsst/sphgeom/LonLat.h"
+#include "lsst/sphgeom/Vector3d.h"
 
 
 namespace lsst {

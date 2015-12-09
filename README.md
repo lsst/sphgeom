@@ -1,8 +1,6 @@
 sphgeom: spherical geometry primitives
 ======================================
 
-[![Build Status](https://api.travis-ci.org/lsst/sphgeom.svg)](https://travis-ci.org/lsst/sphgeom)
-
 Overview
 --------
 

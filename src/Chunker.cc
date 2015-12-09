@@ -23,7 +23,7 @@
 /// \file
 /// \brief This file contains the Chunker class implementation.
 
-#include "Chunker.h"
+#include "lsst/sphgeom/Chunker.h"
 
 namespace lsst {
 namespace sphgeom {

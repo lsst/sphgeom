@@ -25,8 +25,8 @@
 
 #include <limits>
 
-#include "LonLat.h"
-#include "Vector3d.h"
+#include "lsst/sphgeom/LonLat.h"
+#include "lsst/sphgeom/Vector3d.h"
 
 #include "Test.h"
 

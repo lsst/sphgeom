@@ -23,7 +23,7 @@
 /// \file
 /// \brief This file contains tests for the Angle class.
 
-#include "BigInteger.h"
+#include "lsst/sphgeom/BigInteger.h"
 
 #include "Test.h"
 

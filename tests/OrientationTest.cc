@@ -23,7 +23,7 @@
 /// \file
 /// \brief This file contains tests for the orientation function.
 
-#include "Orientation.h"
+#include "lsst/sphgeom/Orientation.h"
 
 #include "Test.h"
 

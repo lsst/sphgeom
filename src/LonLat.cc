@@ -23,12 +23,12 @@
 /// \file
 /// \brief This file contains the LonLat class implementation.
 
-#include "LonLat.h"
+#include "lsst/sphgeom/LonLat.h"
 
 #include <cmath>
 #include <ostream>
 
-#include "Vector3d.h"
+#include "lsst/sphgeom/Vector3d.h"
 
 
 namespace lsst {

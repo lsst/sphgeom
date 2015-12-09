@@ -23,15 +23,15 @@
 /// \file
 /// \brief This file contains the Box class implementation.
 
-#include "Box.h"
+#include "lsst/sphgeom/Box.h"
 
 #include <cmath>
 #include <ostream>
 
-#include "Circle.h"
-#include "ConvexPolygon.h"
-#include "Ellipse.h"
-#include "Utils.h"
+#include "lsst/sphgeom/Circle.h"
+#include "lsst/sphgeom/ConvexPolygon.h"
+#include "lsst/sphgeom/Ellipse.h"
+#include "lsst/sphgeom/Utils.h"
 
 
 namespace lsst {

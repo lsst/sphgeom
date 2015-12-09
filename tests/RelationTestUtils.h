@@ -28,7 +28,7 @@
 ///        relations between regions. It is useful both for
 ///        spherical regions as well as for 1D intervals.
 
-#include "SpatialRelation.h"
+#include "lsst/sphgeom/SpatialRelation.h"
 
 
 namespace lsst {

@@ -23,11 +23,11 @@
 /// \file
 /// \brief This file contains utility method implementations.
 
-#include "Utils.h"
+#include "lsst/sphgeom/Utils.h"
 
 #include <cmath>
 
-#include "UnitVector3d.h"
+#include "lsst/sphgeom/UnitVector3d.h"
 
 
 namespace lsst {

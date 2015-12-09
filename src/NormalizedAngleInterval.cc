@@ -23,12 +23,12 @@
 /// \file
 /// \brief This file contains the NormalizedAngleInterval class implementation.
 
-#include "NormalizedAngleInterval.h"
+#include "lsst/sphgeom/NormalizedAngleInterval.h"
 
 #include <ostream>
 #include <stdexcept>
 
-#include "SpatialRelation.h"
+#include "lsst/sphgeom/SpatialRelation.h"
 
 
 namespace lsst {

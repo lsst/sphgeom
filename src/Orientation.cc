@@ -23,11 +23,11 @@
 /// \file
 /// \brief This file contains the implementation of orientation().
 
-#include "Orientation.h"
+#include "lsst/sphgeom/Orientation.h"
 
 #include <algorithm>
 
-#include "BigInteger.h"
+#include "lsst/sphgeom/BigInteger.h"
 
 
 namespace lsst {

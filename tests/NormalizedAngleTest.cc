@@ -26,9 +26,9 @@
 #include <sstream>
 #include <string>
 
-#include "LonLat.h"
-#include "NormalizedAngle.h"
-#include "Vector3d.h"
+#include "lsst/sphgeom/LonLat.h"
+#include "lsst/sphgeom/NormalizedAngle.h"
+#include "lsst/sphgeom/Vector3d.h"
 
 #include "Test.h"
 

@@ -23,15 +23,15 @@
 /// \file
 /// \brief This file contains the ConvexPolygon class implementation.
 
-#include "ConvexPolygon.h"
+#include "lsst/sphgeom/ConvexPolygon.h"
 
 #include <ostream>
 
-#include "Box.h"
-#include "Circle.h"
-#include "Ellipse.h"
-#include "Orientation.h"
-#include "Utils.h"
+#include "lsst/sphgeom/Box.h"
+#include "lsst/sphgeom/Circle.h"
+#include "lsst/sphgeom/Ellipse.h"
+#include "lsst/sphgeom/Orientation.h"
+#include "lsst/sphgeom/Utils.h"
 
 
 namespace lsst {

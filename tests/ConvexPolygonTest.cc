@@ -25,9 +25,9 @@
 
 #include <vector>
 
-#include "Box.h"
-#include "Circle.h"
-#include "ConvexPolygon.h"
+#include "lsst/sphgeom/Box.h"
+#include "lsst/sphgeom/Circle.h"
+#include "lsst/sphgeom/ConvexPolygon.h"
 
 #include "Test.h"
 

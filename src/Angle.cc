@@ -23,7 +23,7 @@
 /// \file
 /// \brief This file contains the Angle class implementation.
 
-#include "Angle.h"
+#include "lsst/sphgeom/Angle.h"
 
 #include <cstdio>
 #include <ostream>

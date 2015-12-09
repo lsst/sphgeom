@@ -23,7 +23,7 @@
 /// \file
 /// \brief This file contains the BigInteger class implementation.
 
-#include "BigInteger.h"
+#include "lsst/sphgeom/BigInteger.h"
 
 #include <algorithm>
 

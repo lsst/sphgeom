@@ -23,7 +23,7 @@
 /// \file
 /// \brief This file contains tests for the Matrix3d class.
 
-#include "Matrix3d.h"
+#include "lsst/sphgeom/Matrix3d.h"
 
 #include "Test.h"
 
