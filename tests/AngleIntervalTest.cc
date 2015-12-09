@@ -23,8 +23,8 @@
 /// \file
 /// \brief This file contains tests for the AngleInterval class.
 
-#include "AngleInterval.h"
-#include "SpatialRelation.h"
+#include "lsst/sphgeom/AngleInterval.h"
+#include "lsst/sphgeom/SpatialRelation.h"
 
 #include "Test.h"
 #include "RelationTestUtils.h"

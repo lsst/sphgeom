@@ -25,7 +25,7 @@
 
 #include <stdexcept>
 
-#include "NormalizedAngleInterval.h"
+#include "lsst/sphgeom/NormalizedAngleInterval.h"
 
 #include "Test.h"
 #include "RelationTestUtils.h"

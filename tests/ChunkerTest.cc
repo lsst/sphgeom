@@ -23,8 +23,8 @@
 /// \file
 /// \brief This file contains tests for the Chunker class.
 
-#include "Box.h"
-#include "Chunker.h"
+#include "lsst/sphgeom/Box.h"
+#include "lsst/sphgeom/Chunker.h"
 
 #include "Test.h"
 

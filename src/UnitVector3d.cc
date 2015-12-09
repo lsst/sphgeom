@@ -23,7 +23,7 @@
 /// \file
 /// \brief This file contains the Vector3d class implementation.
 
-#include "UnitVector3d.h"
+#include "lsst/sphgeom/UnitVector3d.h"
 
 #include <cstdio>
 #include <ostream>

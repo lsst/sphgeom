@@ -23,13 +23,13 @@
 /// \file
 /// \brief This file contains the Circle class implementation.
 
-#include "Circle.h"
+#include "lsst/sphgeom/Circle.h"
 
 #include <ostream>
 
-#include "Box.h"
-#include "ConvexPolygon.h"
-#include "Ellipse.h"
+#include "lsst/sphgeom/Box.h"
+#include "lsst/sphgeom/ConvexPolygon.h"
+#include "lsst/sphgeom/Ellipse.h"
 
 
 namespace lsst {

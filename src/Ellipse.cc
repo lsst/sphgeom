@@ -23,14 +23,14 @@
 /// \file
 /// \brief This file contains the Ellipse class implementation.
 
-#include "Ellipse.h"
+#include "lsst/sphgeom/Ellipse.h"
 
 #include <cmath>
 #include <ostream>
 
-#include "Box.h"
-#include "Circle.h"
-#include "ConvexPolygon.h"
+#include "lsst/sphgeom/Box.h"
+#include "lsst/sphgeom/Circle.h"
+#include "lsst/sphgeom/ConvexPolygon.h"
 
 
 namespace lsst {

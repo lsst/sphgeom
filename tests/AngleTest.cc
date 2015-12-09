@@ -26,7 +26,7 @@
 #include <sstream>
 #include <string>
 
-#include "NormalizedAngle.h"
+#include "lsst/sphgeom/NormalizedAngle.h"
 
 #include "Test.h"
 

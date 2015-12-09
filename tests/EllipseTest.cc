@@ -26,9 +26,9 @@
 #include <memory>
 #include <vector>
 
-#include "Box.h"
-#include "Circle.h"
-#include "Ellipse.h"
+#include "lsst/sphgeom/Box.h"
+#include "lsst/sphgeom/Circle.h"
+#include "lsst/sphgeom/Ellipse.h"
 
 #include "Test.h"
 #include "RelationTestUtils.h"

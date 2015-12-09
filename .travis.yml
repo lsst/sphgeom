@@ -1,6 +1,0 @@
-language: cpp
-compiler:
-  - clang
-  - gcc
-script: scons test install
-after_failure: cat build/release/tests/*.failed

@@ -23,7 +23,7 @@
 /// \file
 /// \brief This file contains tests for the UnitVector3d class.
 
-#include "UnitVector3d.h"
+#include "lsst/sphgeom/UnitVector3d.h"
 
 #include "Test.h"
 

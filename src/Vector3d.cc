@@ -23,13 +23,13 @@
 /// \file
 /// \brief This file contains the Vector3d class implementation.
 
-#include "Vector3d.h"
+#include "lsst/sphgeom/Vector3d.h"
 
 #include <cstdio>
 #include <ostream>
 
-#include "Angle.h"
-#include "UnitVector3d.h"
+#include "lsst/sphgeom/Angle.h"
+#include "lsst/sphgeom/UnitVector3d.h"
 
 
 namespace lsst {
