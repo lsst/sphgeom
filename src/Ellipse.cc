@@ -96,6 +96,14 @@ Ellipse::Ellipse(UnitVector3d const & f1, UnitVector3d const & f2, Angle alpha) 
     return;
 }
 
+/*
+ * @brief Create an ellipse representation
+ *
+ * @param center: ellipse center (ra, decl)
+ * @param alpha: size of semi-major-axis angle in radian
+ * @param beta: size of semi-minor-axis angle in radian
+ * @param orientation: ellipse orientation, in radian
+ */
 Ellipse::Ellipse(UnitVector3d const & center,
                  Angle alpha,
                  Angle beta,
