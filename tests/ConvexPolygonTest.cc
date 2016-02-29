@@ -151,6 +151,58 @@ TEST_CASE(CircleRelations) {
     CHECK(p.relate(Circle(-UnitVector3d::Z(), 1)) == DISJOINT);
 }
 
+TEST_CASE(PolygonRelations1) {
+    ConvexPolygon t = makeSimpleTriangle();
+    std::vector<UnitVector3d> points;
+    points.push_back(UnitVector3d::X());
+    points.push_back(UnitVector3d::Y());
+    points.emplace_back(1, 1, 1);
+    ConvexPolygon p = ConvexPolygon::convexHull(points);
+    CHECK(p.relate(p) == (CONTAINS | INTERSECTS | WITHIN));
+    CHECK(t.relate(p) == (CONTAINS | INTERSECTS));
+    CHECK(p.relate(t) == (INTERSECTS | WITHIN));
+}
+
+TEST_CASE(PolygonRelations2) {
+    // These are all degenerate cases where the intersection of
+    // two polygons is an edge or an edge segment.
+    ConvexPolygon t = makeSimpleTriangle();
+    std::vector<UnitVector3d> points;
+    points.emplace_back(1, 2, 0);
+    points.emplace_back(2, 1, 0);
+    points.push_back(-UnitVector3d::Z());
+    ConvexPolygon p = ConvexPolygon::convexHull(points);
+    CHECK(p.relate(t) == INTERSECTS);
+    CHECK(t.relate(p) == INTERSECTS);
+    points.clear();
+    points.emplace_back(2, -1, 0);
+    points.emplace_back(-1, 2, 0);
+    points.push_back(-UnitVector3d::Z());
+    p = ConvexPolygon::convexHull(points);
+    CHECK(p.relate(t) == INTERSECTS);
+    CHECK(t.relate(p) == INTERSECTS);
+    points.clear();
+    points.emplace_back(1, 1, 0);
+    points.emplace_back(-1, 2, 0);
+    points.push_back(-UnitVector3d::Z());
+    p = ConvexPolygon::convexHull(points);
+    CHECK(p.relate(t) == INTERSECTS);
+    CHECK(t.relate(p) == INTERSECTS);
+}
+
+TEST_CASE(PolygonRelations3) {
+    ConvexPolygon p1 = makeSimpleTriangle();
+    ConvexPolygon p2 = makeNgon(UnitVector3d::X(), UnitVector3d(1, 1, 1), 3);
+    std::vector<UnitVector3d> points;
+    points.emplace_back(2, -1, 1);
+    points.emplace_back(-1, 2, 1);
+    points.emplace_back(2, 2, -1);
+    ConvexPolygon p3 = ConvexPolygon::convexHull(points);
+    CHECK(p1.relate(p2) == INTERSECTS);
+    CHECK(p1.relate(p3) == INTERSECTS);
+    CHECK(p2.relate(p3) == INTERSECTS);
+}
+
 TEST_CASE(BoundingBox) {
     ConvexPolygon p = makeNgon(UnitVector3d::Z(), UnitVector3d(1, 1, 1), 4);
     Box b = p.getBoundingBox();

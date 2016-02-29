@@ -576,16 +576,56 @@ int ConvexPolygon::relate(Circle const & c) const {
     return DISJOINT;
 }
 
-int ConvexPolygon::relate(ConvexPolygon const &) const {
-    // TODO(smm): Implement this. It should be possible to determine whether
-    // the boundaries intersect by adapting the following method to the sphere:
+int ConvexPolygon::relate(ConvexPolygon const & p) const {
+    // TODO(smm): Make this more performant. Instead of the current quadratic
+    // implementation, it should be possible to determine whether the boundaries
+    // intersect by adapting the following method to the sphere:
     //
     // A new linear algorithm for intersecting convex polygons
     // Computer Graphics and Image Processing, Volume 19, Issue 1, May 1982, Page 92
     // Joseph O'Rourke, Chi-Bin Chien, Thomas Olson, David Naddor
     //
     // http://www.sciencedirect.com/science/article/pii/0146664X82900235
-    throw std::runtime_error("Not implemented");
+    VertexIterator const e = _vertices.end();
+    VertexIterator const ep = p._vertices.end();
+    size_t n = 0; // number of vertices of this polygon in p
+    size_t m = 0; // number of vertices of p in this polygon
+    for (VertexIterator a = _vertices.begin(); a != e; ++a) {
+        n += p.contains(*a);
+    }
+    for (VertexIterator c = p._vertices.begin(); c != ep; ++c) {
+        m += contains(*c);
+    }
+    if (n == _vertices.size()) {
+        if (m == p._vertices.size()) {
+            return CONTAINS | INTERSECTS | WITHIN;
+        }
+        return INTERSECTS | WITHIN;
+    } else if (m == p._vertices.size()) {
+        return CONTAINS | INTERSECTS;
+    }
+    if (n > 0 || m > 0) {
+        // There is at least one point common to this polygon and p.
+        return INTERSECTS;
+    }
+    // Consider all possible edge pairs and look for a crossing.
+    for (VertexIterator a = e - 1, b = _vertices.begin();
+         b != e; a = b, ++b) {
+        for (VertexIterator c = ep - 1, d = p._vertices.begin();
+             d != ep; c = d, ++d) {
+            int acd = orientation(*a, *c, *d);
+            int bcd = orientation(*b, *c, *d);
+            if (acd == -bcd && acd != 0) {
+                int cab = orientation(*c, *a, *b);
+                int dab = orientation(*d, *a, *b);
+                if (cab == -dab && cab != 0) {
+                    // Found a non-degenerate edge crossing
+                    return INTERSECTS;
+                }
+            }
+        }
+    }
+    return DISJOINT;
 }
 
 int ConvexPolygon::relate(Ellipse const & e) const {
