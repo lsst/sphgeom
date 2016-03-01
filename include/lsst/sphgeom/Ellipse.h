@@ -271,7 +271,9 @@ public:
     Ellipse complemented() const { return Ellipse(*this).complement(); }
 
     // Region interface
-    virtual Ellipse * clone() const { return new Ellipse(*this); }
+    virtual std::unique_ptr<Region> clone() const {
+        return std::unique_ptr<Ellipse>(new Ellipse(*this));
+    }
 
     virtual Box getBoundingBox() const;
     virtual Box3d getBoundingBox3d() const;

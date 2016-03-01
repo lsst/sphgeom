@@ -88,6 +88,14 @@ TEST_CASE(Stream) {
                       ")");
 }
 
+TEST_CASE(Clone) {
+    ConvexPolygon p = makeSimpleTriangle();
+    std::unique_ptr<Region> r(p.clone());
+    REQUIRE(dynamic_cast<ConvexPolygon *>(r.get()) != 0);
+    CHECK(*dynamic_cast<ConvexPolygon *>(r.get()) == p);
+    CHECK(dynamic_cast<ConvexPolygon *>(r.get()) != &p);
+}
+
 TEST_CASE(Construction) {
     std::vector<UnitVector3d> points;
     points.push_back(UnitVector3d(1, 2, 1));

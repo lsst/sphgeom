@@ -82,7 +82,7 @@ TEST_CASE(Stream) {
 
 TEST_CASE(Clone) {
     Ellipse e(UnitVector3d::X(), Angle(0.5));
-    std::auto_ptr<Region> r(e.clone());
+    std::unique_ptr<Region> r(e.clone());
     REQUIRE(dynamic_cast<Ellipse *>(r.get()) != 0);
     CHECK(*dynamic_cast<Ellipse *>(r.get()) == e);
     CHECK(dynamic_cast<Ellipse *>(r.get()) != &e);

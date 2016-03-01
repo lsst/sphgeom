@@ -82,7 +82,10 @@ public:
     UnitVector3d getCentroid() const;
 
     // Region interface
-    virtual ConvexPolygon * clone() const { return new ConvexPolygon(*this); }
+    virtual std::unique_ptr<Region> clone() const {
+        return std::unique_ptr<ConvexPolygon>(new ConvexPolygon(*this));
+    }
+
 
     virtual Box getBoundingBox() const;
     virtual Box3d getBoundingBox3d() const;

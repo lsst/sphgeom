@@ -218,7 +218,9 @@ public:
     int relate(UnitVector3d const & v) const;
 
     // Region interface
-    virtual Circle * clone() const { return new Circle(*this); }
+    virtual std::unique_ptr<Region> clone() const {
+        return std::unique_ptr<Circle>(new Circle(*this));
+    }
 
     virtual Box getBoundingBox() const;
     virtual Box3d getBoundingBox3d() const;

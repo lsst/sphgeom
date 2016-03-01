@@ -23,6 +23,8 @@
 #ifndef LSST_SPHGEOM_REGION_H_
 #define LSST_SPHGEOM_REGION_H_
 
+#include <memory>
+
 /// \file
 /// \brief This file defines an interface for spherical regions.
 
@@ -74,10 +76,7 @@ public:
     virtual ~Region() {}
 
     /// `clone` returns a deep copy of this region.
-    ///
-    /// TODO(smm): Once Qserv moves to C++11, change this to return a
-    ///            std::unique_ptr<Region> rather than a raw pointer.
-    virtual Region * clone() const = 0;
+    virtual std::unique_ptr<Region> clone() const = 0;
 
     /// `getBoundingBox` returns a bounding-box for this region.
     virtual Box getBoundingBox() const = 0;

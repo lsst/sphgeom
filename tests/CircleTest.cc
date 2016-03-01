@@ -108,7 +108,7 @@ TEST_CASE(Construction) {
 
 TEST_CASE(Clone) {
     Circle c(UnitVector3d::X(), 0.5);
-    std::auto_ptr<Region> r(c.clone());
+    std::unique_ptr<Region> r(c.clone());
     REQUIRE(dynamic_cast<Circle *>(r.get()) != 0);
     CHECK(*dynamic_cast<Circle *>(r.get()) == c);
     CHECK(dynamic_cast<Circle *>(r.get()) != &c);

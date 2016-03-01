@@ -296,7 +296,9 @@ public:
     double getArea() const;
 
     // Region interface
-    virtual Box * clone() const { return new Box(*this); }
+    virtual std::unique_ptr<Region> clone() const {
+        return std::unique_ptr<Box>(new Box(*this));
+    }
 
     virtual Box getBoundingBox() const { return *this; }
     virtual Box3d getBoundingBox3d() const;

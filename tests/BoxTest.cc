@@ -102,7 +102,7 @@ TEST_CASE(Clone) {
     Box b(LonLat::fromDegrees(45, 45),
           Angle::fromDegrees(15),
           Angle::fromDegrees(15));
-    std::auto_ptr<Region> r(b.clone());
+    std::unique_ptr<Region> r(b.clone());
     REQUIRE(dynamic_cast<Box *>(r.get()) != 0);
     CHECK(*dynamic_cast<Box *>(r.get()) == b);
     CHECK(dynamic_cast<Box *>(r.get()) != &b);
