@@ -254,7 +254,7 @@ public:
 
     ///@{
     /// `expandedTo` returns the smallest box containing the union of
-    /// this interval and x. The result is not always unique, and
+    /// this box and x. The result is not always unique, and
     /// `x.expandedTo(y)` is not guaranteed to equal `y.expandedTo(x)`.
     Box expandedTo(LonLat const & x) const { return Box(*this).expandTo(x); }
     Box expandedTo(Box const & x) const { return Box(*this).expandTo(x); }
