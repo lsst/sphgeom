@@ -18,6 +18,7 @@ tests/AngleIntervalTest
 tests/AngleTest
 tests/BigIntegerTest
 tests/BoxTest
+tests/Box3dTest
 tests/ChunkerTest
 tests/CircleTest
 tests/ConvexPolygonTest
