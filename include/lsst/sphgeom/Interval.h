@@ -27,7 +27,6 @@
 /// \brief This file defines a template representing closed real intervals.
 
 #include <algorithm>
-#include <ostream>
 
 #include "SpatialRelation.h"
 
@@ -293,13 +292,6 @@ int Interval<Derived, Scalar>::relate(
         return INTERSECTS | WITHIN;
     }
     return INTERSECTS;
-}
-
-template <typename Derived, typename Scalar>
-std::ostream & operator<<(std::ostream & os,
-                          Interval<Derived, Scalar> const & x)
-{
-    return os << '[' << x.getA() << ", " << x.getB() << ']';
 }
 
 }} // namespace lsst::sphgeom

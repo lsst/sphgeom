@@ -22,6 +22,7 @@ tests/ChunkerTest
 tests/CircleTest
 tests/ConvexPolygonTest
 tests/EllipseTest
+tests/Interval1dTest
 tests/LonLatTest
 tests/Matrix3dTest
 tests/NormalizedAngleIntervalTest

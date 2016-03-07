@@ -26,6 +26,8 @@
 /// \file
 /// \brief This file defines a class for representing angle intervals.
 
+#include <iosfwd>
+
 #include "Angle.h"
 #include "Interval.h"
 
@@ -66,6 +68,8 @@ public:
 
     AngleInterval(Base const & base) : Base(base) {}
 };
+
+std::ostream & operator<<(std::ostream &, AngleInterval const &);
 
 }} // namespace lsst::sphgeom
 
