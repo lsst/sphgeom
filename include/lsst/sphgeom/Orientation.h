@@ -43,14 +43,14 @@ int orientationExact(Vector3d const & a,
                      Vector3d const & b,
                      Vector3d const & c);
 
-/// `orientation` computes and returns the orientations of 3 unit vectors a, b
-/// and c. The return value is +1 if the vectors a, b, and c are in counter-
-/// clockwise orientation, 0 if they are coplanar, colinear or identical, and
-/// -1 if they are in clockwise orientation.
+/// `orientation` computes and returns the orientations of 3 unit vectors
+/// a, b and c. The return value is +1 if the vectors are in counter-clockwise
+/// orientation, 0 if they are coplanar, colinear or identical, and -1 if
+/// they are in clockwise orientation.
 ///
-/// This is equivalent to computing the scalar triple product a · (b x c),
-/// which is the sign of the determinant of the 3x3 matrix with a, b
-/// and c as columns/rows.
+/// This is equivalent to computing the sign of the scalar triple product
+/// a · (b x c), which is the sign of the determinant of the 3x3 matrix with
+/// a, b and c as columns/rows.
 ///
 /// The implementation proceeds by first computing a double precision
 /// approximation, and then falling back to arbitrary precision arithmetic
@@ -58,6 +58,15 @@ int orientationExact(Vector3d const & a,
 int orientation(UnitVector3d const & a,
                 UnitVector3d const & b,
                 UnitVector3d const & c);
+
+/// `orientationX(b, c)` is equivalent to `orientation(UnitVector3d::X(), b, c)`.
+int orientationX(UnitVector3d const & b, UnitVector3d const & c);
+
+/// `orientationY(b, c)` is equivalent to `orientation(UnitVector3d::Y(), b, c)`.
+int orientationY(UnitVector3d const & b, UnitVector3d const & c);
+
+/// `orientationZ(b, c)` is equivalent to `orientation(UnitVector3d::Z(), b, c)`.
+int orientationZ(UnitVector3d const & b, UnitVector3d const & c);
 
 }} // namespace lsst::sphgeom
 

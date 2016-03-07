@@ -196,4 +196,49 @@ int orientation(UnitVector3d const & a,
     return orientationExact(a, b, c);
 }
 
+
+namespace {
+
+    inline int _orientationXYZ(double ab, double ba) {
+        // Calling orientation() with a first argument of (1,0,0), (0,1,0) or
+        // (0,0,1) corresponds to computing the sign of a 2x2 determinant
+        // rather than a 3x3 determinant. The corresponding error bounds
+        // are also tighter.
+        static double const relativeError = 1.12e-16;    // > 2^-53
+        static double const maxAbsoluteError = 1.12e-16; // > 2^-53
+        static double const minAbsoluteError = 1.0e-307; // > 3 * 2^-1022
+
+        double determinant = ab - ba;
+        if (determinant > maxAbsoluteError) {
+            return 1;
+        } else if (determinant < -maxAbsoluteError) {
+            return -1;
+        }
+        double permanent = std::fabs(ab) + std::fabs(ba);
+        double maxError = relativeError * permanent + minAbsoluteError;
+        if (determinant > maxError) {
+            return 1;
+        } else if (determinant < -maxError) {
+            return -1;
+        }
+        return 0;
+    }
+
+}
+
+int orientationX(UnitVector3d const & b, UnitVector3d const & c) {
+    int o = _orientationXYZ(b.y() * c.z(), b.z() * c.y());
+    return (o != 0) ? o : orientationExact(UnitVector3d::X(), b, c);
+}
+
+int orientationY(UnitVector3d const & b, UnitVector3d const & c) {
+    int o = _orientationXYZ(b.z() * c.x(), b.x() * c.z());
+    return (o != 0) ? o : orientationExact(UnitVector3d::Y(), b, c);
+}
+
+int orientationZ(UnitVector3d const & b, UnitVector3d const & c) {
+    int o = _orientationXYZ(b.x() * c.y(), b.y() * c.x());
+    return (o != 0) ? o : orientationExact(UnitVector3d::Z(), b, c);
+}
+
 }} // namespace lsst::sphgeom
