@@ -42,10 +42,6 @@ struct BigFloat {
 
     BigFloat() : mantissa(0), exponent(0) {}
     BigFloat(BigInteger * m) : mantissa(m), exponent(0) {}
-
-    bool operator<(BigFloat const & f) const {
-        return exponent > f.exponent;
-    }
 };
 
 // `computeProduct` computes the product of 3 doubles exactly and stores the
@@ -115,8 +111,10 @@ int orientationExact(Vector3d const & a,
     mantissas[1].negate();
     mantissas[3].negate();
     mantissas[5].negate();
-    // Sort the array of products by decreasing exponent.
-    std::sort(products, products + 6);
+    // Sort the array of products in descending exponent order.
+    std::sort(products, products + 6, [](BigFloat const & a, BigFloat const & b) {
+        return a.exponent > b.exponent;
+    });
     // First, initialize the accumulator to the product with the highest
     // exponent, then add the remaining products. Prior to each addition, we
     // must shift the accumulated value so that its radix point lines up with
