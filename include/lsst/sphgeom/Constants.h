@@ -48,6 +48,10 @@ static double const MAX_ASIN_ERROR = 1.5e-8;
 // maximum error can be shown to be < 2.5e-15.
 static double const MAX_SCL_ERROR = 2.5e-15;
 
+// The smallest value ε such that 1 + ε rounds to 1 in IEEE double
+// precision, assuming round-to-nearest-ties-to-even rounding.
+static double const EPSILON = 1.1102230246251565e-16;
+
 }} // namespace lsst::sphgeom
 
 #endif // LSST_SPHGEOM_CONSTANTS_H_

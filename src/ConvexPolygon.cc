@@ -325,11 +325,10 @@ Circle ConvexPolygon::getBoundingCircle() const {
     // Compute the maximum squared chord length between the centroid and
     // all vertices.
     VertexIterator const end = _vertices.end();
-    VertexIterator i = end - 1;
-    VertexIterator j = _vertices.begin();
+    VertexIterator i = _vertices.begin();
     double cl2 = 0.0;
-    for (; j != end; i = j, ++j) {
-        cl2 = std::max(cl2, (*j - *i).getSquaredNorm());
+    for (; i != end; ++i) {
+        cl2 = std::max(cl2, (*i - c).getSquaredNorm());
     }
     // Add double the maximum squared-chord-length error, so that the
     // bounding circle we return also reliably CONTAINS this polygon.
@@ -434,8 +433,8 @@ int ConvexPolygon::relate(Circle const & c) const {
     // If the polygon vertices are not all inside or all outside of c, then the
     // boundaries cross.
     bool inside = false;
-    for (VertexIterator v = _vertices.begin(), e = _vertices.end();
-         v != e; ++v) {
+    VertexIterator const end = _vertices.end();
+    for (VertexIterator v = _vertices.begin(); v != end; ++v) {
         double d = (*v - c.getCenter()).getSquaredNorm();
         if (std::fabs(d - c.getSquaredChordLength()) < MAX_SCL_ERROR) {
             // A polygon vertex is close to the circle boundary.
@@ -452,8 +451,8 @@ int ConvexPolygon::relate(Circle const & c) const {
     if (inside) {
         // All polygon vertices are inside c. Look for points in the polygon
         // edge interiors that are outside c.
-        for (VertexIterator a = _vertices.end(), b = _vertices.begin(), e = a;
-             b != e; a = b, ++b) {
+        for (VertexIterator a = end - 1, b = _vertices.begin();
+             b != end; a = b, ++b) {
             Vector3d n = a->robustCross(*b);
             double d = getMaxSquaredChordLength(c.getCenter(), *a, *b, n);
             if (d > c.getSquaredChordLength() - MAX_SCL_ERROR) {
@@ -471,8 +470,8 @@ int ConvexPolygon::relate(Circle const & c) const {
     }
     // All polygon vertices are outside c. Look for points in the polygon edge
     // interiors that are inside c.
-    for (VertexIterator a = _vertices.end(), b = _vertices.begin(), e = a;
-         b != e; a = b, ++b) {
+    for (VertexIterator a = end - 1, b = _vertices.begin();
+         b != end; a = b, ++b) {
         Vector3d n = a->robustCross(*b);
         double d = getMinSquaredChordLength(c.getCenter(), *a, *b, n);
         if (d < c.getSquaredChordLength() + MAX_SCL_ERROR) {

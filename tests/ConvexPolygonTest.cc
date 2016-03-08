@@ -53,12 +53,31 @@ void checkProperties(ConvexPolygon const & p) {
     CHECK(p.getBoundingBox().relate(p) == (CONTAINS | INTERSECTS));
 }
 
-TEST_CASE(Stream) {
+ConvexPolygon makeSimpleTriangle() {
     std::vector<UnitVector3d> points;
     points.push_back(UnitVector3d::X());
     points.push_back(UnitVector3d::Y());
     points.push_back(UnitVector3d::Z());
-    ConvexPolygon p(points);
+    return ConvexPolygon(points);
+}
+
+ConvexPolygon makeNgon(UnitVector3d const & center,
+                       UnitVector3d const & v0,
+                       size_t n)
+{
+    REQUIRE(center.dot(v0) > 1.5 * EPSILON);
+    REQUIRE(n >= 3);
+    std::vector<UnitVector3d> points;
+    points.reserve(n);
+    for (size_t i = 0; i < n; ++i) {
+        double f = static_cast<double>(i) / static_cast<double>(n);
+        points.push_back(v0.rotatedAround(center, Angle(2.0 * PI) * f));
+    }
+    return ConvexPolygon(points);
+}
+
+TEST_CASE(Stream) {
+    ConvexPolygon p = makeSimpleTriangle();
     std::stringstream ss;
     ss << p;
     CHECK(ss.str() == "ConvexPolygon(\n"
@@ -94,6 +113,9 @@ TEST_CASE(Construction) {
     for (VertexIterator v = points.begin(), end = points.end(); v != end; ++v) {
         CHECK(p.contains(*v));
     }
+    CHECK(p.contains(UnitVector3d(1, 1, 1)));
+    std::rotate(points.begin(), points.begin() + 3, points.end());
+    CHECK(p == ConvexPolygon(points));
 }
 
 TEST_CASE(ConstructionFailure) {
@@ -105,4 +127,63 @@ TEST_CASE(ConstructionFailure) {
     points.push_back(UnitVector3d::Z());
     points.push_back(UnitVector3d(-1, -1, -1));
     CHECK_THROW(ConvexPolygon::convexHull(points), std::invalid_argument);
+}
+
+TEST_CASE(Centroid) {
+    ConvexPolygon p = makeSimpleTriangle();
+    UnitVector3d c = p.getCentroid();
+    CHECK(c.dot(UnitVector3d(1, 1, 1)) >= 1.0 - EPSILON);
+}
+
+TEST_CASE(CircleRelations) {
+    ConvexPolygon p = makeSimpleTriangle();
+    CHECK(p.relate(p.getBoundingCircle()) == (INTERSECTS | WITHIN));
+    CHECK(p.getBoundingCircle().relate(p) == (INTERSECTS | CONTAINS));
+    CHECK(p.relate(Circle::full()) == (INTERSECTS | WITHIN));
+    CHECK(p.relate(Circle::empty()) == (CONTAINS | DISJOINT));
+    CHECK(p.relate(Circle(UnitVector3d(1, 1, 1), 0.25)) == (INTERSECTS | CONTAINS));
+    CHECK(p.relate(Circle(UnitVector3d::X(), 1)) == INTERSECTS);
+    CHECK(p.relate(Circle(UnitVector3d::Y(), 1)) == INTERSECTS);
+    CHECK(p.relate(Circle(UnitVector3d::Z(), 1)) == INTERSECTS);
+    CHECK(p.relate(Circle(-UnitVector3d::X(), 1)) == DISJOINT);
+    CHECK(p.relate(Circle(-UnitVector3d::Y(), 1)) == DISJOINT);
+    CHECK(p.relate(Circle(-UnitVector3d::Z(), 1)) == DISJOINT);
+}
+
+TEST_CASE(BoundingBox) {
+    ConvexPolygon p = makeNgon(UnitVector3d::Z(), UnitVector3d(1, 1, 1), 4);
+    Box b = p.getBoundingBox();
+    Angle a = Angle::fromRadians(0.61547970867038734);
+    CHECK(b.getLon().isFull());
+    CHECK(b.getLat().getA() >= a - Angle(MAX_ASIN_ERROR));
+    CHECK(b.getLat().getA() <= a);
+    CHECK(b.getLat().getB() == Angle(0.5 * PI));
+    p = makeNgon(-UnitVector3d::Z(), UnitVector3d(-1, -1, -1), 4);
+    b = p.getBoundingBox();
+    CHECK(b.getLon().isFull());
+    CHECK(b.getLat().getA() == -Angle(0.5 * PI));
+    CHECK(b.getLat().getB() >= -a);
+    CHECK(b.getLat().getB() <= -a + Angle(MAX_ASIN_ERROR));
+    p = makeNgon(UnitVector3d::Y(), UnitVector3d(1, 1, 1), 4);
+    b = p.getBoundingBox();
+    CHECK(b.getLon().getA() >= Angle(0.25 * PI - MAX_ASIN_ERROR));
+    CHECK(b.getLon().getA() <= Angle(0.25 * PI));
+    CHECK(b.getLon().getB() >= Angle(0.75 * PI));
+    CHECK(b.getLon().getB() <= Angle(0.75 * PI + MAX_ASIN_ERROR));
+    CHECK(b.getLat().getA() <= Angle(-0.25 * PI));
+    CHECK(b.getLat().getA() >= Angle(-0.25 * PI - MAX_ASIN_ERROR));
+    CHECK(b.getLat().getB() >= Angle(0.25 * PI));
+    CHECK(b.getLat().getB() <= Angle(0.25 * PI + MAX_ASIN_ERROR));
+}
+
+TEST_CASE(BoundingCircle) {
+    ConvexPolygon p = makeSimpleTriangle();
+    Circle c = p.getBoundingCircle();
+    CHECK(c.contains(UnitVector3d::X()));
+    CHECK(c.contains(UnitVector3d::Y()));
+    CHECK(c.contains(UnitVector3d::Z()));
+    CHECK(c.getCenter().dot(UnitVector3d(1, 1, 1)) >= 1.0 - EPSILON);
+    double scl = 2.0 * (std::sqrt(3.0) - 1.0) / std::sqrt(3.0);
+    CHECK(c.getSquaredChordLength() >= scl);
+    CHECK(c.getSquaredChordLength() <= scl + 3.0 * MAX_SCL_ERROR);
 }
