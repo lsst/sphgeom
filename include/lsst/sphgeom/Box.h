@@ -215,6 +215,7 @@ public:
     Box & clipTo(LonLat const & x) {
         _lon.clipTo(x.getLon());
         _lat.clipTo(x.getLat());
+        _enforceInvariants();
         return *this;
     }
 
@@ -224,6 +225,7 @@ public:
     Box & clipTo(Box const & x) {
         _lon.clipTo(x.getLon());
         _lat.clipTo(x.getLat());
+        _enforceInvariants();
         return *this;
     }
 

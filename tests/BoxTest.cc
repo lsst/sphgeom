@@ -52,7 +52,7 @@ void checkProperties(Box const & b) {
     // The union of any box with a full box should result in a full box.
     CHECK(b.expandedTo(Box::full()).isFull());
     CHECK(Box::full().expandedTo(b).isFull());
-    // The intersection of any box with a full box should have not effect.
+    // The intersection of any box with a full box should have no effect.
     CHECK(b.clippedTo(Box::full()) == b);
     CHECK(Box::full().clippedTo(b) == b);
     if (!b.isFull()) {
@@ -278,12 +278,16 @@ TEST_CASE(PointContraction) {
     LonLat p = LonLat::fromDegrees(45, 45);
     CHECK(Box::fromDegrees(0, 0, 90, 90).clippedTo(p) == p);
     CHECK(Box::fromDegrees(0, 0, 10, 10).clippedTo(p).isEmpty());
+    CHECK(Box::fromDegrees(0, 40, 10, 50).clippedTo(p).isEmpty());
+
 }
 
 TEST_CASE(BoxContraction) {
     CHECK(Box::fromDegrees(20, 0, 340, 10)
             .clippedTo(Box::fromDegrees(-20, 0, 20, 10)) ==
           Box::fromDegrees(-20, 0, 20, 10));
+    CHECK(Box::fromDegrees(20, 0, 30, 10)
+            .clippedTo(Box::fromDegrees(25, 20, 35, 30)).isEmpty());
 }
 
 TEST_CASE(Dilation1) {
