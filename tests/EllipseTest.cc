@@ -31,7 +31,6 @@
 #include "lsst/sphgeom/Ellipse.h"
 
 #include "Test.h"
-#include "RelationTestUtils.h"
 
 
 using namespace lsst::sphgeom;

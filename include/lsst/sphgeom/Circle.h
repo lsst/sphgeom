@@ -30,7 +30,6 @@
 #include <iosfwd>
 
 #include "Region.h"
-#include "SpatialRelation.h"
 #include "UnitVector3d.h"
 
 
@@ -215,7 +214,7 @@ public:
     /// `complemented` returns the closure of the complement of this circle.
     Circle complemented() const { return Circle(*this).complement(); }
 
-    int relate(UnitVector3d const & v) const;
+    Relationship relate(UnitVector3d const & v) const;
 
     // Region interface
     virtual std::unique_ptr<Region> clone() const {
@@ -231,15 +230,15 @@ public:
                (v - _center).getSquaredNorm() <= _squaredChordLength;
     }
 
-    virtual int relate(Region const & r) const {
+    virtual Relationship relate(Region const & r) const {
         // Dispatch on the type of r.
-        return invertSpatialRelations(r.relate(*this));
+        return invert(r.relate(*this));
     }
 
-    virtual int relate(Box const &) const;
-    virtual int relate(Circle const &) const;
-    virtual int relate(ConvexPolygon const &) const;
-    virtual int relate(Ellipse const &) const;
+    virtual Relationship relate(Box const &) const;
+    virtual Relationship relate(Circle const &) const;
+    virtual Relationship relate(ConvexPolygon const &) const;
+    virtual Relationship relate(Ellipse const &) const;
 
 private:
     UnitVector3d _center;

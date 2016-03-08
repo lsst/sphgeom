@@ -28,7 +28,7 @@
 #include "lsst/sphgeom/Box3d.h"
 
 #include "Test.h"
-#include "RelationTestUtils.h"
+#include "RelationshipTestUtils.h"
 
 
 using namespace lsst::sphgeom;
@@ -36,13 +36,13 @@ using namespace lsst::sphgeom;
 void checkProperties(Box3d const & b) {
     checkBasicProperties(b);
     // A non-empty box should contain, be within, and intersect itself.
-    checkRelations(b, b, CONTAINS | INTERSECTS | WITHIN);
+    checkRelationship(b, b, CONTAINS | WITHIN);
     // A non-empty box should contain and intersect its center.
     if (!b.isFull()) {
         if (b == b.getCenter()) {
-            checkRelations(b, b.getCenter(), CONTAINS | INTERSECTS | WITHIN);
+            checkRelationship(b, b.getCenter(), CONTAINS | WITHIN);
         } else {
-            checkRelations(b, b.getCenter(), CONTAINS | INTERSECTS);
+            checkRelationship(b, b.getCenter(), CONTAINS);
         }
     }
     // Taking the union of any box with an empty box should be a no-op.
@@ -108,7 +108,7 @@ TEST_CASE(EmptyBox3d) {
     CHECK(b.getDepth() < 0 || std::isnan(b.getDepth()));
     // An empty box should contain itself, be within itself,
     // and be disjoint from itself.
-    checkRelations(b, b, CONTAINS | WITHIN | DISJOINT);
+    checkRelationship(b, b, CONTAINS | WITHIN | DISJOINT);
     // The union with the empty/full box should result in the
     // empty/full boxes.
     CHECK(b.expandedTo(b) == b);
@@ -167,10 +167,10 @@ TEST_CASE(Box3dBox3dRelations) {
           DISJOINT);
     CHECK(Box3d::aroundUnitSphere().relate(
             Box3d(Vector3d(-0.5, -0.5, -0.5), Vector3d(1, 1, 1))) ==
-          (CONTAINS | INTERSECTS));
+          CONTAINS);
     CHECK(Box3d(Vector3d(-0.5, -0.5, -0.5), Vector3d(1, 1, 1)).relate(
             Box3d::aroundUnitSphere()) ==
-          (INTERSECTS | WITHIN));
+          WITHIN);
     CHECK(Box3d(Vector3d(0, 0, 0.5), Vector3d(1, 1, 1.5)).relate(
             Box3d::aroundUnitSphere()) ==
           INTERSECTS);

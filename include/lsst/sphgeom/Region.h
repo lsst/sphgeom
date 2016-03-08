@@ -25,6 +25,9 @@
 
 #include <memory>
 
+#include "Relationship.h"
+
+
 /// \file
 /// \brief This file defines an interface for spherical regions.
 
@@ -53,17 +56,17 @@ class UnitVector3d;
 /// When implementing a new concrete region subclass R, the Region interface
 /// should be extended with:
 ///
-///     virtual int relate(R const &) const = 0;
+///     virtual Relationship relate(R const &) const = 0;
 ///
 /// All other Region subclasses must then implement this method. In
 /// addition, R is expected to contain the following implementation of the
 /// generic relate method:
 ///
-///     virtual int relate(Region const & r) const {
-///         return invertSpatialRelations(r.relate(*this));
+///     virtual Relationship relate(Region const & r) const {
+///         return invert(r.relate(*this));
 ///     }
 ///
-/// where invertSpatialRelations is defined in SpatialRelations.h.
+/// where invert is defined in Relationship.h.
 ///
 /// Given two Region references r1 and r2 of type R1 and R2, the net effect
 /// is that r1.relate(r2) will end up calling R2::relate(R1 const &). In other
@@ -91,35 +94,28 @@ public:
     virtual bool contains(UnitVector3d const &) const = 0;
 
     ///@{
-    /// `relate` computes the spatial relations between this region and another
-    /// region R. The return value F is a bitfield with the following
+    /// `relate` computes the spatial relationships between this region A and
+    /// another region B. The return value S is a bitset with the following
     /// properties:
     ///
-    /// - Bit `F & CONTAINS` is set only if this region contains all points in
-    ///   R. If this is difficult/impossible to conclusively establish (e.g. due
-    ///   to the imperfect nature of floating point arithmetic or the thorniness
-    ///   of mathematics), or R contains a point not in this region, then the
-    ///   bit shall remain unset.
-    /// - Bit `F & INTERSECTS` is set if the intersection of this region and R
-    ///   may be non-empty. Its value is the complement of `F & DISJOINT`.
-    /// - Bit `F & WITHIN` is set only if R contains all points in this region.
-    /// - Bit `F & DISJOINT` is set only if this region and R do not have any
+    /// - Bit `S & DISJOINT` is set only if A and B do not have any
     ///   points in common.
+    /// - Bit `S & CONTAINS` is set only if A contains all points in B.
+    /// - Bit `S & WITHIN` is set only if B contains all points in A.
     ///
     /// Said another way: if the CONTAINS, WITHIN or DISJOINT bit is set, then
     /// the corresponding spatial relationship between the two regions holds
     /// conclusively. If it is not set, the relationship may or may not
-    /// hold. Similarly, if the INTERSECTS bit is not set, the regions are
-    /// conclusively disjoint. Otherwise, they may or may not intersect.
+    /// hold.
     ///
-    /// These semantics allow for inexact spatial relation computations. In
-    /// particular, a Region may choose to implement `relate` by replacing
-    /// itself and/or the argument with a simplified bounding region.
-    virtual int relate(Region const &) const = 0;
-    virtual int relate(Box const &) const = 0;
-    virtual int relate(Circle const &) const = 0;
-    virtual int relate(ConvexPolygon const &) const = 0;
-    virtual int relate(Ellipse const &) const = 0;
+    /// These semantics allow for inexact (conservative) relationship
+    /// computations. In particular, a Region may choose to implement `relate`
+    /// by replacing itself and/or the argument with a simplified bounding region.
+    virtual Relationship relate(Region const &) const = 0;
+    virtual Relationship relate(Box const &) const = 0;
+    virtual Relationship relate(Circle const &) const = 0;
+    virtual Relationship relate(ConvexPolygon const &) const = 0;
+    virtual Relationship relate(Ellipse const &) const = 0;
     ///@}
 };
 

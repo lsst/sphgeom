@@ -30,6 +30,7 @@
 #include <iosfwd>
 
 #include "NormalizedAngle.h"
+#include "Relationship.h"
 
 
 namespace lsst {
@@ -191,11 +192,11 @@ public:
     ///@}
 
     ///@{
-    /// `relate` returns a bit field R describing the spatial relations between
-    /// this interval and x. For each relation that holds, the bitwise and of
-    /// R and the corresponding `SpatialRelation` bit mask will be non-zero.
-    int relate(NormalizedAngle x) const;
-    int relate(NormalizedAngleInterval const & x) const;
+    /// `relate` returns a bitset S describing the spatial relationships
+    /// between this interval and x. For each relation that holds, the
+    /// bitwise AND of S and the corresponding Relationship will be non-zero.
+    Relationship relate(NormalizedAngle x) const;
+    Relationship relate(NormalizedAngleInterval const & x) const;
     ///@}
 
     /// `clipTo` shrinks this interval until all its points are in x.

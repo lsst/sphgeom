@@ -30,10 +30,9 @@
 #include <cmath>
 
 #include "lsst/sphgeom/Interval1d.h"
-#include "lsst/sphgeom/SpatialRelation.h"
 
 #include "Test.h"
-#include "RelationTestUtils.h"
+#include "RelationshipTestUtils.h"
 
 
 using namespace lsst::sphgeom;
@@ -41,7 +40,7 @@ using namespace lsst::sphgeom;
 void checkProperties(Interval1d const & i) {
     checkBasicProperties(i);
     // A non-empty interval should contain, be within, and intersect itself.
-    checkRelations(i, i, CONTAINS | INTERSECTS | WITHIN);
+    checkRelationship(i, i, CONTAINS | WITHIN);
     // Taking the union with an identical or empty interval should be a no-op.
     CHECK(i.expandedTo(i) == i);
     CHECK(i.expandedTo(Interval1d()) == i);
@@ -82,15 +81,15 @@ TEST_CASE(EmptyInterval) {
         CHECK(i == std::nan(nullptr));
         // An empty interval should contain itself, be within itself,
         // and be disjoint from itself.
-        checkRelations(i, i, CONTAINS | WITHIN | DISJOINT);
-        checkRelations(i, std::nan(nullptr), CONTAINS | WITHIN | DISJOINT);
+        checkRelationship(i, i, CONTAINS | WITHIN | DISJOINT);
+        checkRelationship(i, std::nan(nullptr), CONTAINS | WITHIN | DISJOINT);
         for (int k = 0; k < j; ++k) {
-            checkRelations(i, emptyIntervals[k], CONTAINS | WITHIN | DISJOINT);
-            checkRelations(emptyIntervals[k], i, CONTAINS | WITHIN | DISJOINT);
+            checkRelationship(i, emptyIntervals[k], CONTAINS | WITHIN | DISJOINT);
+            checkRelationship(emptyIntervals[k], i, CONTAINS | WITHIN | DISJOINT);
         }
-        checkRelations(i, Interval1d(1), WITHIN | DISJOINT);
-        checkRelations(Interval1d(1), i, CONTAINS | DISJOINT);
-        checkRelations(i, 1, WITHIN | DISJOINT);
+        checkRelationship(i, Interval1d(1), WITHIN | DISJOINT);
+        checkRelationship(Interval1d(1), i, CONTAINS | DISJOINT);
+        checkRelationship(i, 1, WITHIN | DISJOINT);
         // The union of the empty interval with itself should be empty.
         CHECK(i.expandedTo(i) == i);
         CHECK(i.expandedTo(1) == Interval1d(1));

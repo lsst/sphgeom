@@ -28,7 +28,7 @@
 #include "lsst/sphgeom/NormalizedAngleInterval.h"
 
 #include "Test.h"
-#include "RelationTestUtils.h"
+#include "RelationshipTestUtils.h"
 
 
 using namespace lsst::sphgeom;
@@ -36,7 +36,7 @@ using namespace lsst::sphgeom;
 void checkProperties(NormalizedAngleInterval const & i) {
     checkBasicProperties(i);
     // A non-empty region should contain, be within, and intersect itself.
-    checkRelations(i, i, CONTAINS | INTERSECTS | WITHIN);
+    checkRelationship(i, i, CONTAINS | WITHIN);
     // Taking the union with an identical or empty interval should be a no-op.
     CHECK(i.expandedTo(i) == i);
     CHECK(i.expandedTo(NormalizedAngleInterval()) == i);
@@ -88,9 +88,9 @@ TEST_CASE(BasicEmptyInterval) {
     CHECK(i == NormalizedAngle::nan());
     // An empty interval should contain itself, be within itself,
     // and be disjoint from itself.
-    checkRelations(i, i, CONTAINS | WITHIN | DISJOINT);
-    checkRelations(i, NormalizedAngle::nan(), CONTAINS | WITHIN | DISJOINT);
-    checkRelations(i, NormalizedAngle(1), DISJOINT | WITHIN);
+    checkRelationship(i, i, CONTAINS | WITHIN | DISJOINT);
+    checkRelationship(i, NormalizedAngle::nan(), CONTAINS | WITHIN | DISJOINT);
+    checkRelationship(i, NormalizedAngle(1), DISJOINT | WITHIN);
     // The union with the empty/full interval should result in the
     // empty/full interval.
     CHECK(i.expandedTo(i) == i);
@@ -172,10 +172,10 @@ TEST_CASE(PointPointRelations) {
     NormalizedAngle a1(0.2), a2(5.1);
     NormalizedAngleInterval i1(a1), i2(a2);
     CHECK(i1 != i2);
-    checkRelations(i1, i1, CONTAINS | INTERSECTS | WITHIN);
-    checkRelations(i2, a2, CONTAINS | INTERSECTS | WITHIN);
-    checkRelations(i1, i2, DISJOINT);
-    checkRelations(i2, a1, DISJOINT);
+    checkRelationship(i1, i1, CONTAINS | WITHIN);
+    checkRelationship(i2, a2, CONTAINS | WITHIN);
+    checkRelationship(i1, i2, DISJOINT);
+    checkRelationship(i2, a1, DISJOINT);
 }
 
 TEST_CASE(PointIntervalRelations) {
@@ -192,7 +192,7 @@ TEST_CASE(PointIntervalRelations) {
     CHECK(!i.wraps());
     CHECK(i.getSize() > Angle(0));
     checkPoints(in, 3, out, 2, i);
-    checkRelations(i, NormalizedAngle::nan(), CONTAINS | DISJOINT);
+    checkRelationship(i, NormalizedAngle::nan(), CONTAINS | DISJOINT);
 }
 
 TEST_CASE(PointWrappingIntervalRelations) {

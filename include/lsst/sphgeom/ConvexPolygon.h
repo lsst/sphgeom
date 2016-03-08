@@ -31,7 +31,6 @@
 #include <vector>
 
 #include "Region.h"
-#include "SpatialRelation.h"
 #include "Vector3d.h"
 
 
@@ -93,15 +92,15 @@ public:
 
     virtual bool contains(UnitVector3d const & v) const;
 
-    virtual int relate(Region const & r) const {
+    virtual Relationship relate(Region const & r) const {
         // Dispatch on the type of r.
-        return invertSpatialRelations(r.relate(*this));
+        return invert(r.relate(*this));
     }
 
-    virtual int relate(Box const &) const;
-    virtual int relate(Circle const &) const;
-    virtual int relate(ConvexPolygon const &) const;
-    virtual int relate(Ellipse const &) const;
+    virtual Relationship relate(Box const &) const;
+    virtual Relationship relate(Circle const &) const;
+    virtual Relationship relate(ConvexPolygon const &) const;
+    virtual Relationship relate(Ellipse const &) const;
 
 private:
     typedef std::vector<UnitVector3d>::const_iterator VertexIterator;

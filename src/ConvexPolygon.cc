@@ -506,17 +506,17 @@ bool ConvexPolygon::contains(UnitVector3d const & v) const {
     return true;
 }
 
-int ConvexPolygon::relate(Box const & b) const {
+Relationship ConvexPolygon::relate(Box const & b) const {
     // TODO(smm): be more accurate when computing box relations.
-    return getBoundingBox().relate(b) & (WITHIN | INTERSECTS | DISJOINT);
+    return getBoundingBox().relate(b) & (DISJOINT | WITHIN);
 }
 
-int ConvexPolygon::relate(Circle const & c) const {
+Relationship ConvexPolygon::relate(Circle const & c) const {
     if (c.isEmpty()) {
         return CONTAINS | DISJOINT;
     }
     if (c.isFull()) {
-        return INTERSECTS | WITHIN;
+        return WITHIN;
     }
     // Determine whether or not the circle and polygon boundaries intersect.
     // If the polygon vertices are not all inside or all outside of c, then the
@@ -557,7 +557,7 @@ int ConvexPolygon::relate(Circle const & c) const {
         if (contains(-c.getCenter())) {
             return INTERSECTS;
         }
-        return INTERSECTS | WITHIN;
+        return WITHIN;
     }
     // All polygon vertices are outside c. Look for points in the polygon edge
     // interiors that are inside c.
@@ -573,12 +573,12 @@ int ConvexPolygon::relate(Circle const & c) const {
     // contains the circle center, then the polygon contains c. Otherwise, the
     // polygon and circle are disjoint.
     if (contains(c.getCenter())) {
-        return CONTAINS | INTERSECTS;
+        return CONTAINS;
     }
     return DISJOINT;
 }
 
-int ConvexPolygon::relate(ConvexPolygon const & p) const {
+Relationship ConvexPolygon::relate(ConvexPolygon const & p) const {
     // TODO(smm): Make this more performant. Instead of the current quadratic
     // implementation, it should be possible to determine whether the boundaries
     // intersect by adapting the following method to the sphere:
@@ -600,11 +600,11 @@ int ConvexPolygon::relate(ConvexPolygon const & p) const {
     }
     if (n == _vertices.size()) {
         if (m == p._vertices.size()) {
-            return CONTAINS | INTERSECTS | WITHIN;
+            return CONTAINS | WITHIN;
         }
-        return INTERSECTS | WITHIN;
+        return WITHIN;
     } else if (m == p._vertices.size()) {
-        return CONTAINS | INTERSECTS;
+        return CONTAINS;
     }
     if (n > 0 || m > 0) {
         // There is at least one point common to this polygon and p.
@@ -630,8 +630,8 @@ int ConvexPolygon::relate(ConvexPolygon const & p) const {
     return DISJOINT;
 }
 
-int ConvexPolygon::relate(Ellipse const & e) const {
-    return relate(e.getBoundingCircle()) & (CONTAINS | INTERSECTS | DISJOINT);
+Relationship ConvexPolygon::relate(Ellipse const & e) const {
+    return relate(e.getBoundingCircle()) & (CONTAINS | DISJOINT);
 }
 
 std::ostream & operator<<(std::ostream & os, ConvexPolygon const & p) {

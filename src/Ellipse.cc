@@ -241,8 +241,8 @@ Circle Ellipse::getBoundingCircle() const {
     return Circle(getCenter(), r);
 }
 
-int Ellipse::relate(Box const & b) const {
-    return getBoundingCircle().relate(b) & (INTERSECTS | WITHIN | DISJOINT);
+Relationship Ellipse::relate(Box const & b) const {
+    return getBoundingCircle().relate(b) & (DISJOINT | WITHIN);
 }
 
 // For now, implement ellipse-circle and ellipse-ellipse relation
@@ -322,16 +322,16 @@ int Ellipse::relate(Box const & b) const {
 //   accurate computation? Is there some usefully exploitable relationship
 //   between them and the degenerate quadratic forms they engender?
 
-int Ellipse::relate(Circle const & c) const {
-    return getBoundingCircle().relate(c) & (INTERSECTS | WITHIN | DISJOINT);
+Relationship Ellipse::relate(Circle const & c) const {
+    return getBoundingCircle().relate(c) & (DISJOINT | WITHIN);
 }
 
-int Ellipse::relate(ConvexPolygon const & p) const {
-    return getBoundingCircle().relate(p) & (INTERSECTS | WITHIN | DISJOINT);
+Relationship Ellipse::relate(ConvexPolygon const & p) const {
+    return getBoundingCircle().relate(p) & (DISJOINT | WITHIN);
 }
 
-int Ellipse::relate(Ellipse const & e) const {
-    return getBoundingCircle().relate(e.getBoundingCircle()) & (INTERSECTS | DISJOINT);
+Relationship Ellipse::relate(Ellipse const & e) const {
+    return getBoundingCircle().relate(e.getBoundingCircle()) & DISJOINT;
 }
 
 std::ostream & operator<<(std::ostream & os, Ellipse const & e) {

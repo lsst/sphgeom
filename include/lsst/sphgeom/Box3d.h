@@ -30,6 +30,7 @@
 #include <iosfwd>
 
 #include "Interval1d.h"
+#include "Relationship.h"
 #include "Vector3d.h"
 
 
@@ -299,17 +300,17 @@ public:
         return dilatedBy(-w, -h, -d);
     }
 
-    int relate(Vector3d const & v) const { return relate(Box3d(v)); }
+    Relationship relate(Vector3d const & v) const { return relate(Box3d(v)); }
 
-    int relate(Box3d const & b) const {
-        int xrel = x().relate(b.x());
-        int yrel = y().relate(b.y());
-        int zrel = z().relate(b.z());
-        // If the box x, y, or z intervals are disjoint, then the boxes are
-        // disjoint. The other spatial relationships must hold for all
-        // constituent intervals in order to hold for the boxes.
-        return ((xrel & yrel & zrel) & (CONTAINS | INTERSECTS | WITHIN)) |
-               ((xrel | yrel | zrel) & DISJOINT);
+    Relationship relate(Box3d const & b) const {
+        Relationship xr = x().relate(b.x());
+        Relationship yr = y().relate(b.y());
+        Relationship zr = z().relate(b.z());
+        // If the box x, y, or z intervals are disjoint, then so are the
+        // boxes. The other relationships must hold for all constituent
+        // intervals in order to hold for the boxes.
+        return ((xr & yr & zr) & (CONTAINS | WITHIN)) |
+               ((xr | yr | zr) & DISJOINT);
     }
 
 

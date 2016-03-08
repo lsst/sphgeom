@@ -31,7 +31,7 @@
 #include "lsst/sphgeom/Circle.h"
 
 #include "Test.h"
-#include "RelationTestUtils.h"
+#include "RelationshipTestUtils.h"
 
 
 using namespace lsst::sphgeom;
@@ -57,7 +57,7 @@ std::vector<UnitVector3d> getPointsOnCircle(Circle const & c,
 void checkProperties(Circle const & c) {
     checkBasicProperties(c);
     // A non-empty circle should contain and intersect its center.
-    checkRelations(c, c.getCenter(), CONTAINS | INTERSECTS);
+    checkRelationship(c, c.getCenter(), CONTAINS);
     // Taking the union of any circle with an empty circle should be a no-op.
     CHECK(c.expandedTo(Circle()) == c);
     CHECK(Circle().expandedTo(c) == c);
@@ -127,7 +127,7 @@ TEST_CASE(EmptyCircle) {
     CHECK(c.getOpeningAngle() < Angle(0) || c.getOpeningAngle().isNan());
     // An empty circle should contain itself, be within itself,
     // and be disjoint from itself.
-    checkRelations(c, c, CONTAINS | WITHIN | DISJOINT);
+    checkRelationship(c, c, CONTAINS | WITHIN | DISJOINT);
     // The union with the empty/full circle should result in the
     // empty/full circles.
     CHECK(c.expandedTo(c) == c);
@@ -159,9 +159,9 @@ TEST_CASE(FullCircle) {
     CHECK(c.getSquaredChordLength() >= 4.0);
     CHECK(c.getArea() == 4*PI);
     checkProperties(c);
-    checkRelations(c, Circle::full(), CONTAINS | INTERSECTS | WITHIN);
-    checkRelations(c, Circle(UnitVector3d::X()), CONTAINS | INTERSECTS);
-    checkRelations(Circle(UnitVector3d::X()), c, INTERSECTS | WITHIN);
+    checkRelationship(c, Circle::full(), CONTAINS | WITHIN);
+    checkRelationship(c, Circle(UnitVector3d::X()), CONTAINS);
+    checkRelationship(Circle(UnitVector3d::X()), c, WITHIN);
     // Morphological operations should have no effect on full circles.
     CHECK(c.dilatedBy(Angle(PI)) == c);
     CHECK(c.erodedBy(Angle(PI)) == c);
@@ -309,15 +309,15 @@ TEST_CASE(PointRelations) {
     UnitVector3d y = UnitVector3d::Y();
     CHECK(Circle().relate(x) == (DISJOINT | WITHIN));
     CHECK(Circle(x).relate(y) == DISJOINT);
-    CHECK(Circle(x).relate(x) == (CONTAINS | INTERSECTS));
+    CHECK(Circle(x).relate(x) == CONTAINS);
 }
 
 TEST_CASE(CircleRelations) {
     UnitVector3d x = UnitVector3d::X();
     UnitVector3d y = UnitVector3d::Y();
     CHECK(Circle(x, 1).relate(Circle(-x, 1)) == DISJOINT);
-    CHECK(Circle(x, 2).relate(Circle(x, 1)) == (CONTAINS | INTERSECTS));
-    CHECK(Circle(x, 1).relate(Circle(x, 2)) == (INTERSECTS | WITHIN));
+    CHECK(Circle(x, 2).relate(Circle(x, 1)) == CONTAINS);
+    CHECK(Circle(x, 1).relate(Circle(x, 2)) == WITHIN);
     CHECK(Circle(x, 1).relate(Circle(y, 1)) == INTERSECTS);
 }
 

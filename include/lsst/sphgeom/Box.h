@@ -290,7 +290,7 @@ public:
     Box & erodeBy(Angle w, Angle h) { return dilateBy(-w, -h); }
     Box erodedBy(Angle w, Angle h) const { return dilatedBy(-w, -h);  }
 
-    int relate(LonLat const & p) const { return relate(Box(p)); }
+    Relationship relate(LonLat const & p) const { return relate(Box(p)); }
 
     /// `getArea` returns the area of this box in steradians.
     double getArea() const;
@@ -308,25 +308,24 @@ public:
         return contains(LonLat(v));
     }
 
-    virtual int relate(Region const & r) const {
+    virtual Relationship relate(Region const & r) const {
         // Dispatch on the type of r.
-        return invertSpatialRelations(r.relate(*this));
+        return invert(r.relate(*this));
     }
 
-    virtual int relate(Box const & b) const {
-        int lonrel = _lon.relate(b._lon);
-        int latrel = _lat.relate(b._lat);
+    virtual Relationship relate(Box const & b) const {
+        Relationship r1 = _lon.relate(b._lon);
+        Relationship r2 = _lat.relate(b._lat);
         // If the box longitude or latitude intervals are disjoint, then the
         // boxes are disjoint. The other spatial relationships must hold for
         // both the longitude and latitude intervals in order to hold for the
         // boxes.
-        return ((lonrel & latrel) & (CONTAINS | INTERSECTS | WITHIN)) |
-               ((lonrel | latrel) & DISJOINT);
+        return ((r1 & r2) & (CONTAINS | WITHIN)) | ((r1 | r2) & DISJOINT);
     }
 
-    virtual int relate(Circle const &) const;
-    virtual int relate(ConvexPolygon const &) const;
-    virtual int relate(Ellipse const &) const;
+    virtual Relationship relate(Circle const &) const;
+    virtual Relationship relate(ConvexPolygon const &) const;
+    virtual Relationship relate(Ellipse const &) const;
 
 private:
     void _enforceInvariants() {

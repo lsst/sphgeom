@@ -263,21 +263,21 @@ Box3d Circle::getBoundingBox3d() const {
     return Box3d(e[0], e[1], e[2]);
 }
 
-int Circle::relate(UnitVector3d const & v) const {
+Relationship Circle::relate(UnitVector3d const & v) const {
     if (contains(v)) {
-        return CONTAINS | INTERSECTS;
+        return CONTAINS;
     } else if (isEmpty()) {
         return DISJOINT | WITHIN;
     }
     return DISJOINT;
 }
 
-int Circle::relate(Box const & b) const {
+Relationship Circle::relate(Box const & b) const {
     // Box-Circle relations are implemented by Box.
-    return invertSpatialRelations(b.relate(*this));
+    return invert(b.relate(*this));
 }
 
-int Circle::relate(Circle const & c) const {
+Relationship Circle::relate(Circle const & c) const {
     if (isEmpty()) {
         if (c.isEmpty()) {
             return CONTAINS | DISJOINT | WITHIN;
@@ -289,35 +289,34 @@ int Circle::relate(Circle const & c) const {
     // Neither circle is empty.
     if (isFull()) {
         if (c.isFull()) {
-            return CONTAINS | INTERSECTS | WITHIN;
+            return CONTAINS | WITHIN;
         }
-        return CONTAINS | INTERSECTS;
+        return CONTAINS;
     } else if (c.isFull()) {
-        return INTERSECTS | WITHIN;
+        return WITHIN;
     }
     // Neither circle is full.
     NormalizedAngle cc(_center, c._center);
     if (cc > _openingAngle + c._openingAngle + 4.0 * Angle(MAX_ASIN_ERROR)) {
         return DISJOINT;
     }
-    int rel = INTERSECTS;
     if (cc + c._openingAngle + 4.0 * Angle(MAX_ASIN_ERROR) <= _openingAngle) {
-        rel |= CONTAINS;
+        return CONTAINS;
     } else if (cc + _openingAngle + 4.0 * Angle(MAX_ASIN_ERROR) <=
                c._openingAngle) {
-        rel |= WITHIN;
+        return WITHIN;
     }
-    return rel;
+    return INTERSECTS;
 }
 
-int Circle::relate(ConvexPolygon const & p) const {
+Relationship Circle::relate(ConvexPolygon const & p) const {
     // ConvexPolygon-Circle relations are implemented by ConvexPolygon.
-    return invertSpatialRelations(p.relate(*this));
+    return invert(p.relate(*this));
 }
 
-int Circle::relate(Ellipse const & e) const {
+Relationship Circle::relate(Ellipse const & e) const {
     // Ellipse-Circle relations are implemented by Ellipse.
-    return invertSpatialRelations(e.relate(*this));
+    return invert(e.relate(*this));
 }
 
 std::ostream & operator<<(std::ostream & os, Circle const & c) {

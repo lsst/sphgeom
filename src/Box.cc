@@ -313,7 +313,7 @@ Circle Box::getBoundingCircle() const {
     return Circle(v, r + 4.0 * Angle(MAX_ASIN_ERROR));
 }
 
-int Box::relate(Circle const & c) const {
+Relationship Box::relate(Circle const & c) const {
     if (isEmpty()) {
         if (c.isEmpty()) {
             return CONTAINS | DISJOINT | WITHIN;
@@ -324,11 +324,11 @@ int Box::relate(Circle const & c) const {
     }
     if (isFull()) {
         if (c.isFull()) {
-            return CONTAINS | INTERSECTS | WITHIN;
+            return CONTAINS | WITHIN;
         }
-        return CONTAINS | INTERSECTS;
+        return CONTAINS;
     } else if (c.isFull()) {
-        return INTERSECTS | WITHIN;
+        return WITHIN;
     }
     // Neither region is empty or full. We now determine whether or not the
     // circle and box boundaries intersect.
@@ -400,7 +400,7 @@ int Box::relate(Circle const & c) const {
         if (contains(cc)) {
             return INTERSECTS;
         }
-        return INTERSECTS | WITHIN;
+        return WITHIN;
     }
     // All box vertices are outside c. Look for points in the box edge
     // interiors that are inside c.
@@ -427,19 +427,19 @@ int Box::relate(Circle const & c) const {
     // circle center, then the box contains c. Otherwise, the box and circle
     // are disjoint.
     if (contains(cc)) {
-        return CONTAINS | INTERSECTS;
+        return CONTAINS;
     }
     return DISJOINT;
 }
 
-int Box::relate(ConvexPolygon const & p) const {
+Relationship Box::relate(ConvexPolygon const & p) const {
     // ConvexPolygon-Box relations are implemented by ConvexPolygon.
-    return invertSpatialRelations(p.relate(*this));
+    return invert(p.relate(*this));
 }
 
-int Box::relate(Ellipse const & e) const {
+Relationship Box::relate(Ellipse const & e) const {
     // Ellipse-Box relations are implemented by Ellipse.
-    return invertSpatialRelations(e.relate(*this));
+    return invert(e.relate(*this));
 }
 
 std::ostream & operator<<(std::ostream & os, Box const & b) {

@@ -50,8 +50,8 @@ void checkProperties(ConvexPolygon const & p) {
     CHECK(p.contains(p.getCentroid()));
     // The bounding circle and box for a polygon should
     // CONTAIN and INTERSECT the polygon.
-    CHECK(p.getBoundingCircle().relate(p) == (CONTAINS | INTERSECTS));
-    CHECK(p.getBoundingBox().relate(p) == (CONTAINS | INTERSECTS));
+    CHECK(p.getBoundingCircle().relate(p) == CONTAINS);
+    CHECK(p.getBoundingBox().relate(p) == CONTAINS);
 }
 
 ConvexPolygon makeSimpleTriangle() {
@@ -146,11 +146,11 @@ TEST_CASE(Centroid) {
 
 TEST_CASE(CircleRelations) {
     ConvexPolygon p = makeSimpleTriangle();
-    CHECK(p.relate(p.getBoundingCircle()) == (INTERSECTS | WITHIN));
-    CHECK(p.getBoundingCircle().relate(p) == (INTERSECTS | CONTAINS));
-    CHECK(p.relate(Circle::full()) == (INTERSECTS | WITHIN));
+    CHECK(p.relate(p.getBoundingCircle()) == WITHIN);
+    CHECK(p.getBoundingCircle().relate(p) == CONTAINS);
+    CHECK(p.relate(Circle::full()) == WITHIN);
     CHECK(p.relate(Circle::empty()) == (CONTAINS | DISJOINT));
-    CHECK(p.relate(Circle(UnitVector3d(1, 1, 1), 0.25)) == (INTERSECTS | CONTAINS));
+    CHECK(p.relate(Circle(UnitVector3d(1, 1, 1), 0.25)) == CONTAINS);
     CHECK(p.relate(Circle(UnitVector3d::X(), 1)) == INTERSECTS);
     CHECK(p.relate(Circle(UnitVector3d::Y(), 1)) == INTERSECTS);
     CHECK(p.relate(Circle(UnitVector3d::Z(), 1)) == INTERSECTS);
@@ -166,9 +166,9 @@ TEST_CASE(PolygonRelations1) {
     points.push_back(UnitVector3d::Y());
     points.emplace_back(1, 1, 1);
     ConvexPolygon p = ConvexPolygon::convexHull(points);
-    CHECK(p.relate(p) == (CONTAINS | INTERSECTS | WITHIN));
-    CHECK(t.relate(p) == (CONTAINS | INTERSECTS));
-    CHECK(p.relate(t) == (INTERSECTS | WITHIN));
+    CHECK(p.relate(p) == (CONTAINS | WITHIN));
+    CHECK(t.relate(p) == CONTAINS);
+    CHECK(p.relate(t) == WITHIN);
 }
 
 TEST_CASE(PolygonRelations2) {
