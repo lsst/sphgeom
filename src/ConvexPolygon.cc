@@ -358,10 +358,7 @@ Box ConvexPolygon::getBoundingBox() const {
         LonLat p(*j);
         bbox.expandTo(Box(p, eps, eps));
         if (!haveCW || !haveCCW) {
-            // TODO(smm): This orientation call in particular is likely to be
-            // useful in other contexts, and may warrant a specialized
-            // implementation.
-            int o = orientation(UnitVector3d::Z(), *i, *j);
+            int o = orientationZ(*i, *j);
             haveCCW = haveCCW || (o > 0);
             haveCW = haveCW || (o < 0);
         }
