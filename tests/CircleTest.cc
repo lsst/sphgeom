@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "lsst/sphgeom/Box.h"
+#include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/Circle.h"
 
 #include "Test.h"
@@ -318,4 +319,47 @@ TEST_CASE(CircleRelations) {
     CHECK(Circle(x, 2).relate(Circle(x, 1)) == (CONTAINS | INTERSECTS));
     CHECK(Circle(x, 1).relate(Circle(x, 2)) == (INTERSECTS | WITHIN));
     CHECK(Circle(x, 1).relate(Circle(y, 1)) == INTERSECTS);
+}
+
+TEST_CASE(Box3dBounds1) {
+    static double const TOLERANCE = 1.0e-15;
+
+    UnitVector3d x = UnitVector3d::X();
+    UnitVector3d y = UnitVector3d::Y();
+    UnitVector3d z = UnitVector3d::Z();
+    Circle c = Circle(x, 2.0);
+    Box3d b = c.getBoundingBox3d();
+    CHECK(b.x().getB() == 1);
+    CHECK(b.x().getA() >= -TOLERANCE && b.x().getA() <= 0.0);
+    CHECK(b.y() == Interval1d(-1, 1));
+    CHECK(b.z() == Interval1d(-1, 1));
+    c = Circle(y, 2.0);
+    b = c.getBoundingBox3d();
+    CHECK(b.x() == Interval1d(-1, 1));
+    CHECK(b.y().getB() == 1);
+    CHECK(b.y().getA() >= -TOLERANCE && b.y().getA() <= 0.0);
+    CHECK(b.z() == Interval1d(-1, 1));
+    c = Circle(z, 2.0);
+    b = c.getBoundingBox3d();
+    CHECK(b.x() == Interval1d(-1, 1));
+    CHECK(b.y() == Interval1d(-1, 1));
+    CHECK(b.z().getB() == 1);
+    CHECK(b.z().getA() >= -TOLERANCE && b.z().getA() <= 0.0);
+}
+
+TEST_CASE(Box3dBounds2) {
+    static double const TOLERANCE = 1.0e-15;
+    UnitVector3d a = UnitVector3d(1, 1, 0);
+    Circle c = Circle(a, Angle(PI * 0.25));
+    Box3d b = c.getBoundingBox3d();
+    CHECK(b.x().getA() >= -TOLERANCE && b.x().getA() <= 0.0);
+    CHECK(b.x().getB() == 1.0);
+    CHECK(b.y().getA() >= -TOLERANCE && b.y().getA() <= 0.0);
+    CHECK(b.y().getB() == 1.0);
+    CHECK(b.z().getA() == -b.z().getB());
+    CHECK(b.z().getB() >= 0.5 * std::sqrt(2.0) - TOLERANCE);
+    CHECK(b.z().getB() <= 0.5 * std::sqrt(2.0) + TOLERANCE);
+    a = UnitVector3d(1, 1, 1);
+    c = Circle(a, 0.0);
+    CHECK(Box3d(a).dilatedBy(TOLERANCE).contains(c.getBoundingBox3d()));
 }

@@ -28,6 +28,7 @@
 #include <ostream>
 
 #include "lsst/sphgeom/Box.h"
+#include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/ConvexPolygon.h"
 #include "lsst/sphgeom/Ellipse.h"
 
@@ -211,6 +212,55 @@ Box Circle::getBoundingBox() const {
     NormalizedAngle w(Box::halfWidthForCircle(h, c.getLat()) +
                       Angle(MAX_ASIN_ERROR));
     return Box(c, w, h);
+}
+
+Box3d Circle::getBoundingBox3d() const {
+    static double const MAX_BOUNDARY_ERROR = 6.2e-16; // > 5.5ε, where ε = 2^-53
+    if (isEmpty()) {
+        return Box3d();
+    }
+    if (isFull()) {
+        return Box3d::aroundUnitSphere();
+    }
+    // Given circle center c and standard basis vector eᵢ, to check whether
+    // ±eᵢ is inside the circle we need to check that (c ∓ eᵢ)·(c ∓ eᵢ) ≤ s.
+    // Since c·c = 1, eᵢ·eᵢ = 1 (c and eᵢ are unit vectors) this is the
+    // same as checking that 2 ∓ 2c·eᵢ ≤ s, or 2 ∓ 2cᵢ ≤ s, where cᵢ is
+    // the i-th component of c.
+    //
+    // Besides any standard basis vectors inside the circle, the bounding box
+    // must also include the circle boundary. To find the extent of this
+    // boundary along a particular axis, note that we can write the i-th
+    // component of the circle center vector as the sine of a latitude angle
+    // (treating the i-th standard basis vector as "north"). So given a circle
+    // opening angle θ, the desired extent is
+    //
+    //     [min(sin(asin(cᵢ) ± θ)), max(sin(asin(cᵢ) ± θ))]
+    //
+    // which can be simplified using the usual trigonometric identities to
+    // arrive at the code below.
+    Interval1d e[3];
+    double s = sin(_openingAngle);
+    double c = cos(_openingAngle);
+    for (int i = 0; i < 3; ++i) {
+        double ci = _center(i);
+        double di = std::sqrt(1.0 - ci * ci);
+        double bmin = 1.0, bmax = -1.0;
+        if (2.0 - 2.0 * ci <= _squaredChordLength) {
+            bmax = 1.0;
+        }
+        if (2.0 + 2.0 * ci <= _squaredChordLength) {
+            bmin = -1.0;
+        }
+        double b0 = ci * c + di * s;
+        bmax = std::max(bmax, b0 + MAX_BOUNDARY_ERROR);
+        bmin = std::min(bmin, b0 - MAX_BOUNDARY_ERROR);
+        double b1 = ci * c - di * s;
+        bmax = std::max(bmax, b1 + MAX_BOUNDARY_ERROR);
+        bmin = std::min(bmin, b1 - MAX_BOUNDARY_ERROR);
+        e[i] = Interval1d(std::max(-1.0, bmin), std::min(1.0, bmax));
+    }
+    return Box3d(e[0], e[1], e[2]);
 }
 
 int Circle::relate(UnitVector3d const & v) const {

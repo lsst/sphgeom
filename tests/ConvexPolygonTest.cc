@@ -26,6 +26,7 @@
 #include <vector>
 
 #include "lsst/sphgeom/Box.h"
+#include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/Circle.h"
 #include "lsst/sphgeom/ConvexPolygon.h"
 
@@ -174,6 +175,17 @@ TEST_CASE(BoundingBox) {
     CHECK(b.getLat().getA() >= Angle(-0.25 * PI - MAX_ASIN_ERROR));
     CHECK(b.getLat().getB() >= Angle(0.25 * PI));
     CHECK(b.getLat().getB() <= Angle(0.25 * PI + MAX_ASIN_ERROR));
+}
+
+TEST_CASE(BoundingBox3d) {
+    ConvexPolygon p = makeSimpleTriangle();
+    Box3d b = p.getBoundingBox3d();
+    CHECK(b.x().getA() >= -1.0e-14 && b.x().getA() <= 0);
+    CHECK(b.y().getA() >= -1.0e-14 && b.y().getA() <= 0);
+    CHECK(b.z().getA() >= -1.0e-14 && b.z().getA() <= 0);
+    CHECK(b.x().getB() == 1);
+    CHECK(b.y().getB() == 1);
+    CHECK(b.z().getB() == 1);
 }
 
 TEST_CASE(BoundingCircle) {

@@ -31,6 +31,7 @@ namespace sphgeom {
 
 // Forward declarations
 class Box;
+class Box3d;
 class Circle;
 class ConvexPolygon;
 class Ellipse;
@@ -80,6 +81,9 @@ public:
 
     /// `getBoundingBox` returns a bounding-box for this region.
     virtual Box getBoundingBox() const = 0;
+
+    /// `getBoundingBox3d` returns a 3-dimensional bounding-box for this region.
+    virtual Box3d getBoundingBox3d() const = 0;
 
     /// `getBoundingCircle` returns a bounding-circle for this region.
     virtual Circle getBoundingCircle() const = 0;

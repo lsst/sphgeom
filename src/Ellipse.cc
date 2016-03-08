@@ -29,6 +29,7 @@
 #include <ostream>
 
 #include "lsst/sphgeom/Box.h"
+#include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/Circle.h"
 #include "lsst/sphgeom/ConvexPolygon.h"
 
@@ -231,6 +232,10 @@ Box Ellipse::getBoundingBox() const {
     return getBoundingCircle().getBoundingBox();
 }
 
+Box3d Ellipse::getBoundingBox3d() const {
+    return getBoundingCircle().getBoundingBox3d();
+}
+
 Circle Ellipse::getBoundingCircle() const {
     Angle r = std::max(getAlpha(), getBeta()) + 2.0 * Angle(MAX_ASIN_ERROR);
     return Circle(getCenter(), r);
@@ -322,7 +327,6 @@ int Ellipse::relate(Circle const & c) const {
 }
 
 int Ellipse::relate(ConvexPolygon const & p) const {
-    // ConvexPolygon-Box relations are implemented by ConvexPolygon.
     return getBoundingCircle().relate(p) & (INTERSECTS | WITHIN | DISJOINT);
 }
 

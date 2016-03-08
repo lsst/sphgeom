@@ -28,6 +28,7 @@
 #include <cmath>
 #include <ostream>
 
+#include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/Circle.h"
 #include "lsst/sphgeom/ConvexPolygon.h"
 #include "lsst/sphgeom/Ellipse.h"
@@ -119,6 +120,66 @@ double Box::getArea() const {
     // absolute value.
     double dz = sin(_lat.getB()) - sin(_lat.getA());
     return std::fabs(_lon.getSize().asRadians() * dz);
+}
+
+Box3d Box::getBoundingBox3d() const {
+    if (isEmpty()) {
+        return Box3d();
+    }
+    if (isFull()) {
+        return Box3d::aroundUnitSphere();
+    }
+    double slata = sin(_lat.getA()), clata = cos(_lat.getA());
+    double slatb = sin(_lat.getB()), clatb = cos(_lat.getB());
+    double slona = sin(_lon.getA()), clona = cos(_lon.getA());
+    double slonb = sin(_lon.getB()), clonb = cos(_lon.getB());
+    // Compute the minimum/maximum x/y values of the box vertices.
+    double xmin = std::min(std::min(clona * clata, clonb * clata),
+                           std::min(clona * clatb, clonb * clatb)) - 2.5 * EPSILON;
+    double xmax = std::max(std::max(clona * clata, clonb * clata),
+                           std::max(clona * clatb, clonb * clatb)) + 2.5 * EPSILON;
+    double ymin = std::min(std::min(slona * clata, slonb * clata),
+                           std::min(slona * clatb, slonb * clatb)) - 2.5 * EPSILON;
+    double ymax = std::max(std::max(slona * clata, slonb * clata),
+                           std::max(slona * clatb, slonb * clatb)) + 2.5 * EPSILON;
+    // Compute the maximum latitude cosine of points in the box.
+    double mlc;
+    if (_lat.contains(Angle(0.0))) {
+        mlc = 1.0;
+        // The box intersects the equator - the x or y extrema of the box may be
+        // at the intersection of the box edge meridians with the equator.
+        xmin = std::min(xmin, std::min(clona, clonb) - EPSILON);
+        xmax = std::max(xmax, std::max(clona, clonb) + EPSILON);
+        ymin = std::min(ymin, std::min(slona, slonb) - EPSILON);
+        ymax = std::max(ymax, std::max(slona, slonb) + EPSILON);
+    } else {
+        // Note that clata and clatb are positive.
+        mlc = std::max(clata, clatb) + EPSILON;
+    }
+    // Check for extrema on the box edges parallel to the equator.
+    if (_lon.contains(NormalizedAngle(0.0))) {
+        xmax = std::max(xmax, mlc);
+    }
+    if (_lon.contains(NormalizedAngle(0.5 * PI))) {
+        ymax = std::max(ymax, mlc);
+    }
+    if (_lon.contains(NormalizedAngle(PI))) {
+        xmin = std::min(xmin, -mlc);
+    }
+    if (_lon.contains(NormalizedAngle(1.5 * PI))) {
+        ymin = std::min(ymin, -mlc);
+    }
+    // Clamp x/y extrema to [-1, 1]
+    xmin = std::max(-1.0, xmin);
+    xmax = std::min(1.0, xmax);
+    ymin = std::max(-1.0, ymin);
+    ymax = std::min(1.0, ymax);
+    // Compute z extrema.
+    double zmin = std::max(-1.0, slata - EPSILON);
+    double zmax = std::min(1.0, slatb + EPSILON);
+    return Box3d(Interval1d(xmin, xmax),
+                 Interval1d(ymin, ymax),
+                 Interval1d(zmin, zmax));
 }
 
 Circle Box::getBoundingCircle() const {

@@ -299,7 +299,7 @@ public:
     virtual Box * clone() const { return new Box(*this); }
 
     virtual Box getBoundingBox() const { return *this; }
-
+    virtual Box3d getBoundingBox3d() const;
     virtual Circle getBoundingCircle() const;
 
     virtual bool contains(UnitVector3d const & v) const {

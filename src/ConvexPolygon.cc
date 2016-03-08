@@ -28,6 +28,7 @@
 #include <ostream>
 
 #include "lsst/sphgeom/Box.h"
+#include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/Circle.h"
 #include "lsst/sphgeom/Ellipse.h"
 #include "lsst/sphgeom/Orientation.h"
@@ -400,6 +401,97 @@ Box ConvexPolygon::getBoundingBox() const {
         bbox.expandTo(southPole);
     }
     return bbox;
+}
+
+Box3d ConvexPolygon::getBoundingBox3d() const {
+    static double const maxError = 1.0e-14;
+    VertexIterator const end = _vertices.end();
+    // Compute the extrema of all vertex coordinates.
+    VertexIterator j = _vertices.begin();
+    double emin[3] = { j->x(), j->y(), j->z() };
+    double emax[3] = { j->x(), j->y(), j->z() };
+    for (++j; j != end; ++j) {
+        for (int i = 0; i < 3; ++i) {
+            double v = j->operator()(i);
+            emin[i] = std::min(emin[i], v);
+            emax[i] = std::max(emax[i], v);
+        }
+    }
+    // Compute the extrema of all edges.
+    //
+    // It can be shown that the great circle with unit normal vector
+    // n = (n₀, n₁, n₂) has extrema in x at:
+    //
+    //   (∓√(1 - n₀²), ±n₁n₀/√(1 - n₀²), ±n₂n₀/√(1 - n₀²))
+    //
+    // in y at:
+    //
+    //   (±n₀n₁/√(1 - n₁²), ∓√(1 - n₁²), ±n₂n₁/√(1 - n₁²))
+    //
+    // and in z at
+    //
+    //   (±n₀n₂/√(1 - n₂²), ±n₁n₂/√(1 - n₂²), ∓√(1 - n₂²))
+    //
+    // Compute these vectors for each edge, determine whether they lie in
+    // the edge, and update the extrema if so. Rounding errors in these
+    // computations are compensated for by expanding the bounding box
+    // prior to returning it.
+    j = end - 1;
+    VertexIterator k = _vertices.begin();
+    for (; k != end; j = k, ++k) {
+        UnitVector3d n(j->robustCross(*k));
+        for (int i = 0; i < 3; ++i) {
+            double ni = n(i);
+            double d = std::fabs(1.0 - ni * ni);
+            if (d > 0.0) {
+                Vector3d e(i == 0 ? -d : n.x() * ni,
+                           i == 1 ? -d : n.y() * ni,
+                           i == 2 ? -d : n.z() * ni);
+                // If e or -e lies in the lune defined by the half great
+                // circle passing through n and a and the half great circle
+                // passing through n and b, the edge contains an extremum.
+                Vector3d v = e.cross(n);
+                double vdj = v.dot(*j);
+                double vdk = v.dot(*k);
+                if (vdj >= 0.0 && vdk <= 0.0) {
+                    emin[i] = std::min(emin[i], -std::sqrt(d));
+                }
+                if (vdj <= 0.0 && vdk >= 0.0) {
+                    emax[i] = std::max(emax[i], std::sqrt(d));
+                }
+            }
+        }
+    }
+    // Check whether which of the standard basis vectors and their antipodes
+    // are inside this polygon.
+    bool a[3] = { true, true, true };
+    bool b[3] = { true, true, true };
+    j = end - 1;
+    k = _vertices.begin();
+    for (; k != end; j = k, ++k) {
+        // Test the standard basis vectors against the plane defined by
+        // vertices (j, k). Note that orientation(-x, *j, *k) =
+        // -orientation(x, *j, *k).
+        int ox = orientationX(*j, *k);
+        a[0] = a[0] && (ox <= 0);
+        b[0] = b[0] && (ox >= 0);
+        int oy = orientationY(*j, *k);
+        a[1] = a[1] && (oy <= 0);
+        b[1] = b[1] && (oy >= 0);
+        int oz = orientationZ(*j, *k);
+        a[2] = a[2] && (oz <= 0);
+        b[2] = b[2] && (oz >= 0);
+    }
+    // At this point, b[i] is true iff the standard basis vector eᵢ
+    // is inside all the half spaces defined by the polygon edges.
+    // Similarly, a[i] is true iff -eᵢ is inside the same half spaces.
+    for (int i = 0; i < 3; ++i) {
+        emin[i] = a[i] ? -1.0 : std::max(-1.0, emin[i] - maxError);
+        emax[i] = b[i] ? 1.0 : std::min(1.0, emax[i] + maxError);
+    }
+    return Box3d(Interval1d(emin[0], emax[0]),
+                 Interval1d(emin[1], emax[1]),
+                 Interval1d(emin[2], emax[2]));
 }
 
 bool ConvexPolygon::contains(UnitVector3d const & v) const {

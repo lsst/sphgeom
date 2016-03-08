@@ -26,6 +26,7 @@
 #include <memory>
 
 #include "lsst/sphgeom/Box.h"
+#include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/Circle.h"
 
 #include "Test.h"
@@ -370,4 +371,29 @@ TEST_CASE(BoxBounds6) {
     CHECK(c.getCenter().z() == 0);
     CHECK(c.getOpeningAngle().asDegrees() < 135.001);
     CHECK(c.relate(b) == (CONTAINS | INTERSECTS));
+}
+
+TEST_CASE(Box3dBounds) {
+    static double const TOLERANCE = 1.0e-15;
+    Box b = Box::full();
+    Box3d bb = b.getBoundingBox3d();
+    CHECK(bb == Box3d::aroundUnitSphere());
+    b = Box::fromRadians(0, 0, 2.0 * PI, 0.5 * PI);
+    bb = b.getBoundingBox3d();
+    CHECK(bb.x() == Interval1d(-1, 1));
+    CHECK(bb.y() == Interval1d(-1, 1));
+    CHECK(bb.z().getB() == 1);
+    CHECK(bb.z().getA() >= -TOLERANCE && bb.z().getA() <= 0.0);
+    b = Box::fromRadians(0.25 * PI, -0.25 * PI, 1.25 * PI, 0.25 * PI);
+    bb = b.getBoundingBox3d();
+    CHECK(bb.x().getA() == -1);
+    CHECK(bb.x().getB() >= 0.5 * std::sqrt(2.0));
+    CHECK(bb.x().getB() <= 0.5 * std::sqrt(2.0) + TOLERANCE);
+    CHECK(bb.y().getA() >= -0.5 * std::sqrt(2.0) - TOLERANCE);
+    CHECK(bb.y().getA() <= -0.5 * std::sqrt(2.0));
+    CHECK(bb.y().getB() == 1);
+    CHECK(bb.z().getA() >= -0.5 * std::sqrt(2.0) - TOLERANCE);
+    CHECK(bb.z().getA() <= -0.5 * std::sqrt(2.0));
+    CHECK(bb.z().getB() >= 0.5 * std::sqrt(2.0));
+    CHECK(bb.z().getB() <= 0.5 * std::sqrt(2.0) + TOLERANCE);
 }

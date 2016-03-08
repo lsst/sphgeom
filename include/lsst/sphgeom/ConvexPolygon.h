@@ -85,6 +85,7 @@ public:
     virtual ConvexPolygon * clone() const { return new ConvexPolygon(*this); }
 
     virtual Box getBoundingBox() const;
+    virtual Box3d getBoundingBox3d() const;
     virtual Circle getBoundingCircle() const;
 
     virtual bool contains(UnitVector3d const & v) const;
