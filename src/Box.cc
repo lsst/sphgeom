@@ -289,7 +289,7 @@ Circle Box::getBoundingCircle() const {
         }
         // Add double the maximum squared-chord-length error, so that the
         // bounding circle we return also reliably CONTAINS this box.
-        return Circle(p, cl2 + 2.0 * MAX_SCL_ERROR);
+        return Circle(p, cl2 + 2.0 * MAX_SQUARED_CHORD_LENGTH_ERROR);
     }
     // The box spans more than π radians in longitude. First, pick the smaller
     // of the bounding circles centered at the north and south pole.
@@ -346,7 +346,8 @@ int Box::relate(Circle const & c) const {
     for (int i = 0; i < 4; ++i) {
         verts[i] = UnitVector3d(vertLonLat[i]);
         double d = (verts[i] - c.getCenter()).getSquaredNorm();
-        if (std::fabs(d - c.getSquaredChordLength()) < MAX_SCL_ERROR) {
+        if (std::fabs(d - c.getSquaredChordLength()) <
+            MAX_SQUARED_CHORD_LENGTH_ERROR) {
             // A box vertex is close to the circle boundary.
             return INTERSECTS;
         }
@@ -368,7 +369,8 @@ int Box::relate(Circle const & c) const {
         for (int i = 0; i < 2; ++i) {
             double d = getMaxSquaredChordLength(
                 c.getCenter(), verts[2 * i + 1], verts[2 * i], norms[i]);
-            if (d > c.getSquaredChordLength() - MAX_SCL_ERROR) {
+            if (d > c.getSquaredChordLength() -
+                    MAX_SQUARED_CHORD_LENGTH_ERROR) {
                 return INTERSECTS;
             }
         }
@@ -380,7 +382,8 @@ int Box::relate(Circle const & c) const {
             Angle a = std::min(getMinAngleToCircle(cc.getLat(), _lat.getA()),
                                getMinAngleToCircle(cc.getLat(), _lat.getB()));
             double d = Circle::squaredChordLengthFor(Angle(PI) - a);
-            if (d > c.getSquaredChordLength() - MAX_SCL_ERROR) {
+            if (d > c.getSquaredChordLength() -
+                    MAX_SQUARED_CHORD_LENGTH_ERROR) {
                 return INTERSECTS;
             }
         }
@@ -404,7 +407,7 @@ int Box::relate(Circle const & c) const {
     for (int i = 0; i < 2; ++i) {
         double d = getMinSquaredChordLength(
             c.getCenter(), verts[2 * i + 1], verts[2 * i], norms[i]);
-        if (d < c.getSquaredChordLength() + MAX_SCL_ERROR) {
+        if (d < c.getSquaredChordLength() + MAX_SQUARED_CHORD_LENGTH_ERROR) {
             return INTERSECTS;
         }
     }
@@ -416,7 +419,7 @@ int Box::relate(Circle const & c) const {
         Angle a = std::min(getMinAngleToCircle(cc.getLat(), _lat.getA()),
                            getMinAngleToCircle(cc.getLat(), _lat.getB()));
         double d = Circle::squaredChordLengthFor(a);
-        if (d < c.getSquaredChordLength() + MAX_SCL_ERROR) {
+        if (d < c.getSquaredChordLength() + MAX_SQUARED_CHORD_LENGTH_ERROR) {
             return INTERSECTS;
         }
     }

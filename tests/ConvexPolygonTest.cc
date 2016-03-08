@@ -257,5 +257,6 @@ TEST_CASE(BoundingCircle) {
     CHECK(c.getCenter().dot(UnitVector3d(1, 1, 1)) >= 1.0 - EPSILON);
     double scl = 2.0 * (std::sqrt(3.0) - 1.0) / std::sqrt(3.0);
     CHECK(c.getSquaredChordLength() >= scl);
-    CHECK(c.getSquaredChordLength() <= scl + 3.0 * MAX_SCL_ERROR);
+    CHECK(c.getSquaredChordLength() <=
+          scl + 3.0 * MAX_SQUARED_CHORD_LENGTH_ERROR);
 }

@@ -46,7 +46,7 @@ static double const MAX_ASIN_ERROR = 1.5e-8;
 // The computation of squared chord length between two unit vectors
 // involves 8 elementary operations on numbers with magnitude ≤ 4. Its
 // maximum error can be shown to be < 2.5e-15.
-static double const MAX_SCL_ERROR = 2.5e-15;
+static double const MAX_SQUARED_CHORD_LENGTH_ERROR = 2.5e-15;
 
 // The smallest value ε such that 1 + ε rounds to 1 in IEEE double
 // precision, assuming round-to-nearest-ties-to-even rounding.

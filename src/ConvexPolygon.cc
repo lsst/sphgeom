@@ -333,7 +333,7 @@ Circle ConvexPolygon::getBoundingCircle() const {
     }
     // Add double the maximum squared-chord-length error, so that the
     // bounding circle we return also reliably CONTAINS this polygon.
-    return Circle(c, cl2 + 2.0 * MAX_SCL_ERROR);
+    return Circle(c, cl2 + 2.0 * MAX_SQUARED_CHORD_LENGTH_ERROR);
 }
 
 Box ConvexPolygon::getBoundingBox() const {
@@ -525,7 +525,8 @@ int ConvexPolygon::relate(Circle const & c) const {
     VertexIterator const end = _vertices.end();
     for (VertexIterator v = _vertices.begin(); v != end; ++v) {
         double d = (*v - c.getCenter()).getSquaredNorm();
-        if (std::fabs(d - c.getSquaredChordLength()) < MAX_SCL_ERROR) {
+        if (std::fabs(d - c.getSquaredChordLength()) <
+            MAX_SQUARED_CHORD_LENGTH_ERROR) {
             // A polygon vertex is close to the circle boundary.
             return INTERSECTS;
         }
@@ -544,7 +545,8 @@ int ConvexPolygon::relate(Circle const & c) const {
              b != end; a = b, ++b) {
             Vector3d n = a->robustCross(*b);
             double d = getMaxSquaredChordLength(c.getCenter(), *a, *b, n);
-            if (d > c.getSquaredChordLength() - MAX_SCL_ERROR) {
+            if (d > c.getSquaredChordLength() -
+                    MAX_SQUARED_CHORD_LENGTH_ERROR) {
                 return INTERSECTS;
             }
         }
@@ -563,7 +565,7 @@ int ConvexPolygon::relate(Circle const & c) const {
          b != end; a = b, ++b) {
         Vector3d n = a->robustCross(*b);
         double d = getMinSquaredChordLength(c.getCenter(), *a, *b, n);
-        if (d < c.getSquaredChordLength() + MAX_SCL_ERROR) {
+        if (d < c.getSquaredChordLength() + MAX_SQUARED_CHORD_LENGTH_ERROR) {
             return INTERSECTS;
         }
     }
