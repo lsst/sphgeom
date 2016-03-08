@@ -69,7 +69,7 @@ void checkProperties(Circle const & c) {
     // The union of any circle with a full circle should be a full circle.
     CHECK(c.expandedTo(Circle::full()).isFull());
     CHECK(Circle::full().expandedTo(c).isFull());
-    // The intersection of any box with a full box should have not effect.
+    // The intersection of any circle with a full circle should have no effect.
     CHECK(c.clippedTo(Circle::full()) == c);
     CHECK(Circle::full().clippedTo(c) == c);
     if (!c.isFull()) {
