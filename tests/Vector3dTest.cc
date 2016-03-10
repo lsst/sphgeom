@@ -39,7 +39,7 @@ TEST_CASE(Stream) {
     Vector3d v(1, 2, 3);
     std::stringstream ss;
     ss << v;
-    CHECK(ss.str() == "Vector3d(1, 2, 3)");
+    CHECK(ss.str() == "[1, 2, 3]");
 }
 
 TEST_CASE(Comparison) {

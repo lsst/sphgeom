@@ -51,7 +51,7 @@ TEST_CASE(Stream) {
     Angle a(1);
     std::stringstream ss;
     ss << a;
-    CHECK(ss.str() == "1 rad");
+    CHECK(ss.str() == "1");
     ss.str(std::string());
 }
 

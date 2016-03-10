@@ -443,7 +443,7 @@ Relationship Box::relate(Ellipse const & e) const {
 }
 
 std::ostream & operator<<(std::ostream & os, Box const & b) {
-    return os << "Box(" << b.getLon() << ", " << b.getLat() << ')';
+    return os << "{\"Box\": [" << b.getLon() << ", " << b.getLat() << "]}";
 }
 
 }} // namespace lsst::sphgeom

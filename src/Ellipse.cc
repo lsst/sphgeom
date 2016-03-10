@@ -335,12 +335,8 @@ Relationship Ellipse::relate(Ellipse const & e) const {
 }
 
 std::ostream & operator<<(std::ostream & os, Ellipse const & e) {
-    os << "Ellipse(\n";
-    e.getTransformMatrix().print(os, 4);
-    os << ",\n"
-       << "    " << e.getAlpha() << ",\n"
-       << "    " << e.getBeta() << "\n"
-       << ")";
+    os << "{\"Ellipse\": [" << e.getTransformMatrix() << ", "
+       << e.getAlpha() << ", " << e.getBeta() << "]}";
     return os;
 }
 

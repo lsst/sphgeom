@@ -47,7 +47,7 @@ TEST_CASE(Stream) {
     NormalizedAngle b(1);
     std::stringstream ss;
     ss << b;
-    CHECK(ss.str() == "1 rad");
+    CHECK(ss.str() == "1");
 }
 
 TEST_CASE(Comparison) {

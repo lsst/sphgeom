@@ -81,11 +81,7 @@ TEST_CASE(Stream) {
     ConvexPolygon p = makeSimpleTriangle();
     std::stringstream ss;
     ss << p;
-    CHECK(ss.str() == "ConvexPolygon(\n"
-                      "    UnitVector3d(0, 0, 1),\n"
-                      "    UnitVector3d(1, 0, 0),\n"
-                      "    UnitVector3d(0, 1, 0)\n"
-                      ")");
+    CHECK(ss.str() == "{\"ConvexPolygon\": [[0, 0, 1], [1, 0, 0], [0, 1, 0]]}");
 }
 
 TEST_CASE(Clone) {

@@ -636,19 +636,11 @@ Relationship ConvexPolygon::relate(Ellipse const & e) const {
 
 std::ostream & operator<<(std::ostream & os, ConvexPolygon const & p) {
     typedef std::vector<UnitVector3d>::const_iterator VertexIterator;
-    os << "ConvexPolygon(\n"
-          "    ";
     VertexIterator v = p.getVertices().begin();
     VertexIterator const end = p.getVertices().end();
-    for (; v != end; ++v) {
-        if (v != p.getVertices().begin()) {
-            os << ",\n"
-                  "    ";
-        }
-        os << *v;
-    }
-    os << "\n"
-          ")";
+    os << "{\"ConvexPolygon\": [" << *v;
+    for (++v; v != end; ++v) { os << ", " << *v; }
+    os << "]}";
     return os;
 }
 

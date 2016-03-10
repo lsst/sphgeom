@@ -25,7 +25,6 @@
 
 #include "lsst/sphgeom/UnitVector3d.h"
 
-#include <cstdio>
 #include <ostream>
 
 
@@ -72,10 +71,7 @@ UnitVector3d::UnitVector3d(Angle lon, Angle lat) {
 }
 
 std::ostream & operator<<(std::ostream & os, UnitVector3d const & v) {
-    char buf[128];
-    std::snprintf(buf, sizeof(buf), "UnitVector3d(%.17g, %.17g, %.17g)",
-                  v.x(), v.y(), v.z());
-    return os << buf;
+    return os << static_cast<Vector3d const &>(v);
 }
 
 }} // namespace lsst::sphgeom

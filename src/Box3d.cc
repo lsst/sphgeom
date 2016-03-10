@@ -32,7 +32,7 @@ namespace lsst {
 namespace sphgeom {
 
 std::ostream & operator<<(std::ostream & os, Box3d const & b) {
-    return os << "Box3d(" << b.x() << ", " << b.y() << ", " << b.z() << ')';
+    return os << "{\"Box3d\": [" << b.x() << ", " << b.y() << ", " << b.z() << "]}";
 }
 
 }} // namespace lsst::sphgeom

@@ -70,13 +70,7 @@ TEST_CASE(Stream) {
     Ellipse e(UnitVector3d::Z(), Angle(1));
     std::stringstream ss;
     ss << e;
-    CHECK(ss.str() == "Ellipse(\n"
-                      "    Matrix3d( 0, 1, -0,\n"
-                      "             -1, 0,  0,\n"
-                      "              0, 0,  1),\n"
-                      "    1 rad,\n"
-                      "    1 rad\n"
-                      ")");
+    CHECK(ss.str() == "{\"Ellipse\": [[[0, 1, -0], [-1, 0, 0], [0, 0, 1]], 1, 1]}");
 }
 
 TEST_CASE(Clone) {

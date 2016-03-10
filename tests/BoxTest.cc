@@ -66,7 +66,7 @@ TEST_CASE(Stream) {
     Box b(LonLat::fromRadians(1, 0), Angle(1), Angle(1));
     std::stringstream ss;
     ss << b;
-    CHECK(ss.str() == "Box([0 rad, 2 rad], [-1 rad, 1 rad])");
+    CHECK(ss.str() == "{\"Box\": [[0, 2], [-1, 1]]}");
 }
 
 TEST_CASE(HalfWidthForCircle) {

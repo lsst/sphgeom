@@ -50,7 +50,7 @@ TEST_CASE(Stream) {
     AngleInterval i = AngleInterval::fromRadians(1,2);
     std::stringstream ss;
     ss << i;
-    CHECK(ss.str() == "[1 rad, 2 rad]");
+    CHECK(ss.str() == "[1, 2]");
 }
 
 TEST_CASE(EmptyInterval) {

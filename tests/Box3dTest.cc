@@ -70,7 +70,7 @@ TEST_CASE(Stream) {
     Box3d b = Box3d(Interval1d(0, 1), Interval1d(2, 3), Interval1d(4, 5));
     std::stringstream ss;
     ss << b;
-    CHECK(ss.str() == "Box3d([0, 1], [2, 3], [4, 5])");
+    CHECK(ss.str() == "{\"Box3d\": [[0, 1], [2, 3], [4, 5]]}");
 }
 
 TEST_CASE(Construction) {

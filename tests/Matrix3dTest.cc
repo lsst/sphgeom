@@ -49,14 +49,10 @@ FIXTURE_TEST_CASE(Stream, Fixture) {
     Matrix3d M(Vector3d(-1, 10, 100));
     std::stringstream ss;
     ss << M;
-    CHECK(ss.str() == "Matrix3d(-1,  0,   0,\n"
-                      "          0, 10,   0,\n"
-                      "          0,  0, 100)");
+    CHECK(ss.str() == "[[-1, 0, 0], [0, 10, 0], [0, 0, 100]]");
     ss.str(std::string());
-    M1.print(ss, 4);
-    CHECK(ss.str() == "    Matrix3d(1, 2, 3,\n"
-                      "             4, 5, 6,\n"
-                      "             7, 8, 9)");
+    ss << M1;
+    CHECK(ss.str() == "[[1, 2, 3], [4, 5, 6], [7, 8, 9]]");
 }
 
 TEST_CASE(Comparison) {

@@ -320,8 +320,8 @@ Relationship Circle::relate(Ellipse const & e) const {
 }
 
 std::ostream & operator<<(std::ostream & os, Circle const & c) {
-    return os << "Circle(" << c.getCenter() << ", "
-              << c.getSquaredChordLength() << ')';
+    return os << "{\"Circle\": [" << c.getCenter() << ", "
+              << c.getSquaredChordLength() << "]}";
 }
 
 }} // namespace lsst::sphgeom

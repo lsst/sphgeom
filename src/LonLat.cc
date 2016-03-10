@@ -80,7 +80,7 @@ void LonLat::_enforceInvariants() {
 }
 
 std::ostream & operator<<(std::ostream & os, LonLat const & p) {
-    return os << "LonLat(" << p.getLon() << ", " << p.getLat() << ")";
+    return os << '[' << p.getLon() << ", " << p.getLat() << ']';
 }
 
 }} // namespace lsst::sphgeom

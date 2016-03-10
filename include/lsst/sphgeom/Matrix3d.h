@@ -78,6 +78,11 @@ public:
                _c[2] != m._c[2];
     }
 
+    /// `getRow` returns the `r`-th matrix row. Bounds are not checked.
+    Vector3d getRow(int r) const {
+        return Vector3d(getColumn(0)(r), getColumn(1)(r), getColumn(2)(r));
+    }
+
     /// `getColumn` returns the `c`-th matrix column. Bounds are not checked.
     Vector3d const & getColumn(int c) const { return _c[c]; }
 
@@ -164,10 +169,6 @@ public:
                              (m(0, 0) * m(1, 1) - m(1, 0) * m(0, 1)) * rdet);
         return inv;
     }
-
-    /// `print` writes this matrix to the given output stream. Each line of
-    /// output is indented by the given number of spaces.
-    void print(std::ostream & os, int indent) const;
 
 private:
     Vector3d _c[3];

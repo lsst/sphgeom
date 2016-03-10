@@ -64,7 +64,7 @@ TEST_CASE(Stream) {
     NormalizedAngleInterval i(Angle(1), Angle(2));
     std::stringstream ss;
     ss << i;
-    CHECK(ss.str() == "[1 rad, 2 rad]");
+    CHECK(ss.str() == "[1, 2]");
 }
 
 TEST_CASE(Construction) {

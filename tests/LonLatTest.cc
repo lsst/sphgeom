@@ -41,7 +41,7 @@ TEST_CASE(Stream) {
     LonLat p = LonLat::fromRadians(2, 1);
     std::stringstream ss;
     ss << p;
-    CHECK(ss.str() == "LonLat(2 rad, 1 rad)");
+    CHECK(ss.str() == "[2, 1]");
 }
 
 TEST_CASE(Construction) {
