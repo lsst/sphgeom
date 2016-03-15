@@ -466,7 +466,7 @@ Box3d ConvexPolygon::getBoundingBox3d() const {
             }
         }
     }
-    // Check whether which of the standard basis vectors and their antipodes
+    // Check whether the standard basis vectors and their antipodes
     // are inside this polygon.
     bool a[3] = { true, true, true };
     bool b[3] = { true, true, true };
