@@ -25,8 +25,8 @@
 
 #include "lsst/sphgeom/AngleInterval.h"
 
-#include "Test.h"
-#include "RelationshipTestUtils.h"
+#include "test.h"
+#include "relationshipTestUtils.h"
 
 
 using namespace lsst::sphgeom;

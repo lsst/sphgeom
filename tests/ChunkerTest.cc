@@ -26,7 +26,7 @@
 #include "lsst/sphgeom/Box.h"
 #include "lsst/sphgeom/Chunker.h"
 
-#include "Test.h"
+#include "test.h"
 
 
 using namespace lsst::sphgeom;

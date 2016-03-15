@@ -25,7 +25,7 @@
 
 #include "lsst/sphgeom/BigInteger.h"
 
-#include "Test.h"
+#include "test.h"
 
 
 using namespace lsst::sphgeom;

@@ -31,7 +31,7 @@
 #include <iosfwd>
 #include <limits>
 
-#include "Constants.h"
+#include "constants.h"
 
 
 namespace lsst {

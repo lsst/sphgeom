@@ -32,9 +32,9 @@
 #include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/Circle.h"
 #include "lsst/sphgeom/Ellipse.h"
-#include "lsst/sphgeom/Orientation.h"
-#include "lsst/sphgeom/Utils.h"
 #include "lsst/sphgeom/codec.h"
+#include "lsst/sphgeom/orientation.h"
+#include "lsst/sphgeom/utils.h"
 
 
 namespace lsst {

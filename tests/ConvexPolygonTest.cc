@@ -30,7 +30,7 @@
 #include "lsst/sphgeom/Circle.h"
 #include "lsst/sphgeom/ConvexPolygon.h"
 
-#include "Test.h"
+#include "test.h"
 
 
 using namespace lsst::sphgeom;

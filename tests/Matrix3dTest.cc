@@ -25,7 +25,7 @@
 
 #include "lsst/sphgeom/Matrix3d.h"
 
-#include "Test.h"
+#include "test.h"
 
 
 using namespace lsst::sphgeom;

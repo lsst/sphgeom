@@ -23,9 +23,9 @@
 /// \file
 /// \brief This file contains tests for the orientation function.
 
-#include "lsst/sphgeom/Orientation.h"
+#include "lsst/sphgeom/orientation.h"
 
-#include "Test.h"
+#include "test.h"
 
 using namespace lsst::sphgeom;
 

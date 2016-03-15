@@ -30,7 +30,7 @@
 #include "lsst/sphgeom/NormalizedAngle.h"
 #include "lsst/sphgeom/Vector3d.h"
 
-#include "Test.h"
+#include "test.h"
 
 
 using namespace lsst::sphgeom;

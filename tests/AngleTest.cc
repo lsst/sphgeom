@@ -28,7 +28,7 @@
 
 #include "lsst/sphgeom/NormalizedAngle.h"
 
-#include "Test.h"
+#include "test.h"
 
 
 using namespace lsst::sphgeom;

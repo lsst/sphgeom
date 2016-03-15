@@ -31,8 +31,8 @@
 
 #include "lsst/sphgeom/Interval1d.h"
 
-#include "Test.h"
-#include "RelationshipTestUtils.h"
+#include "test.h"
+#include "relationshipTestUtils.h"
 
 
 using namespace lsst::sphgeom;
