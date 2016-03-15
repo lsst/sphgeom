@@ -53,6 +53,8 @@ namespace sphgeom {
 /// - Box::allLongitudes().contains(b.getLon())
 class Box : public Region {
 public:
+    static constexpr uint8_t TYPE_CODE = 'b';
+
     // Factory functions
     static Box fromDegrees(double lon1, double lat1, double lon2, double lat2) {
         return Box(NormalizedAngleInterval::fromDegrees(lon1, lon2),
@@ -327,7 +329,19 @@ public:
     virtual Relationship relate(ConvexPolygon const &) const;
     virtual Relationship relate(Ellipse const &) const;
 
+    virtual std::vector<uint8_t> encode() const;
+
+    ///@{
+    /// `decode` deserializes a Box from a byte string produced by encode.
+    static std::unique_ptr<Box> decode(std::vector<uint8_t> & s) {
+        return decode(s.data(), s.size());
+    }
+    static std::unique_ptr<Box> decode(uint8_t const * buffer, size_t n);
+    ///@}
+
 private:
+    static constexpr size_t ENCODED_SIZE = 33;
+
     void _enforceInvariants() {
         // Make sure that _lat ⊆ [-π/2, π/2].
         _lat.clipTo(allLatitudes());

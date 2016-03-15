@@ -27,15 +27,19 @@
 
 #include <cmath>
 #include <ostream>
+#include <stdexcept>
 
 #include "lsst/sphgeom/Box.h"
 #include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/Circle.h"
 #include "lsst/sphgeom/ConvexPolygon.h"
+#include "lsst/sphgeom/codec.h"
 
 
 namespace lsst {
 namespace sphgeom {
+
+const uint8_t Ellipse::TYPE_CODE;
 
 Ellipse::Ellipse(UnitVector3d const & f1, UnitVector3d const & f2, Angle alpha) :
     _a(alpha.asRadians() - 0.5 * PI)
@@ -332,6 +336,54 @@ Relationship Ellipse::relate(ConvexPolygon const & p) const {
 
 Relationship Ellipse::relate(Ellipse const & e) const {
     return getBoundingCircle().relate(e.getBoundingCircle()) & DISJOINT;
+}
+
+std::vector<uint8_t> Ellipse::encode() const {
+    std::vector<uint8_t> buffer;
+    buffer.reserve(ENCODED_SIZE);
+    buffer.push_back(TYPE_CODE);
+    for (int r = 0; r < 3; ++r) {
+        for (int c = 0; c < 3; ++c) {
+            encodeDouble(_S(r, c), buffer);
+        }
+    }
+    encodeDouble(_a.asRadians(), buffer);
+    encodeDouble(_b.asRadians(), buffer);
+    encodeDouble(_gamma.asRadians(), buffer);
+    encodeDouble(_tana, buffer);
+    encodeDouble(_tanb, buffer);
+    return buffer;
+}
+
+std::unique_ptr<Ellipse> Ellipse::decode(uint8_t const * buffer, size_t n) {
+    if (buffer == nullptr || n != ENCODED_SIZE || buffer[0] != TYPE_CODE) {
+        throw std::runtime_error("Byte-string is not an encoded Ellipse");
+    }
+    std::unique_ptr<Ellipse> ellipse(new Ellipse);
+    ++buffer;
+    double m00 = decodeDouble(buffer); buffer += 8;
+    double m01 = decodeDouble(buffer); buffer += 8;
+    double m02 = decodeDouble(buffer); buffer += 8;
+    double m10 = decodeDouble(buffer); buffer += 8;
+    double m11 = decodeDouble(buffer); buffer += 8;
+    double m12 = decodeDouble(buffer); buffer += 8;
+    double m20 = decodeDouble(buffer); buffer += 8;
+    double m21 = decodeDouble(buffer); buffer += 8;
+    double m22 = decodeDouble(buffer); buffer += 8;
+    ellipse->_S = Matrix3d(m00, m01, m02,
+                           m10, m11, m12,
+                           m20, m21, m22);
+    double a = decodeDouble(buffer); buffer += 8;
+    double b = decodeDouble(buffer); buffer += 8;
+    double gamma = decodeDouble(buffer); buffer += 8;
+    ellipse->_a = Angle(a);
+    ellipse->_b = Angle(b);
+    ellipse->_gamma = Angle(gamma);
+    double tana = decodeDouble(buffer); buffer += 8;
+    double tanb = decodeDouble(buffer); buffer += 8;
+    ellipse->_tana = tana;
+    ellipse->_tanb = tanb;
+    return ellipse;
 }
 
 std::ostream & operator<<(std::ostream & os, Ellipse const & e) {

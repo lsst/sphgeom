@@ -363,3 +363,12 @@ TEST_CASE(Box3dBounds2) {
     c = Circle(a, 0.0);
     CHECK(Box3d(a).dilatedBy(TOLERANCE).contains(c.getBoundingBox3d()));
 }
+
+TEST_CASE(Codec) {
+    Circle c = Circle(UnitVector3d(-1, -1, 1), 0.5);
+    std::vector<uint8_t> buffer = c.encode();
+    CHECK(*Circle::decode(buffer) == c);
+    std::unique_ptr<Region> r = Region::decode(buffer);
+    CHECK(dynamic_cast<Circle *>(r.get()) != nullptr);
+    CHECK(*dynamic_cast<Circle *>(r.get()) == c);
+}

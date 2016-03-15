@@ -221,3 +221,12 @@ TEST_CASE(Contains2) {
     CHECK(!e.contains(-UnitVector3d::Y()));
     CHECK(!e.contains(-UnitVector3d::Z()));
 }
+
+TEST_CASE(Codec) {
+    Ellipse e = Ellipse(UnitVector3d(1, 2, 3), UnitVector3d(3, 2, 1), Angle(1));
+    std::vector<uint8_t> buffer = e.encode();
+    CHECK(*Ellipse::decode(buffer) == e);
+    std::unique_ptr<Region> r = Region::decode(buffer);
+    CHECK(dynamic_cast<Ellipse *>(r.get()) != nullptr);
+    CHECK(*dynamic_cast<Ellipse *>(r.get()) == e);
+}

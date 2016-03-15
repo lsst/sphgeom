@@ -45,6 +45,8 @@ namespace sphgeom {
 /// angles.
 class Circle : public Region {
 public:
+    static constexpr uint8_t TYPE_CODE = 'c';
+
     static Circle empty() { return Circle(); }
 
     static Circle full() { return Circle(UnitVector3d::Z(), 4.0); }
@@ -240,7 +242,19 @@ public:
     virtual Relationship relate(ConvexPolygon const &) const;
     virtual Relationship relate(Ellipse const &) const;
 
+    virtual std::vector<uint8_t> encode() const;
+
+    ///@{
+    /// `decode` deserializes a Circle from a byte string produced by encode.
+    static std::unique_ptr<Circle> decode(std::vector<uint8_t> & s) {
+        return decode(s.data(), s.size());
+    }
+    static std::unique_ptr<Circle> decode(uint8_t const * buffer, size_t n);
+    ///@}
+
 private:
+    static constexpr size_t ENCODED_SIZE = 41;
+
     UnitVector3d _center;
     double _squaredChordLength;
     Angle _openingAngle;

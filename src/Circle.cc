@@ -26,15 +26,19 @@
 #include "lsst/sphgeom/Circle.h"
 
 #include <ostream>
+#include <stdexcept>
 
 #include "lsst/sphgeom/Box.h"
 #include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/ConvexPolygon.h"
 #include "lsst/sphgeom/Ellipse.h"
+#include "lsst/sphgeom/codec.h"
 
 
 namespace lsst {
 namespace sphgeom {
+
+const uint8_t Circle::TYPE_CODE;
 
 double Circle::squaredChordLengthFor(Angle a) {
     if (a.asRadians() < 0.0) {
@@ -317,6 +321,35 @@ Relationship Circle::relate(ConvexPolygon const & p) const {
 Relationship Circle::relate(Ellipse const & e) const {
     // Ellipse-Circle relations are implemented by Ellipse.
     return invert(e.relate(*this));
+}
+
+std::vector<uint8_t> Circle::encode() const {
+    std::vector<uint8_t> buffer;
+    buffer.reserve(ENCODED_SIZE);
+    buffer.push_back(TYPE_CODE);
+    encodeDouble(_center.x(), buffer);
+    encodeDouble(_center.y(), buffer);
+    encodeDouble(_center.z(), buffer);
+    encodeDouble(_squaredChordLength, buffer);
+    encodeDouble(_openingAngle.asRadians(), buffer);
+    return buffer;
+}
+
+std::unique_ptr<Circle> Circle::decode(uint8_t const * buffer, size_t n) {
+    if (buffer == nullptr || n != ENCODED_SIZE || *buffer != TYPE_CODE) {
+        throw std::runtime_error("Byte-string is not an encoded Circle");
+    }
+    std::unique_ptr<Circle> circle(new Circle);
+    ++buffer;
+    double x = decodeDouble(buffer); buffer += 8;
+    double y = decodeDouble(buffer); buffer += 8;
+    double z = decodeDouble(buffer); buffer += 8;
+    double squaredChordLength = decodeDouble(buffer); buffer += 8;
+    double openingAngle = decodeDouble(buffer); buffer += 8;
+    circle->_center = UnitVector3d::fromNormalized(x, y, z);
+    circle->_squaredChordLength = squaredChordLength;
+    circle->_openingAngle = Angle(openingAngle);
+    return circle;
 }
 
 std::ostream & operator<<(std::ostream & os, Circle const & c) {

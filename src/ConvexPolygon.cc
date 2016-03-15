@@ -26,6 +26,7 @@
 #include "lsst/sphgeom/ConvexPolygon.h"
 
 #include <ostream>
+#include <stdexcept>
 
 #include "lsst/sphgeom/Box.h"
 #include "lsst/sphgeom/Box3d.h"
@@ -33,6 +34,7 @@
 #include "lsst/sphgeom/Ellipse.h"
 #include "lsst/sphgeom/Orientation.h"
 #include "lsst/sphgeom/Utils.h"
+#include "lsst/sphgeom/codec.h"
 
 
 namespace lsst {
@@ -275,6 +277,8 @@ void computeHull(std::vector<UnitVector3d> & points) {
 
 } // unnamed namespace
 
+
+const uint8_t ConvexPolygon::TYPE_CODE;
 
 ConvexPolygon::ConvexPolygon(std::vector<UnitVector3d> const & points) :
     _vertices(points)
@@ -632,6 +636,39 @@ Relationship ConvexPolygon::relate(ConvexPolygon const & p) const {
 
 Relationship ConvexPolygon::relate(Ellipse const & e) const {
     return relate(e.getBoundingCircle()) & (CONTAINS | DISJOINT);
+}
+
+std::vector<uint8_t> ConvexPolygon::encode() const {
+    std::vector<uint8_t> buffer;
+    buffer.reserve(1 + 24 * _vertices.size());
+    buffer.push_back(TYPE_CODE);
+    for (UnitVector3d const & v: _vertices) {
+        encodeDouble(v.x(), buffer);
+        encodeDouble(v.y(), buffer);
+        encodeDouble(v.z(), buffer);
+    }
+    return buffer;
+}
+
+std::unique_ptr<ConvexPolygon> ConvexPolygon::decode(uint8_t const * buffer,
+                                                     size_t n)
+{
+    if (buffer == nullptr || *buffer != TYPE_CODE ||
+        n < 1 + 24*3 || (n - 1) % 24 != 0) {
+        throw std::runtime_error("Byte-string is not an encoded ConvexPolygon");
+    }
+    std::unique_ptr<ConvexPolygon> poly(new ConvexPolygon);
+    ++buffer;
+    size_t nv = (n - 1) / 24;
+    poly->_vertices.reserve(nv);
+    for (size_t i = 0; i < nv; ++i, buffer += 24) {
+        poly->_vertices.push_back(UnitVector3d::fromNormalized(
+            decodeDouble(buffer),
+            decodeDouble(buffer + 8),
+            decodeDouble(buffer + 16)
+        ));
+    }
+    return poly;
 }
 
 std::ostream & operator<<(std::ostream & os, ConvexPolygon const & p) {

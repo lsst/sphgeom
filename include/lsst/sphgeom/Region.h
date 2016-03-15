@@ -23,13 +23,14 @@
 #ifndef LSST_SPHGEOM_REGION_H_
 #define LSST_SPHGEOM_REGION_H_
 
+/// \file
+/// \brief This file defines an interface for spherical regions.
+
 #include <memory>
+#include <vector>
 
 #include "Relationship.h"
 
-
-/// \file
-/// \brief This file defines an interface for spherical regions.
 
 namespace lsst {
 namespace sphgeom {
@@ -43,11 +44,12 @@ class Ellipse;
 class UnitVector3d;
 
 /// `Region` is a minimal interface for 2-dimensional regions on the unit
-/// sphere. It provides two core pieces of functionality:
+/// sphere. It provides three core pieces of functionality:
 ///
 /// - It allows a region to be approximated with a simpler one.
-/// - It allows for inexact computation of the spatial relationships
-///   between two regions.
+/// - It allows for inexact (but conservative) computation of the spatial
+///   relationships between two regions.
+/// - It provides transformation between objects and binary strings.
 ///
 /// Given a partitioning of the unit sphere with partitions that can be
 /// bounded by Regions, this provides all the necessary functionality for
@@ -108,14 +110,26 @@ public:
     /// conclusively. If it is not set, the relationship may or may not
     /// hold.
     ///
-    /// These semantics allow for inexact (conservative) relationship
-    /// computations. In particular, a Region may choose to implement `relate`
-    /// by replacing itself and/or the argument with a simplified bounding region.
+    /// These semantics allow for conservative relationship computations. In
+    /// particular, a Region may choose to implement `relate` by replacing
+    /// itself and/or the argument with a simplified bounding region.
     virtual Relationship relate(Region const &) const = 0;
     virtual Relationship relate(Box const &) const = 0;
     virtual Relationship relate(Circle const &) const = 0;
     virtual Relationship relate(ConvexPolygon const &) const = 0;
     virtual Relationship relate(Ellipse const &) const = 0;
+    ///@}
+
+    /// `encode` serializes this region into an opaque byte string. Byte strings
+    /// emitted by encode can be deserialized with decode.
+    virtual std::vector<uint8_t> encode() const = 0;
+
+    ///@{
+    /// `decode` deserializes a Region from a byte string produced by encode.
+    static std::unique_ptr<Region> decode(std::vector<uint8_t> & s) {
+        return decode(s.data(), s.size());
+    }
+    static std::unique_ptr<Region> decode(uint8_t const * buffer, size_t n);
     ///@}
 };
 

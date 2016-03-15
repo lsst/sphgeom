@@ -168,6 +168,8 @@ namespace sphgeom {
 /// but tan is finite since a is rational and cannot be exactly equal to ±π/2.
 class Ellipse : public Region {
 public:
+    static constexpr uint8_t TYPE_CODE = 'e';
+
     static Ellipse empty() { return Ellipse(); }
 
     static Ellipse full() { return Ellipse().complement(); }
@@ -291,7 +293,19 @@ public:
     virtual Relationship relate(ConvexPolygon const &) const;
     virtual Relationship relate(Ellipse const &) const;
 
+    virtual std::vector<uint8_t> encode() const;
+
+    ///@{
+    /// `decode` deserializes an Ellipse from a byte string produced by encode.
+    static std::unique_ptr<Ellipse> decode(std::vector<uint8_t> & s) {
+        return decode(s.data(), s.size());
+    }
+    static std::unique_ptr<Ellipse> decode(uint8_t const * buffer, size_t n);
+    ///@}
+
 private:
+    static constexpr size_t ENCODED_SIZE = 113;
+
     Matrix3d _S;
     Angle _a; // α - π/2
     Angle _b; // β - π/2

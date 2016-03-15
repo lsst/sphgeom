@@ -395,3 +395,12 @@ TEST_CASE(Box3dBounds) {
     CHECK(bb.z().getB() >= 0.5 * std::sqrt(2.0));
     CHECK(bb.z().getB() <= 0.5 * std::sqrt(2.0) + TOLERANCE);
 }
+
+TEST_CASE(Codec) {
+    Box b = Box::fromRadians(5.0, -1.0, 1.0, 0.5);
+    std::vector<uint8_t> buffer = b.encode();
+    CHECK(*Box::decode(buffer) == b);
+    std::unique_ptr<Region> r = Region::decode(buffer);
+    CHECK(dynamic_cast<Box *>(r.get()) != nullptr);
+    CHECK(*dynamic_cast<Box *>(r.get()) == b);
+}

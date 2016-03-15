@@ -256,3 +256,12 @@ TEST_CASE(BoundingCircle) {
     CHECK(c.getSquaredChordLength() <=
           scl + 3.0 * MAX_SQUARED_CHORD_LENGTH_ERROR);
 }
+
+TEST_CASE(Codec) {
+    ConvexPolygon p = makeNgon(UnitVector3d(1, -1, -1), UnitVector3d(2, -2, -1), 5);
+    std::vector<uint8_t> buffer = p.encode();
+    CHECK(*ConvexPolygon::decode(buffer) == p);
+    std::unique_ptr<Region> r = Region::decode(buffer);
+    CHECK(dynamic_cast<ConvexPolygon *>(r.get()) != nullptr);
+    CHECK(*dynamic_cast<ConvexPolygon *>(r.get()) == p);
+}

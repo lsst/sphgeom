@@ -27,16 +27,20 @@
 
 #include <cmath>
 #include <ostream>
+#include <stdexcept>
 
 #include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/Circle.h"
 #include "lsst/sphgeom/ConvexPolygon.h"
 #include "lsst/sphgeom/Ellipse.h"
 #include "lsst/sphgeom/Utils.h"
+#include "lsst/sphgeom/codec.h"
 
 
 namespace lsst {
 namespace sphgeom {
+
+const uint8_t Box::TYPE_CODE;
 
 NormalizedAngle Box::halfWidthForCircle(Angle r, Angle lat) {
     if (r <= Angle(0.0)) {
@@ -440,6 +444,33 @@ Relationship Box::relate(ConvexPolygon const & p) const {
 Relationship Box::relate(Ellipse const & e) const {
     // Ellipse-Box relations are implemented by Ellipse.
     return invert(e.relate(*this));
+}
+
+std::vector<uint8_t> Box::encode() const {
+    std::vector<uint8_t> buffer;
+    buffer.reserve(ENCODED_SIZE);
+    buffer.push_back(TYPE_CODE);
+    encodeDouble(_lon.getA().asRadians(), buffer);
+    encodeDouble(_lon.getB().asRadians(), buffer);
+    encodeDouble(_lat.getA().asRadians(), buffer);
+    encodeDouble(_lat.getB().asRadians(), buffer);
+    return buffer;
+}
+
+std::unique_ptr<Box> Box::decode(uint8_t const * buffer, size_t n) {
+    if (buffer == nullptr || n != ENCODED_SIZE || *buffer != TYPE_CODE) {
+        throw std::runtime_error("Byte-string is not an encoded Box");
+    }
+    std::unique_ptr<Box> box(new Box);
+    ++buffer;
+    double a = decodeDouble(buffer); buffer += 8;
+    double b = decodeDouble(buffer); buffer += 8;
+    box->_lon = NormalizedAngleInterval::fromRadians(a, b);
+    a = decodeDouble(buffer); buffer += 8;
+    b = decodeDouble(buffer); buffer += 8;
+    box->_lat = AngleInterval::fromRadians(a, b);
+    box->_enforceInvariants();
+    return box;
 }
 
 std::ostream & operator<<(std::ostream & os, Box const & b) {

@@ -56,6 +56,8 @@ namespace sphgeom {
 /// convex hull of a point set.
 class ConvexPolygon : public Region {
 public:
+    static constexpr uint8_t TYPE_CODE = 'p';
+
     /// `convexHull` returns the convex hull of the given set of points if it
     /// exists and throws an exception otherwise. Though points are supplied
     /// in a vector, they really are conceptually a set - the ConvexPolygon
@@ -101,6 +103,16 @@ public:
     virtual Relationship relate(Circle const &) const;
     virtual Relationship relate(ConvexPolygon const &) const;
     virtual Relationship relate(Ellipse const &) const;
+
+    virtual std::vector<uint8_t> encode() const;
+
+    ///@{
+    /// `decode` deserializes an ConvexPolygon from a byte string produced by encode.
+    static std::unique_ptr<ConvexPolygon> decode(std::vector<uint8_t> & s) {
+        return decode(s.data(), s.size());
+    }
+    static std::unique_ptr<ConvexPolygon> decode(uint8_t const * buffer, size_t n);
+    ///@}
 
 private:
     typedef std::vector<UnitVector3d>::const_iterator VertexIterator;
