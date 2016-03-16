@@ -119,7 +119,7 @@ public:
     Angle operator-(Angle const & a) const { return _a - a; }
     Angle operator*(double a) const { return _a * a; }
     Angle operator/(double a) const { return _a / a; }
-    double operator/(Angle a) const { return _a / a; }
+    double operator/(Angle const & a) const { return _a / a; }
 
     /// `asDegrees` returns the value of this angle in units of degrees.
     double asDegrees() const { return _a.asDegrees(); }

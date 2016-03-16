@@ -12,6 +12,8 @@ doc/doxygen.conf
 doc/html
 doc/xml
 doc/*.tag
+python/lsst/sphgeom/sphgeomLib.py
+python/lsst/sphgeom/sphgeomLib_wrap.cc
 python/lsst/sphgeom/version.py
 tests/.tests/
 tests/AngleIntervalTest

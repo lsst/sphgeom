@@ -39,8 +39,6 @@
 namespace lsst {
 namespace sphgeom {
 
-const uint8_t Ellipse::TYPE_CODE;
-
 Ellipse::Ellipse(UnitVector3d const & f1, UnitVector3d const & f2, Angle alpha) :
     _a(alpha.asRadians() - 0.5 * PI)
 {
@@ -340,8 +338,9 @@ Relationship Ellipse::relate(Ellipse const & e) const {
 
 std::vector<uint8_t> Ellipse::encode() const {
     std::vector<uint8_t> buffer;
+    uint8_t tc = TYPE_CODE;
     buffer.reserve(ENCODED_SIZE);
-    buffer.push_back(TYPE_CODE);
+    buffer.push_back(tc);
     for (int r = 0; r < 3; ++r) {
         for (int c = 0; c < 3; ++c) {
             encodeDouble(_S(r, c), buffer);

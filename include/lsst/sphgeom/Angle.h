@@ -70,7 +70,7 @@ public:
     Angle operator-(Angle const & a) const { return Angle(_rad - a._rad); }
     Angle operator*(double a) const { return Angle(_rad * a); }
     Angle operator/(double a) const { return Angle(_rad / a); }
-    double operator/(Angle a) const { return _rad / a._rad; }
+    double operator/(Angle const & a) const { return _rad / a._rad; }
 
     // In-place arithmetic operators
     Angle & operator+=(Angle const & a) { *this = *this + a; return *this; }

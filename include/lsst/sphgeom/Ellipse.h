@@ -297,7 +297,7 @@ public:
 
     ///@{
     /// `decode` deserializes an Ellipse from a byte string produced by encode.
-    static std::unique_ptr<Ellipse> decode(std::vector<uint8_t> & s) {
+    static std::unique_ptr<Ellipse> decode(std::vector<uint8_t> const & s) {
         return decode(s.data(), s.size());
     }
     static std::unique_ptr<Ellipse> decode(uint8_t const * buffer, size_t n);

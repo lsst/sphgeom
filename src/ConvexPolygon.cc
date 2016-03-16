@@ -278,8 +278,6 @@ void computeHull(std::vector<UnitVector3d> & points) {
 } // unnamed namespace
 
 
-const uint8_t ConvexPolygon::TYPE_CODE;
-
 ConvexPolygon::ConvexPolygon(std::vector<UnitVector3d> const & points) :
     _vertices(points)
 {
@@ -640,8 +638,9 @@ Relationship ConvexPolygon::relate(Ellipse const & e) const {
 
 std::vector<uint8_t> ConvexPolygon::encode() const {
     std::vector<uint8_t> buffer;
+    uint8_t tc = TYPE_CODE;
     buffer.reserve(1 + 24 * _vertices.size());
-    buffer.push_back(TYPE_CODE);
+    buffer.push_back(tc);
     for (UnitVector3d const & v: _vertices) {
         encodeDouble(v.x(), buffer);
         encodeDouble(v.y(), buffer);

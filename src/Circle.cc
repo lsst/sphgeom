@@ -38,8 +38,6 @@
 namespace lsst {
 namespace sphgeom {
 
-const uint8_t Circle::TYPE_CODE;
-
 double Circle::squaredChordLengthFor(Angle a) {
     if (a.asRadians() < 0.0) {
         return -1.0;
@@ -325,8 +323,9 @@ Relationship Circle::relate(Ellipse const & e) const {
 
 std::vector<uint8_t> Circle::encode() const {
     std::vector<uint8_t> buffer;
+    uint8_t tc = TYPE_CODE;
     buffer.reserve(ENCODED_SIZE);
-    buffer.push_back(TYPE_CODE);
+    buffer.push_back(tc);
     encodeDouble(_center.x(), buffer);
     encodeDouble(_center.y(), buffer);
     encodeDouble(_center.z(), buffer);

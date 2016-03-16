@@ -28,6 +28,7 @@
 /// tests.
 
 #include <cmath>
+#include <limits>
 
 #include "lsst/sphgeom/Interval1d.h"
 
@@ -68,9 +69,10 @@ TEST_CASE(Stream) {
 TEST_CASE(EmptyInterval) {
     Interval1d emptyIntervals[5] = {
         Interval1d(),
-        Interval1d(1, std::nan(nullptr)),
-        Interval1d(std::nan(nullptr), 1),
-        Interval1d(std::nan(nullptr), std::nan(nullptr)),
+        Interval1d(1, std::numeric_limits<double>::quiet_NaN()),
+        Interval1d(std::numeric_limits<double>::quiet_NaN(), 1),
+        Interval1d(std::numeric_limits<double>::quiet_NaN(),
+                   std::numeric_limits<double>::quiet_NaN()),
         Interval1d(2, 1)
     };
     for (int j = 0; j < 5; ++j) {
@@ -78,11 +80,12 @@ TEST_CASE(EmptyInterval) {
         CHECK(i.isEmpty());
         CHECK(!i.isFull());
         CHECK(i == i);
-        CHECK(i == std::nan(nullptr));
+        CHECK(i == std::numeric_limits<double>::quiet_NaN());
         // An empty interval should contain itself, be within itself,
         // and be disjoint from itself.
         checkRelationship(i, i, CONTAINS | WITHIN | DISJOINT);
-        checkRelationship(i, std::nan(nullptr), CONTAINS | WITHIN | DISJOINT);
+        checkRelationship(i, std::numeric_limits<double>::quiet_NaN(),
+                          CONTAINS | WITHIN | DISJOINT);
         for (int k = 0; k < j; ++k) {
             checkRelationship(i, emptyIntervals[k], CONTAINS | WITHIN | DISJOINT);
             checkRelationship(emptyIntervals[k], i, CONTAINS | WITHIN | DISJOINT);

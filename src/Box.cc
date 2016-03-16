@@ -40,8 +40,6 @@
 namespace lsst {
 namespace sphgeom {
 
-const uint8_t Box::TYPE_CODE;
-
 NormalizedAngle Box::halfWidthForCircle(Angle r, Angle lat) {
     if (r <= Angle(0.0)) {
         return NormalizedAngle(0.0);
@@ -448,8 +446,9 @@ Relationship Box::relate(Ellipse const & e) const {
 
 std::vector<uint8_t> Box::encode() const {
     std::vector<uint8_t> buffer;
+    uint8_t tc = TYPE_CODE;
     buffer.reserve(ENCODED_SIZE);
-    buffer.push_back(TYPE_CODE);
+    buffer.push_back(tc);
     encodeDouble(_lon.getA().asRadians(), buffer);
     encodeDouble(_lon.getB().asRadians(), buffer);
     encodeDouble(_lat.getA().asRadians(), buffer);

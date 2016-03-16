@@ -246,7 +246,7 @@ public:
 
     ///@{
     /// `decode` deserializes a Circle from a byte string produced by encode.
-    static std::unique_ptr<Circle> decode(std::vector<uint8_t> & s) {
+    static std::unique_ptr<Circle> decode(std::vector<uint8_t> const & s) {
         return decode(s.data(), s.size());
     }
     static std::unique_ptr<Circle> decode(uint8_t const * buffer, size_t n);
