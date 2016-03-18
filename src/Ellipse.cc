@@ -27,10 +27,13 @@
 
 #include <cmath>
 #include <ostream>
+#include <stdexcept>
 
 #include "lsst/sphgeom/Box.h"
+#include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/Circle.h"
 #include "lsst/sphgeom/ConvexPolygon.h"
+#include "lsst/sphgeom/codec.h"
 
 
 namespace lsst {
@@ -231,13 +234,17 @@ Box Ellipse::getBoundingBox() const {
     return getBoundingCircle().getBoundingBox();
 }
 
+Box3d Ellipse::getBoundingBox3d() const {
+    return getBoundingCircle().getBoundingBox3d();
+}
+
 Circle Ellipse::getBoundingCircle() const {
     Angle r = std::max(getAlpha(), getBeta()) + 2.0 * Angle(MAX_ASIN_ERROR);
     return Circle(getCenter(), r);
 }
 
-int Ellipse::relate(Box const & b) const {
-    return getBoundingCircle().relate(b) & (INTERSECTS | WITHIN | DISJOINT);
+Relationship Ellipse::relate(Box const & b) const {
+    return getBoundingCircle().relate(b) & (DISJOINT | WITHIN);
 }
 
 // For now, implement ellipse-circle and ellipse-ellipse relation
@@ -317,26 +324,70 @@ int Ellipse::relate(Box const & b) const {
 //   accurate computation? Is there some usefully exploitable relationship
 //   between them and the degenerate quadratic forms they engender?
 
-int Ellipse::relate(Circle const & c) const {
-    return getBoundingCircle().relate(c) & (INTERSECTS | WITHIN | DISJOINT);
+Relationship Ellipse::relate(Circle const & c) const {
+    return getBoundingCircle().relate(c) & (DISJOINT | WITHIN);
 }
 
-int Ellipse::relate(ConvexPolygon const & p) const {
-    // ConvexPolygon-Box relations are implemented by ConvexPolygon.
-    return getBoundingCircle().relate(p) & (INTERSECTS | WITHIN | DISJOINT);
+Relationship Ellipse::relate(ConvexPolygon const & p) const {
+    return getBoundingCircle().relate(p) & (DISJOINT | WITHIN);
 }
 
-int Ellipse::relate(Ellipse const & e) const {
-    return getBoundingCircle().relate(e.getBoundingCircle()) & (INTERSECTS | DISJOINT);
+Relationship Ellipse::relate(Ellipse const & e) const {
+    return getBoundingCircle().relate(e.getBoundingCircle()) & DISJOINT;
+}
+
+std::vector<uint8_t> Ellipse::encode() const {
+    std::vector<uint8_t> buffer;
+    uint8_t tc = TYPE_CODE;
+    buffer.reserve(ENCODED_SIZE);
+    buffer.push_back(tc);
+    for (int r = 0; r < 3; ++r) {
+        for (int c = 0; c < 3; ++c) {
+            encodeDouble(_S(r, c), buffer);
+        }
+    }
+    encodeDouble(_a.asRadians(), buffer);
+    encodeDouble(_b.asRadians(), buffer);
+    encodeDouble(_gamma.asRadians(), buffer);
+    encodeDouble(_tana, buffer);
+    encodeDouble(_tanb, buffer);
+    return buffer;
+}
+
+std::unique_ptr<Ellipse> Ellipse::decode(uint8_t const * buffer, size_t n) {
+    if (buffer == nullptr || n != ENCODED_SIZE || buffer[0] != TYPE_CODE) {
+        throw std::runtime_error("Byte-string is not an encoded Ellipse");
+    }
+    std::unique_ptr<Ellipse> ellipse(new Ellipse);
+    ++buffer;
+    double m00 = decodeDouble(buffer); buffer += 8;
+    double m01 = decodeDouble(buffer); buffer += 8;
+    double m02 = decodeDouble(buffer); buffer += 8;
+    double m10 = decodeDouble(buffer); buffer += 8;
+    double m11 = decodeDouble(buffer); buffer += 8;
+    double m12 = decodeDouble(buffer); buffer += 8;
+    double m20 = decodeDouble(buffer); buffer += 8;
+    double m21 = decodeDouble(buffer); buffer += 8;
+    double m22 = decodeDouble(buffer); buffer += 8;
+    ellipse->_S = Matrix3d(m00, m01, m02,
+                           m10, m11, m12,
+                           m20, m21, m22);
+    double a = decodeDouble(buffer); buffer += 8;
+    double b = decodeDouble(buffer); buffer += 8;
+    double gamma = decodeDouble(buffer); buffer += 8;
+    ellipse->_a = Angle(a);
+    ellipse->_b = Angle(b);
+    ellipse->_gamma = Angle(gamma);
+    double tana = decodeDouble(buffer); buffer += 8;
+    double tanb = decodeDouble(buffer); buffer += 8;
+    ellipse->_tana = tana;
+    ellipse->_tanb = tanb;
+    return ellipse;
 }
 
 std::ostream & operator<<(std::ostream & os, Ellipse const & e) {
-    os << "Ellipse(\n";
-    e.getTransformMatrix().print(os, 4);
-    os << ",\n"
-       << "    " << e.getAlpha() << ",\n"
-       << "    " << e.getBeta() << "\n"
-       << ")";
+    os << "{\"Ellipse\": [" << e.getTransformMatrix() << ", "
+       << e.getAlpha() << ", " << e.getBeta() << "]}";
     return os;
 }
 

@@ -26,10 +26,11 @@
 #include <memory>
 
 #include "lsst/sphgeom/Box.h"
+#include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/Circle.h"
 
-#include "Test.h"
-#include "RelationTestUtils.h"
+#include "test.h"
+#include "relationshipTestUtils.h"
 
 
 using namespace lsst::sphgeom;
@@ -37,9 +38,9 @@ using namespace lsst::sphgeom;
 void checkProperties(Box const & b) {
     checkBasicProperties(b);
     // A non-empty box should contain, be within, and intersect itself.
-    checkRelations(b, b, CONTAINS | INTERSECTS | WITHIN);
+    checkRelationship(b, b, CONTAINS | WITHIN);
     // A non-empty box should contain and intersect its center.
-    checkRelations(b, b.getCenter(), CONTAINS | INTERSECTS);
+    checkRelationship(b, b.getCenter(), CONTAINS);
     // Taking the union of any box with an empty box should be a no-op.
     CHECK(b.expandedTo(b) == b);
     CHECK(b.expandedTo(Box()) == b);
@@ -52,7 +53,7 @@ void checkProperties(Box const & b) {
     // The union of any box with a full box should result in a full box.
     CHECK(b.expandedTo(Box::full()).isFull());
     CHECK(Box::full().expandedTo(b).isFull());
-    // The intersection of any box with a full box should have not effect.
+    // The intersection of any box with a full box should have no effect.
     CHECK(b.clippedTo(Box::full()) == b);
     CHECK(Box::full().clippedTo(b) == b);
     if (!b.isFull()) {
@@ -65,7 +66,7 @@ TEST_CASE(Stream) {
     Box b(LonLat::fromRadians(1, 0), Angle(1), Angle(1));
     std::stringstream ss;
     ss << b;
-    CHECK(ss.str() == "Box([0 rad, 2 rad], [-1 rad, 1 rad])");
+    CHECK(ss.str() == "{\"Box\": [[0, 2], [-1, 1]]}");
 }
 
 TEST_CASE(HalfWidthForCircle) {
@@ -101,7 +102,7 @@ TEST_CASE(Clone) {
     Box b(LonLat::fromDegrees(45, 45),
           Angle::fromDegrees(15),
           Angle::fromDegrees(15));
-    std::auto_ptr<Region> r(b.clone());
+    std::unique_ptr<Region> r(b.clone());
     REQUIRE(dynamic_cast<Box *>(r.get()) != 0);
     CHECK(*dynamic_cast<Box *>(r.get()) == b);
     CHECK(dynamic_cast<Box *>(r.get()) != &b);
@@ -120,7 +121,7 @@ TEST_CASE(EmptyBox) {
     CHECK(b.getHeight().asRadians() < 0 || b.getHeight().isNan());
     // An empty box should contain itself, be within itself,
     // and be disjoint from itself.
-    checkRelations(b, b, CONTAINS | WITHIN | DISJOINT);
+    checkRelationship(b, b, CONTAINS | WITHIN | DISJOINT);
     // The union with the empty/full box should result in the
     // empty/full boxes.
     CHECK(b.expandedTo(b) == b);
@@ -171,11 +172,9 @@ TEST_CASE(BoxCircleRelations1) {
     CHECK(Box::full().relate(Circle::empty()) ==
           (CONTAINS | DISJOINT));
     CHECK(Box::full().relate(Circle::full()) ==
-          (CONTAINS | INTERSECTS | WITHIN));
-    CHECK(Box::full().relate(Circle(UnitVector3d::X(), Angle(1))) ==
-          (CONTAINS | INTERSECTS));
-    CHECK(Box::fromDegrees(0, 0, 0, 0).relate(Circle::full()) ==
-          (INTERSECTS | WITHIN));
+          (CONTAINS | WITHIN));
+    CHECK(Box::full().relate(Circle(UnitVector3d::X(), Angle(1))) == CONTAINS);
+    CHECK(Box::fromDegrees(0, 0, 0, 0).relate(Circle::full()) == WITHIN);
 }
 
 TEST_CASE(BoxCircleRelations2) {
@@ -217,9 +216,9 @@ TEST_CASE(BoxCircleRelations3) {
 TEST_CASE(BoxCircleRelations4) {
     UnitVector3d x = UnitVector3d::X();
     CHECK(Box::fromRadians(-1, -1, 1, 1).relate(Circle(x, Angle(0.5))) ==
-          (CONTAINS | INTERSECTS));
+          CONTAINS);
     CHECK(Box::fromRadians(-0.5, -0.5, 0.5, 0.5).relate(Circle(x, Angle(1))) ==
-          (INTERSECTS | WITHIN));
+          WITHIN);
 }
 
 TEST_CASE(BoxPointRelations1) {
@@ -278,12 +277,16 @@ TEST_CASE(PointContraction) {
     LonLat p = LonLat::fromDegrees(45, 45);
     CHECK(Box::fromDegrees(0, 0, 90, 90).clippedTo(p) == p);
     CHECK(Box::fromDegrees(0, 0, 10, 10).clippedTo(p).isEmpty());
+    CHECK(Box::fromDegrees(0, 40, 10, 50).clippedTo(p).isEmpty());
+
 }
 
 TEST_CASE(BoxContraction) {
     CHECK(Box::fromDegrees(20, 0, 340, 10)
             .clippedTo(Box::fromDegrees(-20, 0, 20, 10)) ==
           Box::fromDegrees(-20, 0, 20, 10));
+    CHECK(Box::fromDegrees(20, 0, 30, 10)
+            .clippedTo(Box::fromDegrees(25, 20, 35, 30)).isEmpty());
 }
 
 TEST_CASE(Dilation1) {
@@ -291,11 +294,11 @@ TEST_CASE(Dilation1) {
     Angle epsilon = Angle::fromDegrees(2.78e-6); // about 10 milliarcsec
     Box b = Box::fromDegrees(170, -10, 190, 10).dilatedBy(radius + epsilon);
     UnitVector3d v = UnitVector3d(LonLat::fromDegrees(170, -10));
-    CHECK(b.relate(Circle(v, radius)) == (CONTAINS | INTERSECTS));
+    CHECK(b.relate(Circle(v, radius)) == CONTAINS);
     v = UnitVector3d(LonLat::fromDegrees(170, 10));
-    CHECK(b.relate(Circle(v, radius)) == (CONTAINS | INTERSECTS));
+    CHECK(b.relate(Circle(v, radius)) == CONTAINS);
     v = UnitVector3d(LonLat::fromDegrees(190, -10));
-    CHECK(b.relate(Circle(v, radius)) == (CONTAINS | INTERSECTS));
+    CHECK(b.relate(Circle(v, radius)) == CONTAINS);
     v = UnitVector3d(LonLat::fromDegrees(190, 10));
     CHECK(b.contains(Circle(v, radius).getBoundingBox()));
 }
@@ -324,21 +327,21 @@ TEST_CASE(BoxBounds1) {
     // Check that a box is contained by its bounding circle, starting
     // with boxes spanning at most 180 degrees in longitude.
     CHECK(b.relate(static_cast<Region const &>(b.getBoundingCircle())) ==
-          (INTERSECTS | WITHIN));
+          WITHIN);
     CHECK(b.getBoundingCircle().relate(static_cast<Region const &>(b)) ==
-          (CONTAINS | INTERSECTS));
+          CONTAINS);
 }
 
 TEST_CASE(BoxBounds2) {
     Box b = Box::fromDegrees(100, 84, 278, 85);
     Circle c = b.getBoundingCircle();
-    CHECK(b.relate(c) == (INTERSECTS | WITHIN));
+    CHECK(b.relate(c) == WITHIN);
 }
 
 TEST_CASE(BoxBounds3) {
     Box b = Box::fromDegrees(100, -86, 270, -85);
     Circle c = b.getBoundingCircle();
-    CHECK(b.relate(c) == (INTERSECTS | WITHIN));
+    CHECK(b.relate(c) == WITHIN);
 }
 
 // Check bounding circle properties for boxes that span more
@@ -349,7 +352,7 @@ TEST_CASE(BoxBounds4) {
     Circle c = b.getBoundingCircle();
     CHECK(c.getCenter() == UnitVector3d::Z());
     CHECK(c.getOpeningAngle().asDegrees() < 45.001);
-    CHECK(c.relate(b) == (CONTAINS | INTERSECTS));
+    CHECK(c.relate(b) == CONTAINS);
 }
 
 TEST_CASE(BoxBounds5) {
@@ -357,7 +360,7 @@ TEST_CASE(BoxBounds5) {
     Circle c = b.getBoundingCircle();
     CHECK(c.getCenter() == -UnitVector3d::Z());
     CHECK(c.getOpeningAngle().asDegrees() < 45.001);
-    CHECK(c.relate(b) == (CONTAINS | INTERSECTS));
+    CHECK(c.relate(b) == CONTAINS);
 }
 
 TEST_CASE(BoxBounds6) {
@@ -365,5 +368,39 @@ TEST_CASE(BoxBounds6) {
     Circle c = b.getBoundingCircle();
     CHECK(c.getCenter().z() == 0);
     CHECK(c.getOpeningAngle().asDegrees() < 135.001);
-    CHECK(c.relate(b) == (CONTAINS | INTERSECTS));
+    CHECK(c.relate(b) == CONTAINS);
+}
+
+TEST_CASE(Box3dBounds) {
+    static double const TOLERANCE = 1.0e-15;
+    Box b = Box::full();
+    Box3d bb = b.getBoundingBox3d();
+    CHECK(bb == Box3d::aroundUnitSphere());
+    b = Box::fromRadians(0, 0, 2.0 * PI, 0.5 * PI);
+    bb = b.getBoundingBox3d();
+    CHECK(bb.x() == Interval1d(-1, 1));
+    CHECK(bb.y() == Interval1d(-1, 1));
+    CHECK(bb.z().getB() == 1);
+    CHECK(bb.z().getA() >= -TOLERANCE && bb.z().getA() <= 0.0);
+    b = Box::fromRadians(0.25 * PI, -0.25 * PI, 1.25 * PI, 0.25 * PI);
+    bb = b.getBoundingBox3d();
+    CHECK(bb.x().getA() == -1);
+    CHECK(bb.x().getB() >= 0.5 * std::sqrt(2.0));
+    CHECK(bb.x().getB() <= 0.5 * std::sqrt(2.0) + TOLERANCE);
+    CHECK(bb.y().getA() >= -0.5 * std::sqrt(2.0) - TOLERANCE);
+    CHECK(bb.y().getA() <= -0.5 * std::sqrt(2.0));
+    CHECK(bb.y().getB() == 1);
+    CHECK(bb.z().getA() >= -0.5 * std::sqrt(2.0) - TOLERANCE);
+    CHECK(bb.z().getA() <= -0.5 * std::sqrt(2.0));
+    CHECK(bb.z().getB() >= 0.5 * std::sqrt(2.0));
+    CHECK(bb.z().getB() <= 0.5 * std::sqrt(2.0) + TOLERANCE);
+}
+
+TEST_CASE(Codec) {
+    Box b = Box::fromRadians(5.0, -1.0, 1.0, 0.5);
+    std::vector<uint8_t> buffer = b.encode();
+    CHECK(*Box::decode(buffer) == b);
+    std::unique_ptr<Region> r = Region::decode(buffer);
+    CHECK(dynamic_cast<Box *>(r.get()) != nullptr);
+    CHECK(*dynamic_cast<Box *>(r.get()) == b);
 }

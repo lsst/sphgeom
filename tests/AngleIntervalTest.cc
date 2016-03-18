@@ -24,10 +24,9 @@
 /// \brief This file contains tests for the AngleInterval class.
 
 #include "lsst/sphgeom/AngleInterval.h"
-#include "lsst/sphgeom/SpatialRelation.h"
 
-#include "Test.h"
-#include "RelationTestUtils.h"
+#include "test.h"
+#include "relationshipTestUtils.h"
 
 
 using namespace lsst::sphgeom;
@@ -35,7 +34,7 @@ using namespace lsst::sphgeom;
 void checkProperties(AngleInterval const & i) {
     checkBasicProperties(i);
     // A non-empty interval should contain, be within, and intersect itself.
-    checkRelations(i, i, CONTAINS | INTERSECTS | WITHIN);
+    checkRelationship(i, i, CONTAINS | WITHIN);
     // Taking the union with an identical or empty interval should be a no-op.
     CHECK(i.expandedTo(i) == i);
     CHECK(i.expandedTo(AngleInterval()) == i);
@@ -51,7 +50,7 @@ TEST_CASE(Stream) {
     AngleInterval i = AngleInterval::fromRadians(1,2);
     std::stringstream ss;
     ss << i;
-    CHECK(ss.str() == "[1 rad, 2 rad]");
+    CHECK(ss.str() == "[1, 2]");
 }
 
 TEST_CASE(EmptyInterval) {
@@ -70,15 +69,15 @@ TEST_CASE(EmptyInterval) {
         CHECK(i == Angle::nan());
         // An empty interval should contain itself, be within itself,
         // and be disjoint from itself.
-        checkRelations(i, i, CONTAINS | WITHIN | DISJOINT);
-        checkRelations(i, Angle::nan(), CONTAINS | WITHIN | DISJOINT);
+        checkRelationship(i, i, CONTAINS | WITHIN | DISJOINT);
+        checkRelationship(i, Angle::nan(), CONTAINS | WITHIN | DISJOINT);
         for (int k = 0; k < j; ++k) {
-            checkRelations(i, emptyIntervals[k], CONTAINS | WITHIN | DISJOINT);
-            checkRelations(emptyIntervals[k], i, CONTAINS | WITHIN | DISJOINT);
+            checkRelationship(i, emptyIntervals[k], CONTAINS | WITHIN | DISJOINT);
+            checkRelationship(emptyIntervals[k], i, CONTAINS | WITHIN | DISJOINT);
         }
-        checkRelations(i, AngleInterval(a1), WITHIN | DISJOINT);
-        checkRelations(AngleInterval(a1), i, CONTAINS | DISJOINT);
-        checkRelations(i, a1, WITHIN | DISJOINT);
+        checkRelationship(i, AngleInterval(a1), WITHIN | DISJOINT);
+        checkRelationship(AngleInterval(a1), i, CONTAINS | DISJOINT);
+        checkRelationship(i, a1, WITHIN | DISJOINT);
         // The union of the empty interval with itself should be empty.
         CHECK(i.expandedTo(i) == i);
         CHECK(i.expandedTo(a1) == AngleInterval(a1));
@@ -114,10 +113,10 @@ TEST_CASE(BasicInterval) {
 TEST_CASE(PointPointRelations) {
     AngleInterval u(Angle(0.2)), v(Angle(5.1));
     CHECK(u != v);
-    checkRelations(u, u, CONTAINS | INTERSECTS | WITHIN);
-    checkRelations(v, Angle(5.1), CONTAINS | INTERSECTS | WITHIN);
-    checkRelations(u, v, DISJOINT);
-    checkRelations(v, Angle(0.2), DISJOINT);
+    checkRelationship(u, u, CONTAINS | WITHIN);
+    checkRelationship(v, Angle(5.1), CONTAINS | WITHIN);
+    checkRelationship(u, v, DISJOINT);
+    checkRelationship(v, Angle(0.2), DISJOINT);
 }
 
 TEST_CASE(PointIntervalRelations) {
@@ -126,12 +125,12 @@ TEST_CASE(PointIntervalRelations) {
     AngleInterval i(in[0], in[1]);
     CHECK(i.getSize() > Angle(0));
     checkPoints(in, 3, out, 2, i);
-    checkRelations(AngleInterval(Angle(1)),
-                   Angle::nan(),
-                   CONTAINS | DISJOINT);
-    checkRelations(AngleInterval(Angle(1), Angle(5)),
-                   Angle::nan(),
-                   CONTAINS | DISJOINT);
+    checkRelationship(AngleInterval(Angle(1)),
+                      Angle::nan(),
+                      CONTAINS | DISJOINT);
+    checkRelationship(AngleInterval(Angle(1), Angle(5)),
+                      Angle::nan(),
+                      CONTAINS | DISJOINT);
 }
 
 TEST_CASE(IntervalIntervalRelations) {

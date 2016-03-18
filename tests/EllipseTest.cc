@@ -30,8 +30,7 @@
 #include "lsst/sphgeom/Circle.h"
 #include "lsst/sphgeom/Ellipse.h"
 
-#include "Test.h"
-#include "RelationTestUtils.h"
+#include "test.h"
 
 
 using namespace lsst::sphgeom;
@@ -71,18 +70,12 @@ TEST_CASE(Stream) {
     Ellipse e(UnitVector3d::Z(), Angle(1));
     std::stringstream ss;
     ss << e;
-    CHECK(ss.str() == "Ellipse(\n"
-                      "    Matrix3d( 0, 1, -0,\n"
-                      "             -1, 0,  0,\n"
-                      "              0, 0,  1),\n"
-                      "    1 rad,\n"
-                      "    1 rad\n"
-                      ")");
+    CHECK(ss.str() == "{\"Ellipse\": [[[0, 1, -0], [-1, 0, 0], [0, 0, 1]], 1, 1]}");
 }
 
 TEST_CASE(Clone) {
     Ellipse e(UnitVector3d::X(), Angle(0.5));
-    std::auto_ptr<Region> r(e.clone());
+    std::unique_ptr<Region> r(e.clone());
     REQUIRE(dynamic_cast<Ellipse *>(r.get()) != 0);
     CHECK(*dynamic_cast<Ellipse *>(r.get()) == e);
     CHECK(dynamic_cast<Ellipse *>(r.get()) != &e);
@@ -227,4 +220,13 @@ TEST_CASE(Contains2) {
     CHECK(!e.contains(-UnitVector3d::X()));
     CHECK(!e.contains(-UnitVector3d::Y()));
     CHECK(!e.contains(-UnitVector3d::Z()));
+}
+
+TEST_CASE(Codec) {
+    Ellipse e = Ellipse(UnitVector3d(1, 2, 3), UnitVector3d(3, 2, 1), Angle(1));
+    std::vector<uint8_t> buffer = e.encode();
+    CHECK(*Ellipse::decode(buffer) == e);
+    std::unique_ptr<Region> r = Region::decode(buffer);
+    CHECK(dynamic_cast<Ellipse *>(r.get()) != nullptr);
+    CHECK(*dynamic_cast<Ellipse *>(r.get()) == e);
 }

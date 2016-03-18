@@ -168,6 +168,8 @@ namespace sphgeom {
 /// but tan is finite since a is rational and cannot be exactly equal to ±π/2.
 class Ellipse : public Region {
 public:
+    static constexpr uint8_t TYPE_CODE = 'e';
+
     static Ellipse empty() { return Ellipse(); }
 
     static Ellipse full() { return Ellipse().complement(); }
@@ -271,25 +273,39 @@ public:
     Ellipse complemented() const { return Ellipse(*this).complement(); }
 
     // Region interface
-    virtual Ellipse * clone() const { return new Ellipse(*this); }
+    virtual std::unique_ptr<Region> clone() const {
+        return std::unique_ptr<Ellipse>(new Ellipse(*this));
+    }
 
     virtual Box getBoundingBox() const;
-
+    virtual Box3d getBoundingBox3d() const;
     virtual Circle getBoundingCircle() const;
 
     virtual bool contains(UnitVector3d const &v) const;
 
-    virtual int relate(Region const & r) const {
+    virtual Relationship relate(Region const & r) const {
         // Dispatch on the type of r.
-        return invertSpatialRelations(r.relate(*this));
+        return invert(r.relate(*this));
     }
 
-    virtual int relate(Box const &) const;
-    virtual int relate(Circle const &) const;
-    virtual int relate(ConvexPolygon const &) const;
-    virtual int relate(Ellipse const &) const;
+    virtual Relationship relate(Box const &) const;
+    virtual Relationship relate(Circle const &) const;
+    virtual Relationship relate(ConvexPolygon const &) const;
+    virtual Relationship relate(Ellipse const &) const;
+
+    virtual std::vector<uint8_t> encode() const;
+
+    ///@{
+    /// `decode` deserializes an Ellipse from a byte string produced by encode.
+    static std::unique_ptr<Ellipse> decode(std::vector<uint8_t> const & s) {
+        return decode(s.data(), s.size());
+    }
+    static std::unique_ptr<Ellipse> decode(uint8_t const * buffer, size_t n);
+    ///@}
 
 private:
+    static constexpr size_t ENCODED_SIZE = 113;
+
     Matrix3d _S;
     Angle _a; // α - π/2
     Angle _b; // β - π/2

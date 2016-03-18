@@ -63,13 +63,10 @@ public:
     /// The function call operator returns the `i`-th component of this vector.
     double operator()(int i) const { return _v[i]; }
 
-    /// `x` returns the first component of this vector.
     double x() const { return _v[0]; }
 
-    /// `y` returns the second component of this vector.
     double y() const { return _v[1]; }
 
-    /// `z` returns the third component of this vector.
     double z() const { return _v[2]; }
 
     /// `dot` returns the inner product of this vector and `v`.

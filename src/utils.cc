@@ -23,7 +23,7 @@
 /// \file
 /// \brief This file contains utility method implementations.
 
-#include "lsst/sphgeom/Utils.h"
+#include "lsst/sphgeom/utils.h"
 
 #include <cmath>
 

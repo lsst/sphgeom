@@ -73,7 +73,7 @@ Vector3d Vector3d::rotatedAround(UnitVector3d const & k, Angle a) const {
 
 std::ostream & operator<<(std::ostream & os, Vector3d const & v) {
     char buf[128];
-    std::snprintf(buf, sizeof(buf), "Vector3d(%.17g, %.17g, %.17g)",
+    std::snprintf(buf, sizeof(buf), "[%.17g, %.17g, %.17g]",
                   v.x(), v.y(), v.z());
     return os << buf;
 }

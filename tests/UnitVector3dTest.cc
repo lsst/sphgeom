@@ -25,7 +25,7 @@
 
 #include "lsst/sphgeom/UnitVector3d.h"
 
-#include "Test.h"
+#include "test.h"
 
 
 using namespace lsst::sphgeom;
@@ -40,7 +40,7 @@ TEST_CASE(Stream) {
     UnitVector3d v(1, 0, 0);
     std::stringstream ss;
     ss << v;
-    CHECK(ss.str() == "UnitVector3d(1, 0, 0)");
+    CHECK(ss.str() == "[1, 0, 0]");
 }
 
 TEST_CASE(Construction) {

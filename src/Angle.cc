@@ -33,7 +33,7 @@ namespace sphgeom {
 
 std::ostream & operator<<(std::ostream & os, Angle const & a) {
     char buf[32];
-    std::snprintf(buf, sizeof(buf), "%.17g rad", a.asRadians());
+    std::snprintf(buf, sizeof(buf), "%.17g", a.asRadians());
     return os << buf;
 }
 

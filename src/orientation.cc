@@ -23,7 +23,7 @@
 /// \file
 /// \brief This file contains the implementation of orientation().
 
-#include "lsst/sphgeom/Orientation.h"
+#include "lsst/sphgeom/orientation.h"
 
 #include <algorithm>
 
@@ -42,10 +42,6 @@ struct BigFloat {
 
     BigFloat() : mantissa(0), exponent(0) {}
     BigFloat(BigInteger * m) : mantissa(m), exponent(0) {}
-
-    bool operator<(BigFloat const & f) const {
-        return exponent > f.exponent;
-    }
 };
 
 // `computeProduct` computes the product of 3 doubles exactly and stores the
@@ -115,8 +111,10 @@ int orientationExact(Vector3d const & a,
     mantissas[1].negate();
     mantissas[3].negate();
     mantissas[5].negate();
-    // Sort the array of products by decreasing exponent.
-    std::sort(products, products + 6);
+    // Sort the array of products in descending exponent order.
+    std::sort(products, products + 6, [](BigFloat const & a, BigFloat const & b) {
+        return a.exponent > b.exponent;
+    });
     // First, initialize the accumulator to the product with the highest
     // exponent, then add the remaining products. Prior to each addition, we
     // must shift the accumulated value so that its radix point lines up with
@@ -194,6 +192,51 @@ int orientation(UnitVector3d const & a,
         return 0;
     }
     return orientationExact(a, b, c);
+}
+
+
+namespace {
+
+    inline int _orientationXYZ(double ab, double ba) {
+        // Calling orientation() with a first argument of (1,0,0), (0,1,0) or
+        // (0,0,1) corresponds to computing the sign of a 2x2 determinant
+        // rather than a 3x3 determinant. The corresponding error bounds
+        // are also tighter.
+        static double const relativeError = 1.12e-16;    // > 2^-53
+        static double const maxAbsoluteError = 1.12e-16; // > 2^-53
+        static double const minAbsoluteError = 1.0e-307; // > 3 * 2^-1022
+
+        double determinant = ab - ba;
+        if (determinant > maxAbsoluteError) {
+            return 1;
+        } else if (determinant < -maxAbsoluteError) {
+            return -1;
+        }
+        double permanent = std::fabs(ab) + std::fabs(ba);
+        double maxError = relativeError * permanent + minAbsoluteError;
+        if (determinant > maxError) {
+            return 1;
+        } else if (determinant < -maxError) {
+            return -1;
+        }
+        return 0;
+    }
+
+}
+
+int orientationX(UnitVector3d const & b, UnitVector3d const & c) {
+    int o = _orientationXYZ(b.y() * c.z(), b.z() * c.y());
+    return (o != 0) ? o : orientationExact(UnitVector3d::X(), b, c);
+}
+
+int orientationY(UnitVector3d const & b, UnitVector3d const & c) {
+    int o = _orientationXYZ(b.z() * c.x(), b.x() * c.z());
+    return (o != 0) ? o : orientationExact(UnitVector3d::Y(), b, c);
+}
+
+int orientationZ(UnitVector3d const & b, UnitVector3d const & c) {
+    int o = _orientationXYZ(b.x() * c.y(), b.y() * c.x());
+    return (o != 0) ? o : orientationExact(UnitVector3d::Z(), b, c);
 }
 
 }} // namespace lsst::sphgeom

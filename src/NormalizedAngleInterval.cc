@@ -28,8 +28,6 @@
 #include <ostream>
 #include <stdexcept>
 
-#include "lsst/sphgeom/SpatialRelation.h"
-
 
 namespace lsst {
 namespace sphgeom {
@@ -87,7 +85,7 @@ bool NormalizedAngleInterval::isDisjointFrom(
     return x._b < _a || x._a > _b;
 }
 
-int NormalizedAngleInterval::relate(NormalizedAngle x) const {
+Relationship NormalizedAngleInterval::relate(NormalizedAngle x) const {
     if (isEmpty()) {
         if (x.isNan()) {
             return CONTAINS | DISJOINT | WITHIN;
@@ -98,15 +96,17 @@ int NormalizedAngleInterval::relate(NormalizedAngle x) const {
         return CONTAINS | DISJOINT;
     }
     if (_a == x && _b == x) {
-        return CONTAINS | INTERSECTS | WITHIN;
+        return CONTAINS | WITHIN;
     }
     if (intersects(x)) {
-        return CONTAINS | INTERSECTS;
+        return CONTAINS;
     }
     return DISJOINT;
 }
 
-int NormalizedAngleInterval::relate(NormalizedAngleInterval const & x) const {
+Relationship NormalizedAngleInterval::relate(
+    NormalizedAngleInterval const & x) const
+{
     if (isEmpty()) {
         if (x.isEmpty()) {
             return CONTAINS | DISJOINT | WITHIN;
@@ -117,45 +117,45 @@ int NormalizedAngleInterval::relate(NormalizedAngleInterval const & x) const {
         return CONTAINS | DISJOINT;
     }
     if (_a == x._a && _b == x._b) {
-        return CONTAINS | INTERSECTS | WITHIN;
+        return CONTAINS | WITHIN;
     }
     // The intervals are not the same, and neither is empty.
     if (wraps()) {
         if (x.wraps()) {
             // Both intervals wrap.
             if (_a <= x._a && _b >= x._b) {
-                return CONTAINS | INTERSECTS;
+                return CONTAINS;
             }
             if (_a >= x._a && _b <= x._b) {
-                return INTERSECTS | WITHIN;
+                return WITHIN;
             }
             return INTERSECTS;
         }
         // x does not wrap.
         if (x.isFull()) {
-            return INTERSECTS | WITHIN;
+            return WITHIN;
         }
         if (_a <= x._a || _b >= x._b) {
-            return CONTAINS | INTERSECTS;
+            return CONTAINS;
         }
         return (_a > x._b && _b < x._a) ? DISJOINT : INTERSECTS;
     }
     if (x.wraps()) {
         // This interval does not wrap.
         if (isFull()) {
-            return CONTAINS | INTERSECTS;
+            return CONTAINS;
         }
         if (x._a <= _a || x._b >= _b) {
-            return INTERSECTS | WITHIN;
+            return WITHIN;
         }
         return (x._a > _b && x._b < _a) ? DISJOINT : INTERSECTS;
     }
     // Neither interval wraps.
     if (_a <= x._a && _b >= x._b) {
-        return CONTAINS | INTERSECTS;
+        return CONTAINS;
     }
     if (_a >= x._a && _b <= x._b) {
-        return INTERSECTS | WITHIN;
+        return WITHIN;
     }
     return (_a <= x._b && _b >= x._a) ? INTERSECTS : DISJOINT;
 }

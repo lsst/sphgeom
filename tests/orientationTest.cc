@@ -23,41 +23,60 @@
 /// \file
 /// \brief This file contains tests for the orientation function.
 
-#include "lsst/sphgeom/Orientation.h"
+#include "lsst/sphgeom/orientation.h"
 
-#include "Test.h"
+#include "test.h"
 
 using namespace lsst::sphgeom;
+
+void checkOrientation(UnitVector3d const & v0,
+                      UnitVector3d const & v1,
+                      UnitVector3d const & v2,
+                      int expectedOrientation)
+{
+    CHECK(orientation(v0, v1, v2) == expectedOrientation);
+    CHECK(orientationExact(v0, v1, v2) == expectedOrientation);
+    if (v0.y() == 0.0 && v0.z() == 0.0) {
+        if (v0.x() > 0.0) {
+            CHECK(orientationX(v1, v2) == expectedOrientation);
+        } else {
+            CHECK(-orientationX(v1, v2) == expectedOrientation);
+        }
+    }
+    if (v0.x() == 0.0 && v0.z() == 0.0) {
+        if (v0.y() > 0.0) {
+            CHECK(orientationY(v1, v2) == expectedOrientation);
+        } else {
+            CHECK(-orientationY(v1, v2) == expectedOrientation);
+        }
+    }
+    if (v0.x() == 0.0 && v0.y() == 0.0) {
+        if (v0.z() > 0.0) {
+            CHECK(orientationZ(v1, v2) == expectedOrientation);
+        } else {
+            CHECK(-orientationZ(v1, v2) == expectedOrientation);
+        }
+    }
+}
 
 void testOrientation(UnitVector3d const & v0,
                      UnitVector3d const & v1,
                      UnitVector3d const & v2,
                      int expectedOrientation)
 {
-    CHECK(orientation(v0, v1, v2) == expectedOrientation);
-    CHECK(orientation(v1, v2, v0) == expectedOrientation);
-    CHECK(orientation(v2, v0, v1) == expectedOrientation);
-    CHECK(orientation(v1, v0, v2) == -expectedOrientation);
-    CHECK(orientation(v0, v2, v1) == -expectedOrientation);
-    CHECK(orientation(v2, v1, v0) == -expectedOrientation);
-    CHECK(orientation(v0, v0, v1) == 0);
-    CHECK(orientation(v0, -v0, v1) == 0);
-    CHECK(orientation(v0, v1, v1) == 0);
-    CHECK(orientation(v0, v1, -v1) == 0);
-    CHECK(orientation(v0, v1, v0) == 0);
-    CHECK(orientation(v0, v1, -v0) == 0);
-    CHECK(orientationExact(v0, v1, v2) == expectedOrientation);
-    CHECK(orientationExact(v1, v2, v0) == expectedOrientation);
-    CHECK(orientationExact(v2, v0, v1) == expectedOrientation);
-    CHECK(orientationExact(v1, v0, v2) == -expectedOrientation);
-    CHECK(orientationExact(v0, v2, v1) == -expectedOrientation);
-    CHECK(orientationExact(v2, v1, v0) == -expectedOrientation);
-    CHECK(orientationExact(v0, v0, v1) == 0);
-    CHECK(orientationExact(v0, -v0, v1) == 0);
-    CHECK(orientationExact(v0, v1, v1) == 0);
-    CHECK(orientationExact(v0, v1, -v1) == 0);
-    CHECK(orientationExact(v0, v1, v0) == 0);
-    CHECK(orientationExact(v0, v1, -v0) == 0);
+    checkOrientation(v0, v1, v2, expectedOrientation);
+    checkOrientation(v0, v1, v2, expectedOrientation);
+    checkOrientation(v1, v2, v0, expectedOrientation);
+    checkOrientation(v2, v0, v1, expectedOrientation);
+    checkOrientation(v1, v0, v2, -expectedOrientation);
+    checkOrientation(v0, v2, v1, -expectedOrientation);
+    checkOrientation(v2, v1, v0, -expectedOrientation);
+    checkOrientation(v0, v0, v1, 0);
+    checkOrientation(v0, -v0, v1, 0);
+    checkOrientation(v0, v1, v1, 0);
+    checkOrientation(v0, v1, -v1, 0);
+    checkOrientation(v0, v1, v0, 0);
+    checkOrientation(v0, v1, -v0, 0);
 }
 
 TEST_CASE(Orientation) {

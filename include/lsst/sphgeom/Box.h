@@ -53,6 +53,8 @@ namespace sphgeom {
 /// - Box::allLongitudes().contains(b.getLon())
 class Box : public Region {
 public:
+    static constexpr uint8_t TYPE_CODE = 'b';
+
     // Factory functions
     static Box fromDegrees(double lon1, double lat1, double lon2, double lat2) {
         return Box(NormalizedAngleInterval::fromDegrees(lon1, lon2),
@@ -215,6 +217,7 @@ public:
     Box & clipTo(LonLat const & x) {
         _lon.clipTo(x.getLon());
         _lat.clipTo(x.getLat());
+        _enforceInvariants();
         return *this;
     }
 
@@ -224,6 +227,7 @@ public:
     Box & clipTo(Box const & x) {
         _lon.clipTo(x.getLon());
         _lat.clipTo(x.getLat());
+        _enforceInvariants();
         return *this;
     }
 
@@ -254,7 +258,7 @@ public:
 
     ///@{
     /// `expandedTo` returns the smallest box containing the union of
-    /// this interval and x. The result is not always unique, and
+    /// this box and x. The result is not always unique, and
     /// `x.expandedTo(y)` is not guaranteed to equal `y.expandedTo(x)`.
     Box expandedTo(LonLat const & x) const { return Box(*this).expandTo(x); }
     Box expandedTo(Box const & x) const { return Box(*this).expandTo(x); }
@@ -288,43 +292,56 @@ public:
     Box & erodeBy(Angle w, Angle h) { return dilateBy(-w, -h); }
     Box erodedBy(Angle w, Angle h) const { return dilatedBy(-w, -h);  }
 
-    int relate(LonLat const & p) const { return relate(Box(p)); }
+    Relationship relate(LonLat const & p) const { return relate(Box(p)); }
 
     /// `getArea` returns the area of this box in steradians.
     double getArea() const;
 
     // Region interface
-    virtual Box * clone() const { return new Box(*this); }
+    virtual std::unique_ptr<Region> clone() const {
+        return std::unique_ptr<Box>(new Box(*this));
+    }
 
     virtual Box getBoundingBox() const { return *this; }
-
+    virtual Box3d getBoundingBox3d() const;
     virtual Circle getBoundingCircle() const;
 
     virtual bool contains(UnitVector3d const & v) const {
         return contains(LonLat(v));
     }
 
-    virtual int relate(Region const & r) const {
+    virtual Relationship relate(Region const & r) const {
         // Dispatch on the type of r.
-        return invertSpatialRelations(r.relate(*this));
+        return invert(r.relate(*this));
     }
 
-    virtual int relate(Box const & b) const {
-        int lonrel = _lon.relate(b._lon);
-        int latrel = _lat.relate(b._lat);
+    virtual Relationship relate(Box const & b) const {
+        Relationship r1 = _lon.relate(b._lon);
+        Relationship r2 = _lat.relate(b._lat);
         // If the box longitude or latitude intervals are disjoint, then the
         // boxes are disjoint. The other spatial relationships must hold for
         // both the longitude and latitude intervals in order to hold for the
         // boxes.
-        return ((lonrel & latrel) & (CONTAINS | INTERSECTS | WITHIN)) |
-               ((lonrel | latrel) & DISJOINT);
+        return ((r1 & r2) & (CONTAINS | WITHIN)) | ((r1 | r2) & DISJOINT);
     }
 
-    virtual int relate(Circle const &) const;
-    virtual int relate(ConvexPolygon const &) const;
-    virtual int relate(Ellipse const &) const;
+    virtual Relationship relate(Circle const &) const;
+    virtual Relationship relate(ConvexPolygon const &) const;
+    virtual Relationship relate(Ellipse const &) const;
+
+    virtual std::vector<uint8_t> encode() const;
+
+    ///@{
+    /// `decode` deserializes a Box from a byte string produced by encode.
+    static std::unique_ptr<Box> decode(std::vector<uint8_t> const & s) {
+        return decode(s.data(), s.size());
+    }
+    static std::unique_ptr<Box> decode(uint8_t const * buffer, size_t n);
+    ///@}
 
 private:
+    static constexpr size_t ENCODED_SIZE = 33;
+
     void _enforceInvariants() {
         // Make sure that _lat ⊆ [-π/2, π/2].
         _lat.clipTo(allLatitudes());

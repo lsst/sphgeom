@@ -31,7 +31,6 @@
 #include <vector>
 
 #include "Region.h"
-#include "SpatialRelation.h"
 #include "Vector3d.h"
 
 
@@ -57,6 +56,8 @@ namespace sphgeom {
 /// convex hull of a point set.
 class ConvexPolygon : public Region {
 public:
+    static constexpr uint8_t TYPE_CODE = 'p';
+
     /// `convexHull` returns the convex hull of the given set of points if it
     /// exists and throws an exception otherwise. Though points are supplied
     /// in a vector, they really are conceptually a set - the ConvexPolygon
@@ -82,22 +83,36 @@ public:
     UnitVector3d getCentroid() const;
 
     // Region interface
-    virtual ConvexPolygon * clone() const { return new ConvexPolygon(*this); }
+    virtual std::unique_ptr<Region> clone() const {
+        return std::unique_ptr<ConvexPolygon>(new ConvexPolygon(*this));
+    }
+
 
     virtual Box getBoundingBox() const;
+    virtual Box3d getBoundingBox3d() const;
     virtual Circle getBoundingCircle() const;
 
     virtual bool contains(UnitVector3d const & v) const;
 
-    virtual int relate(Region const & r) const {
+    virtual Relationship relate(Region const & r) const {
         // Dispatch on the type of r.
-        return invertSpatialRelations(r.relate(*this));
+        return invert(r.relate(*this));
     }
 
-    virtual int relate(Box const &) const;
-    virtual int relate(Circle const &) const;
-    virtual int relate(ConvexPolygon const &) const;
-    virtual int relate(Ellipse const &) const;
+    virtual Relationship relate(Box const &) const;
+    virtual Relationship relate(Circle const &) const;
+    virtual Relationship relate(ConvexPolygon const &) const;
+    virtual Relationship relate(Ellipse const &) const;
+
+    virtual std::vector<uint8_t> encode() const;
+
+    ///@{
+    /// `decode` deserializes an ConvexPolygon from a byte string produced by encode.
+    static std::unique_ptr<ConvexPolygon> decode(std::vector<uint8_t> const & s) {
+        return decode(s.data(), s.size());
+    }
+    static std::unique_ptr<ConvexPolygon> decode(uint8_t const * buffer, size_t n);
+    ///@}
 
 private:
     typedef std::vector<UnitVector3d>::const_iterator VertexIterator;

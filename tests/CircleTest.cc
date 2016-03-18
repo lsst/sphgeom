@@ -27,10 +27,11 @@
 #include <vector>
 
 #include "lsst/sphgeom/Box.h"
+#include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/Circle.h"
 
-#include "Test.h"
-#include "RelationTestUtils.h"
+#include "test.h"
+#include "relationshipTestUtils.h"
 
 
 using namespace lsst::sphgeom;
@@ -56,7 +57,7 @@ std::vector<UnitVector3d> getPointsOnCircle(Circle const & c,
 void checkProperties(Circle const & c) {
     checkBasicProperties(c);
     // A non-empty circle should contain and intersect its center.
-    checkRelations(c, c.getCenter(), CONTAINS | INTERSECTS);
+    checkRelationship(c, c.getCenter(), CONTAINS);
     // Taking the union of any circle with an empty circle should be a no-op.
     CHECK(c.expandedTo(Circle()) == c);
     CHECK(Circle().expandedTo(c) == c);
@@ -68,7 +69,7 @@ void checkProperties(Circle const & c) {
     // The union of any circle with a full circle should be a full circle.
     CHECK(c.expandedTo(Circle::full()).isFull());
     CHECK(Circle::full().expandedTo(c).isFull());
-    // The intersection of any box with a full box should have not effect.
+    // The intersection of any circle with a full circle should have no effect.
     CHECK(c.clippedTo(Circle::full()) == c);
     CHECK(Circle::full().clippedTo(c) == c);
     if (!c.isFull()) {
@@ -81,7 +82,7 @@ TEST_CASE(Stream) {
     Circle c(UnitVector3d::X(), 1);
     std::stringstream ss;
     ss << c;
-    CHECK(ss.str() == "Circle(UnitVector3d(1, 0, 0), 1)");
+    CHECK(ss.str() == "{\"Circle\": [[1, 0, 0], 1]}");
 }
 
 TEST_CASE(Construction) {
@@ -107,7 +108,7 @@ TEST_CASE(Construction) {
 
 TEST_CASE(Clone) {
     Circle c(UnitVector3d::X(), 0.5);
-    std::auto_ptr<Region> r(c.clone());
+    std::unique_ptr<Region> r(c.clone());
     REQUIRE(dynamic_cast<Circle *>(r.get()) != 0);
     CHECK(*dynamic_cast<Circle *>(r.get()) == c);
     CHECK(dynamic_cast<Circle *>(r.get()) != &c);
@@ -126,7 +127,7 @@ TEST_CASE(EmptyCircle) {
     CHECK(c.getOpeningAngle() < Angle(0) || c.getOpeningAngle().isNan());
     // An empty circle should contain itself, be within itself,
     // and be disjoint from itself.
-    checkRelations(c, c, CONTAINS | WITHIN | DISJOINT);
+    checkRelationship(c, c, CONTAINS | WITHIN | DISJOINT);
     // The union with the empty/full circle should result in the
     // empty/full circles.
     CHECK(c.expandedTo(c) == c);
@@ -158,9 +159,9 @@ TEST_CASE(FullCircle) {
     CHECK(c.getSquaredChordLength() >= 4.0);
     CHECK(c.getArea() == 4*PI);
     checkProperties(c);
-    checkRelations(c, Circle::full(), CONTAINS | INTERSECTS | WITHIN);
-    checkRelations(c, Circle(UnitVector3d::X()), CONTAINS | INTERSECTS);
-    checkRelations(Circle(UnitVector3d::X()), c, INTERSECTS | WITHIN);
+    checkRelationship(c, Circle::full(), CONTAINS | WITHIN);
+    checkRelationship(c, Circle(UnitVector3d::X()), CONTAINS);
+    checkRelationship(Circle(UnitVector3d::X()), c, WITHIN);
     // Morphological operations should have no effect on full circles.
     CHECK(c.dilatedBy(Angle(PI)) == c);
     CHECK(c.erodedBy(Angle(PI)) == c);
@@ -308,14 +309,66 @@ TEST_CASE(PointRelations) {
     UnitVector3d y = UnitVector3d::Y();
     CHECK(Circle().relate(x) == (DISJOINT | WITHIN));
     CHECK(Circle(x).relate(y) == DISJOINT);
-    CHECK(Circle(x).relate(x) == (CONTAINS | INTERSECTS));
+    CHECK(Circle(x).relate(x) == CONTAINS);
 }
 
 TEST_CASE(CircleRelations) {
     UnitVector3d x = UnitVector3d::X();
     UnitVector3d y = UnitVector3d::Y();
     CHECK(Circle(x, 1).relate(Circle(-x, 1)) == DISJOINT);
-    CHECK(Circle(x, 2).relate(Circle(x, 1)) == (CONTAINS | INTERSECTS));
-    CHECK(Circle(x, 1).relate(Circle(x, 2)) == (INTERSECTS | WITHIN));
+    CHECK(Circle(x, 2).relate(Circle(x, 1)) == CONTAINS);
+    CHECK(Circle(x, 1).relate(Circle(x, 2)) == WITHIN);
     CHECK(Circle(x, 1).relate(Circle(y, 1)) == INTERSECTS);
+}
+
+TEST_CASE(Box3dBounds1) {
+    static double const TOLERANCE = 1.0e-15;
+
+    UnitVector3d x = UnitVector3d::X();
+    UnitVector3d y = UnitVector3d::Y();
+    UnitVector3d z = UnitVector3d::Z();
+    Circle c = Circle(x, 2.0);
+    Box3d b = c.getBoundingBox3d();
+    CHECK(b.x().getB() == 1);
+    CHECK(b.x().getA() >= -TOLERANCE && b.x().getA() <= 0.0);
+    CHECK(b.y() == Interval1d(-1, 1));
+    CHECK(b.z() == Interval1d(-1, 1));
+    c = Circle(y, 2.0);
+    b = c.getBoundingBox3d();
+    CHECK(b.x() == Interval1d(-1, 1));
+    CHECK(b.y().getB() == 1);
+    CHECK(b.y().getA() >= -TOLERANCE && b.y().getA() <= 0.0);
+    CHECK(b.z() == Interval1d(-1, 1));
+    c = Circle(z, 2.0);
+    b = c.getBoundingBox3d();
+    CHECK(b.x() == Interval1d(-1, 1));
+    CHECK(b.y() == Interval1d(-1, 1));
+    CHECK(b.z().getB() == 1);
+    CHECK(b.z().getA() >= -TOLERANCE && b.z().getA() <= 0.0);
+}
+
+TEST_CASE(Box3dBounds2) {
+    static double const TOLERANCE = 1.0e-15;
+    UnitVector3d a = UnitVector3d(1, 1, 0);
+    Circle c = Circle(a, Angle(PI * 0.25));
+    Box3d b = c.getBoundingBox3d();
+    CHECK(b.x().getA() >= -TOLERANCE && b.x().getA() <= 0.0);
+    CHECK(b.x().getB() == 1.0);
+    CHECK(b.y().getA() >= -TOLERANCE && b.y().getA() <= 0.0);
+    CHECK(b.y().getB() == 1.0);
+    CHECK(b.z().getA() == -b.z().getB());
+    CHECK(b.z().getB() >= 0.5 * std::sqrt(2.0) - TOLERANCE);
+    CHECK(b.z().getB() <= 0.5 * std::sqrt(2.0) + TOLERANCE);
+    a = UnitVector3d(1, 1, 1);
+    c = Circle(a, 0.0);
+    CHECK(Box3d(a).dilatedBy(TOLERANCE).contains(c.getBoundingBox3d()));
+}
+
+TEST_CASE(Codec) {
+    Circle c = Circle(UnitVector3d(-1, -1, 1), 0.5);
+    std::vector<uint8_t> buffer = c.encode();
+    CHECK(*Circle::decode(buffer) == c);
+    std::unique_ptr<Region> r = Region::decode(buffer);
+    CHECK(dynamic_cast<Circle *>(r.get()) != nullptr);
+    CHECK(*dynamic_cast<Circle *>(r.get()) == c);
 }

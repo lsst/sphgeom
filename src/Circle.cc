@@ -26,10 +26,13 @@
 #include "lsst/sphgeom/Circle.h"
 
 #include <ostream>
+#include <stdexcept>
 
 #include "lsst/sphgeom/Box.h"
+#include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/ConvexPolygon.h"
 #include "lsst/sphgeom/Ellipse.h"
+#include "lsst/sphgeom/codec.h"
 
 
 namespace lsst {
@@ -213,21 +216,70 @@ Box Circle::getBoundingBox() const {
     return Box(c, w, h);
 }
 
-int Circle::relate(UnitVector3d const & v) const {
+Box3d Circle::getBoundingBox3d() const {
+    static double const MAX_BOUNDARY_ERROR = 6.2e-16; // > 5.5ε, where ε = 2^-53
+    if (isEmpty()) {
+        return Box3d();
+    }
+    if (isFull()) {
+        return Box3d::aroundUnitSphere();
+    }
+    // Given circle center c and standard basis vector eᵢ, to check whether
+    // ±eᵢ is inside the circle we need to check that (c ∓ eᵢ)·(c ∓ eᵢ) ≤ s.
+    // Since c·c = 1, eᵢ·eᵢ = 1 (c and eᵢ are unit vectors) this is the
+    // same as checking that 2 ∓ 2c·eᵢ ≤ s, or 2 ∓ 2cᵢ ≤ s, where cᵢ is
+    // the i-th component of c.
+    //
+    // Besides any standard basis vectors inside the circle, the bounding box
+    // must also include the circle boundary. To find the extent of this
+    // boundary along a particular axis, note that we can write the i-th
+    // component of the circle center vector as the sine of a latitude angle
+    // (treating the i-th standard basis vector as "north"). So given a circle
+    // opening angle θ, the desired extent is
+    //
+    //     [min(sin(asin(cᵢ) ± θ)), max(sin(asin(cᵢ) ± θ))]
+    //
+    // which can be simplified using the usual trigonometric identities to
+    // arrive at the code below.
+    Interval1d e[3];
+    double s = sin(_openingAngle);
+    double c = cos(_openingAngle);
+    for (int i = 0; i < 3; ++i) {
+        double ci = _center(i);
+        double di = std::sqrt(1.0 - ci * ci);
+        double bmin = 1.0, bmax = -1.0;
+        if (2.0 - 2.0 * ci <= _squaredChordLength) {
+            bmax = 1.0;
+        }
+        if (2.0 + 2.0 * ci <= _squaredChordLength) {
+            bmin = -1.0;
+        }
+        double b0 = ci * c + di * s;
+        bmax = std::max(bmax, b0 + MAX_BOUNDARY_ERROR);
+        bmin = std::min(bmin, b0 - MAX_BOUNDARY_ERROR);
+        double b1 = ci * c - di * s;
+        bmax = std::max(bmax, b1 + MAX_BOUNDARY_ERROR);
+        bmin = std::min(bmin, b1 - MAX_BOUNDARY_ERROR);
+        e[i] = Interval1d(std::max(-1.0, bmin), std::min(1.0, bmax));
+    }
+    return Box3d(e[0], e[1], e[2]);
+}
+
+Relationship Circle::relate(UnitVector3d const & v) const {
     if (contains(v)) {
-        return CONTAINS | INTERSECTS;
+        return CONTAINS;
     } else if (isEmpty()) {
         return DISJOINT | WITHIN;
     }
     return DISJOINT;
 }
 
-int Circle::relate(Box const & b) const {
+Relationship Circle::relate(Box const & b) const {
     // Box-Circle relations are implemented by Box.
-    return invertSpatialRelations(b.relate(*this));
+    return invert(b.relate(*this));
 }
 
-int Circle::relate(Circle const & c) const {
+Relationship Circle::relate(Circle const & c) const {
     if (isEmpty()) {
         if (c.isEmpty()) {
             return CONTAINS | DISJOINT | WITHIN;
@@ -239,40 +291,69 @@ int Circle::relate(Circle const & c) const {
     // Neither circle is empty.
     if (isFull()) {
         if (c.isFull()) {
-            return CONTAINS | INTERSECTS | WITHIN;
+            return CONTAINS | WITHIN;
         }
-        return CONTAINS | INTERSECTS;
+        return CONTAINS;
     } else if (c.isFull()) {
-        return INTERSECTS | WITHIN;
+        return WITHIN;
     }
     // Neither circle is full.
     NormalizedAngle cc(_center, c._center);
     if (cc > _openingAngle + c._openingAngle + 4.0 * Angle(MAX_ASIN_ERROR)) {
         return DISJOINT;
     }
-    int rel = INTERSECTS;
     if (cc + c._openingAngle + 4.0 * Angle(MAX_ASIN_ERROR) <= _openingAngle) {
-        rel |= CONTAINS;
+        return CONTAINS;
     } else if (cc + _openingAngle + 4.0 * Angle(MAX_ASIN_ERROR) <=
                c._openingAngle) {
-        rel |= WITHIN;
+        return WITHIN;
     }
-    return rel;
+    return INTERSECTS;
 }
 
-int Circle::relate(ConvexPolygon const & p) const {
+Relationship Circle::relate(ConvexPolygon const & p) const {
     // ConvexPolygon-Circle relations are implemented by ConvexPolygon.
-    return invertSpatialRelations(p.relate(*this));
+    return invert(p.relate(*this));
 }
 
-int Circle::relate(Ellipse const & e) const {
+Relationship Circle::relate(Ellipse const & e) const {
     // Ellipse-Circle relations are implemented by Ellipse.
-    return invertSpatialRelations(e.relate(*this));
+    return invert(e.relate(*this));
+}
+
+std::vector<uint8_t> Circle::encode() const {
+    std::vector<uint8_t> buffer;
+    uint8_t tc = TYPE_CODE;
+    buffer.reserve(ENCODED_SIZE);
+    buffer.push_back(tc);
+    encodeDouble(_center.x(), buffer);
+    encodeDouble(_center.y(), buffer);
+    encodeDouble(_center.z(), buffer);
+    encodeDouble(_squaredChordLength, buffer);
+    encodeDouble(_openingAngle.asRadians(), buffer);
+    return buffer;
+}
+
+std::unique_ptr<Circle> Circle::decode(uint8_t const * buffer, size_t n) {
+    if (buffer == nullptr || n != ENCODED_SIZE || *buffer != TYPE_CODE) {
+        throw std::runtime_error("Byte-string is not an encoded Circle");
+    }
+    std::unique_ptr<Circle> circle(new Circle);
+    ++buffer;
+    double x = decodeDouble(buffer); buffer += 8;
+    double y = decodeDouble(buffer); buffer += 8;
+    double z = decodeDouble(buffer); buffer += 8;
+    double squaredChordLength = decodeDouble(buffer); buffer += 8;
+    double openingAngle = decodeDouble(buffer); buffer += 8;
+    circle->_center = UnitVector3d::fromNormalized(x, y, z);
+    circle->_squaredChordLength = squaredChordLength;
+    circle->_openingAngle = Angle(openingAngle);
+    return circle;
 }
 
 std::ostream & operator<<(std::ostream & os, Circle const & c) {
-    return os << "Circle(" << c.getCenter() << ", "
-              << c.getSquaredChordLength() << ')';
+    return os << "{\"Circle\": [" << c.getCenter() << ", "
+              << c.getSquaredChordLength() << "]}";
 }
 
 }} // namespace lsst::sphgeom

@@ -27,9 +27,8 @@
 /// \brief This file defines a template representing closed real intervals.
 
 #include <algorithm>
-#include <ostream>
 
-#include "SpatialRelation.h"
+#include "Relationship.h"
 
 
 namespace lsst {
@@ -148,12 +147,11 @@ public:
     ///@}
 
     ///@{
-    /// `relate` returns a bit field F describing the spatial relations
-    /// between this interval and x. For each relation that holds, the bitwise
-    /// AND of F and the corresponding `SpatialRelation` bit mask will be
-    /// non-zero.
-    int relate(Scalar x) const;
-    int relate(Interval const & x) const;
+    /// `relate` returns a bitset S describing the spatial relationships
+    /// between this interval and x. For each relation that holds, the
+    /// bitwise AND of S and the corresponding Relationship will be non-zero.
+    Relationship relate(Scalar x) const;
+    Relationship relate(Interval const & x) const;
     ///@}
 
     ///@{
@@ -248,7 +246,7 @@ private:
 
 
 template <typename Derived, typename Scalar>
-int Interval<Derived, Scalar>::relate(Scalar x) const {
+Relationship Interval<Derived, Scalar>::relate(Scalar x) const {
     if (isEmpty()) {
         if (x != x) {
             return CONTAINS | DISJOINT | WITHIN;
@@ -259,16 +257,16 @@ int Interval<Derived, Scalar>::relate(Scalar x) const {
         return CONTAINS | DISJOINT;
     }
     if (_a == x && _b == x) {
-        return CONTAINS | INTERSECTS | WITHIN;
+        return CONTAINS | WITHIN;
     }
     if (intersects(x)) {
-        return CONTAINS | INTERSECTS;
+        return CONTAINS;
     }
     return DISJOINT;
 }
 
 template <typename Derived, typename Scalar>
-int Interval<Derived, Scalar>::relate(
+Relationship Interval<Derived, Scalar>::relate(
     Interval<Derived, Scalar> const & x) const
 {
     if (isEmpty()) {
@@ -281,25 +279,18 @@ int Interval<Derived, Scalar>::relate(
         return CONTAINS | DISJOINT;
     }
     if (_a == x._a && _b == x._b) {
-        return CONTAINS | INTERSECTS | WITHIN;
+        return CONTAINS | WITHIN;
     }
     if (_a > x._b || _b < x._a) {
         return DISJOINT;
     }
     if (_a <= x._a && _b >= x._b) {
-        return CONTAINS | INTERSECTS;
+        return CONTAINS;
     }
     if (x._a <= _a && x._b >= _b) {
-        return INTERSECTS | WITHIN;
+        return WITHIN;
     }
     return INTERSECTS;
-}
-
-template <typename Derived, typename Scalar>
-std::ostream & operator<<(std::ostream & os,
-                          Interval<Derived, Scalar> const & x)
-{
-    return os << '[' << x.getA() << ", " << x.getB() << ']';
 }
 
 }} // namespace lsst::sphgeom

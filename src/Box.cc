@@ -27,11 +27,14 @@
 
 #include <cmath>
 #include <ostream>
+#include <stdexcept>
 
+#include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/Circle.h"
 #include "lsst/sphgeom/ConvexPolygon.h"
 #include "lsst/sphgeom/Ellipse.h"
-#include "lsst/sphgeom/Utils.h"
+#include "lsst/sphgeom/codec.h"
+#include "lsst/sphgeom/utils.h"
 
 
 namespace lsst {
@@ -119,6 +122,66 @@ double Box::getArea() const {
     // absolute value.
     double dz = sin(_lat.getB()) - sin(_lat.getA());
     return std::fabs(_lon.getSize().asRadians() * dz);
+}
+
+Box3d Box::getBoundingBox3d() const {
+    if (isEmpty()) {
+        return Box3d();
+    }
+    if (isFull()) {
+        return Box3d::aroundUnitSphere();
+    }
+    double slata = sin(_lat.getA()), clata = cos(_lat.getA());
+    double slatb = sin(_lat.getB()), clatb = cos(_lat.getB());
+    double slona = sin(_lon.getA()), clona = cos(_lon.getA());
+    double slonb = sin(_lon.getB()), clonb = cos(_lon.getB());
+    // Compute the minimum/maximum x/y values of the box vertices.
+    double xmin = std::min(std::min(clona * clata, clonb * clata),
+                           std::min(clona * clatb, clonb * clatb)) - 2.5 * EPSILON;
+    double xmax = std::max(std::max(clona * clata, clonb * clata),
+                           std::max(clona * clatb, clonb * clatb)) + 2.5 * EPSILON;
+    double ymin = std::min(std::min(slona * clata, slonb * clata),
+                           std::min(slona * clatb, slonb * clatb)) - 2.5 * EPSILON;
+    double ymax = std::max(std::max(slona * clata, slonb * clata),
+                           std::max(slona * clatb, slonb * clatb)) + 2.5 * EPSILON;
+    // Compute the maximum latitude cosine of points in the box.
+    double mlc;
+    if (_lat.contains(Angle(0.0))) {
+        mlc = 1.0;
+        // The box intersects the equator - the x or y extrema of the box may be
+        // at the intersection of the box edge meridians with the equator.
+        xmin = std::min(xmin, std::min(clona, clonb) - EPSILON);
+        xmax = std::max(xmax, std::max(clona, clonb) + EPSILON);
+        ymin = std::min(ymin, std::min(slona, slonb) - EPSILON);
+        ymax = std::max(ymax, std::max(slona, slonb) + EPSILON);
+    } else {
+        // Note that clata and clatb are positive.
+        mlc = std::max(clata, clatb) + EPSILON;
+    }
+    // Check for extrema on the box edges parallel to the equator.
+    if (_lon.contains(NormalizedAngle(0.0))) {
+        xmax = std::max(xmax, mlc);
+    }
+    if (_lon.contains(NormalizedAngle(0.5 * PI))) {
+        ymax = std::max(ymax, mlc);
+    }
+    if (_lon.contains(NormalizedAngle(PI))) {
+        xmin = std::min(xmin, -mlc);
+    }
+    if (_lon.contains(NormalizedAngle(1.5 * PI))) {
+        ymin = std::min(ymin, -mlc);
+    }
+    // Clamp x/y extrema to [-1, 1]
+    xmin = std::max(-1.0, xmin);
+    xmax = std::min(1.0, xmax);
+    ymin = std::max(-1.0, ymin);
+    ymax = std::min(1.0, ymax);
+    // Compute z extrema.
+    double zmin = std::max(-1.0, slata - EPSILON);
+    double zmax = std::min(1.0, slatb + EPSILON);
+    return Box3d(Interval1d(xmin, xmax),
+                 Interval1d(ymin, ymax),
+                 Interval1d(zmin, zmax));
 }
 
 Circle Box::getBoundingCircle() const {
@@ -228,7 +291,7 @@ Circle Box::getBoundingCircle() const {
         }
         // Add double the maximum squared-chord-length error, so that the
         // bounding circle we return also reliably CONTAINS this box.
-        return Circle(p, cl2 + 2.0 * MAX_SCL_ERROR);
+        return Circle(p, cl2 + 2.0 * MAX_SQUARED_CHORD_LENGTH_ERROR);
     }
     // The box spans more than π radians in longitude. First, pick the smaller
     // of the bounding circles centered at the north and south pole.
@@ -252,7 +315,7 @@ Circle Box::getBoundingCircle() const {
     return Circle(v, r + 4.0 * Angle(MAX_ASIN_ERROR));
 }
 
-int Box::relate(Circle const & c) const {
+Relationship Box::relate(Circle const & c) const {
     if (isEmpty()) {
         if (c.isEmpty()) {
             return CONTAINS | DISJOINT | WITHIN;
@@ -263,11 +326,11 @@ int Box::relate(Circle const & c) const {
     }
     if (isFull()) {
         if (c.isFull()) {
-            return CONTAINS | INTERSECTS | WITHIN;
+            return CONTAINS | WITHIN;
         }
-        return CONTAINS | INTERSECTS;
+        return CONTAINS;
     } else if (c.isFull()) {
-        return INTERSECTS | WITHIN;
+        return WITHIN;
     }
     // Neither region is empty or full. We now determine whether or not the
     // circle and box boundaries intersect.
@@ -285,7 +348,8 @@ int Box::relate(Circle const & c) const {
     for (int i = 0; i < 4; ++i) {
         verts[i] = UnitVector3d(vertLonLat[i]);
         double d = (verts[i] - c.getCenter()).getSquaredNorm();
-        if (std::fabs(d - c.getSquaredChordLength()) < MAX_SCL_ERROR) {
+        if (std::fabs(d - c.getSquaredChordLength()) <
+            MAX_SQUARED_CHORD_LENGTH_ERROR) {
             // A box vertex is close to the circle boundary.
             return INTERSECTS;
         }
@@ -307,7 +371,8 @@ int Box::relate(Circle const & c) const {
         for (int i = 0; i < 2; ++i) {
             double d = getMaxSquaredChordLength(
                 c.getCenter(), verts[2 * i + 1], verts[2 * i], norms[i]);
-            if (d > c.getSquaredChordLength() - MAX_SCL_ERROR) {
+            if (d > c.getSquaredChordLength() -
+                    MAX_SQUARED_CHORD_LENGTH_ERROR) {
                 return INTERSECTS;
             }
         }
@@ -319,7 +384,8 @@ int Box::relate(Circle const & c) const {
             Angle a = std::min(getMinAngleToCircle(cc.getLat(), _lat.getA()),
                                getMinAngleToCircle(cc.getLat(), _lat.getB()));
             double d = Circle::squaredChordLengthFor(Angle(PI) - a);
-            if (d > c.getSquaredChordLength() - MAX_SCL_ERROR) {
+            if (d > c.getSquaredChordLength() -
+                    MAX_SQUARED_CHORD_LENGTH_ERROR) {
                 return INTERSECTS;
             }
         }
@@ -336,14 +402,14 @@ int Box::relate(Circle const & c) const {
         if (contains(cc)) {
             return INTERSECTS;
         }
-        return INTERSECTS | WITHIN;
+        return WITHIN;
     }
     // All box vertices are outside c. Look for points in the box edge
     // interiors that are inside c.
     for (int i = 0; i < 2; ++i) {
         double d = getMinSquaredChordLength(
             c.getCenter(), verts[2 * i + 1], verts[2 * i], norms[i]);
-        if (d < c.getSquaredChordLength() + MAX_SCL_ERROR) {
+        if (d < c.getSquaredChordLength() + MAX_SQUARED_CHORD_LENGTH_ERROR) {
             return INTERSECTS;
         }
     }
@@ -355,7 +421,7 @@ int Box::relate(Circle const & c) const {
         Angle a = std::min(getMinAngleToCircle(cc.getLat(), _lat.getA()),
                            getMinAngleToCircle(cc.getLat(), _lat.getB()));
         double d = Circle::squaredChordLengthFor(a);
-        if (d < c.getSquaredChordLength() + MAX_SCL_ERROR) {
+        if (d < c.getSquaredChordLength() + MAX_SQUARED_CHORD_LENGTH_ERROR) {
             return INTERSECTS;
         }
     }
@@ -363,23 +429,51 @@ int Box::relate(Circle const & c) const {
     // circle center, then the box contains c. Otherwise, the box and circle
     // are disjoint.
     if (contains(cc)) {
-        return CONTAINS | INTERSECTS;
+        return CONTAINS;
     }
     return DISJOINT;
 }
 
-int Box::relate(ConvexPolygon const & p) const {
+Relationship Box::relate(ConvexPolygon const & p) const {
     // ConvexPolygon-Box relations are implemented by ConvexPolygon.
-    return invertSpatialRelations(p.relate(*this));
+    return invert(p.relate(*this));
 }
 
-int Box::relate(Ellipse const & e) const {
+Relationship Box::relate(Ellipse const & e) const {
     // Ellipse-Box relations are implemented by Ellipse.
-    return invertSpatialRelations(e.relate(*this));
+    return invert(e.relate(*this));
+}
+
+std::vector<uint8_t> Box::encode() const {
+    std::vector<uint8_t> buffer;
+    uint8_t tc = TYPE_CODE;
+    buffer.reserve(ENCODED_SIZE);
+    buffer.push_back(tc);
+    encodeDouble(_lon.getA().asRadians(), buffer);
+    encodeDouble(_lon.getB().asRadians(), buffer);
+    encodeDouble(_lat.getA().asRadians(), buffer);
+    encodeDouble(_lat.getB().asRadians(), buffer);
+    return buffer;
+}
+
+std::unique_ptr<Box> Box::decode(uint8_t const * buffer, size_t n) {
+    if (buffer == nullptr || n != ENCODED_SIZE || *buffer != TYPE_CODE) {
+        throw std::runtime_error("Byte-string is not an encoded Box");
+    }
+    std::unique_ptr<Box> box(new Box);
+    ++buffer;
+    double a = decodeDouble(buffer); buffer += 8;
+    double b = decodeDouble(buffer); buffer += 8;
+    box->_lon = NormalizedAngleInterval::fromRadians(a, b);
+    a = decodeDouble(buffer); buffer += 8;
+    b = decodeDouble(buffer); buffer += 8;
+    box->_lat = AngleInterval::fromRadians(a, b);
+    box->_enforceInvariants();
+    return box;
 }
 
 std::ostream & operator<<(std::ostream & os, Box const & b) {
-    return os << "Box(" << b.getLon() << ", " << b.getLat() << ')';
+    return os << "{\"Box\": [" << b.getLon() << ", " << b.getLat() << "]}";
 }
 
 }} // namespace lsst::sphgeom

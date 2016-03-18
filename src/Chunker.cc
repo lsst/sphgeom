@@ -125,18 +125,18 @@ std::vector<int32_t> Chunker::getChunksIntersecting(Region const & r) const {
         // Examine each chunk overlapping the bounding box of r.
         if (ca <= cb) {
             for (int32_t c = ca; c <= cb; ++c) {
-                if (r.relate(_getChunkBoundingBox(s, c)) & INTERSECTS) {
+                if ((r.relate(_getChunkBoundingBox(s, c)) & DISJOINT) == 0) {
                     chunkIds.push_back(_getChunkId(s, c));
                 }
             }
         } else {
             for (int32_t c = 0; c <= cb; ++c) {
-                if (r.relate(_getChunkBoundingBox(s, c)) & INTERSECTS) {
+                if ((r.relate(_getChunkBoundingBox(s, c)) & DISJOINT) == 0) {
                     chunkIds.push_back(_getChunkId(s, c));
                 }
             }
             for (int32_t c = ca; c < nc; ++c) {
-                if (r.relate(_getChunkBoundingBox(s, c)) & INTERSECTS) {
+                if ((r.relate(_getChunkBoundingBox(s, c)) & DISJOINT) == 0) {
                     chunkIds.push_back(_getChunkId(s, c));
                 }
             }
@@ -196,7 +196,7 @@ void Chunker::_getSubChunks(std::vector<SubChunks> & chunks,
 {
     SubChunks subChunks;
     subChunks.chunkId = _getChunkId(stripe, chunk);
-    if (r.relate(_getChunkBoundingBox(stripe, chunk)) & CONTAINS) {
+    if ((r.relate(_getChunkBoundingBox(stripe, chunk)) & CONTAINS) != 0) {
         // r contains the entire chunk, so there is no need to test sub-chunks
         // for intersection with r.
         subChunks.subChunkIds = getAllSubChunks(subChunks.chunkId);
@@ -224,7 +224,7 @@ void Chunker::_getSubChunks(std::vector<SubChunks> & chunks,
                 minSC = std::max(sca, minSC);
                 maxSC = std::min(scb, maxSC);
                 for (int32_t sc = minSC; sc <= maxSC; ++sc) {
-                    if (r.relate(_getSubChunkBoundingBox(ss, sc)) & INTERSECTS) {
+                    if ((r.relate(_getSubChunkBoundingBox(ss, sc)) & DISJOINT) == 0) {
                         subChunks.subChunkIds.push_back(
                             _getSubChunkId(stripe, ss, chunk, sc));
                     }
@@ -233,13 +233,13 @@ void Chunker::_getSubChunks(std::vector<SubChunks> & chunks,
                 sca = std::max(sca, minSC);
                 scb = std::min(scb, maxSC);
                 for (int32_t sc = sca; sc <= maxSC; ++sc) {
-                    if (r.relate(_getSubChunkBoundingBox(ss, sc)) & INTERSECTS) {
+                    if ((r.relate(_getSubChunkBoundingBox(ss, sc)) & DISJOINT) == 0) {
                         subChunks.subChunkIds.push_back(
                             _getSubChunkId(stripe, ss, chunk, sc));
                     }
                 }
                 for (int32_t sc = minSC; sc <= scb; ++sc) {
-                    if (r.relate(_getSubChunkBoundingBox(ss, sc)) & INTERSECTS) {
+                    if ((r.relate(_getSubChunkBoundingBox(ss, sc)) & DISJOINT) == 0) {
                         subChunks.subChunkIds.push_back(
                             _getSubChunkId(stripe, ss, chunk, sc));
                     }

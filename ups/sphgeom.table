@@ -1,5 +1,6 @@
 setupRequired(base)
 setupRequired(sconsUtils)
+setupRequired(swig)
 setupOptional(doxygen)
 
 envPrepend(LD_LIBRARY_PATH, ${PRODUCT_DIR}/lib)

@@ -30,7 +30,6 @@
 #include <iosfwd>
 
 #include "Region.h"
-#include "SpatialRelation.h"
 #include "UnitVector3d.h"
 
 
@@ -46,6 +45,8 @@ namespace sphgeom {
 /// angles.
 class Circle : public Region {
 public:
+    static constexpr uint8_t TYPE_CODE = 'c';
+
     static Circle empty() { return Circle(); }
 
     static Circle full() { return Circle(UnitVector3d::Z(), 4.0); }
@@ -215,13 +216,15 @@ public:
     /// `complemented` returns the closure of the complement of this circle.
     Circle complemented() const { return Circle(*this).complement(); }
 
-    int relate(UnitVector3d const & v) const;
+    Relationship relate(UnitVector3d const & v) const;
 
     // Region interface
-    virtual Circle * clone() const { return new Circle(*this); }
+    virtual std::unique_ptr<Region> clone() const {
+        return std::unique_ptr<Circle>(new Circle(*this));
+    }
 
     virtual Box getBoundingBox() const;
-
+    virtual Box3d getBoundingBox3d() const;
     virtual Circle getBoundingCircle() const { return *this; }
 
     virtual bool contains(UnitVector3d const & v) const {
@@ -229,17 +232,29 @@ public:
                (v - _center).getSquaredNorm() <= _squaredChordLength;
     }
 
-    virtual int relate(Region const & r) const {
+    virtual Relationship relate(Region const & r) const {
         // Dispatch on the type of r.
-        return invertSpatialRelations(r.relate(*this));
+        return invert(r.relate(*this));
     }
 
-    virtual int relate(Box const &) const;
-    virtual int relate(Circle const &) const;
-    virtual int relate(ConvexPolygon const &) const;
-    virtual int relate(Ellipse const &) const;
+    virtual Relationship relate(Box const &) const;
+    virtual Relationship relate(Circle const &) const;
+    virtual Relationship relate(ConvexPolygon const &) const;
+    virtual Relationship relate(Ellipse const &) const;
+
+    virtual std::vector<uint8_t> encode() const;
+
+    ///@{
+    /// `decode` deserializes a Circle from a byte string produced by encode.
+    static std::unique_ptr<Circle> decode(std::vector<uint8_t> const & s) {
+        return decode(s.data(), s.size());
+    }
+    static std::unique_ptr<Circle> decode(uint8_t const * buffer, size_t n);
+    ///@}
 
 private:
+    static constexpr size_t ENCODED_SIZE = 41;
+
     UnitVector3d _center;
     double _squaredChordLength;
     Angle _openingAngle;
