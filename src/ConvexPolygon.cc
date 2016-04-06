@@ -242,8 +242,9 @@ void computeHull(std::vector<UnitVector3d> & points) {
             if (fromCCW == points.begin()) {
                 *hullEnd = *v;
             } else {
+                UnitVector3d u = *v;
                 std::copy_backward(fromCCW, hullEnd, hullEnd + 1);
-                *fromCCW = *v;
+                *fromCCW = u;
             }
             ++hullEnd;
         }

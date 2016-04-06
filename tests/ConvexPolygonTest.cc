@@ -265,3 +265,15 @@ TEST_CASE(Codec) {
     CHECK(dynamic_cast<ConvexPolygon *>(r.get()) != nullptr);
     CHECK(*dynamic_cast<ConvexPolygon *>(r.get()) == p);
 }
+
+TEST_CASE(Hull) {
+    std::vector<UnitVector3d> points = {
+        UnitVector3d(0.9962891943972693, -0.06085984360495963, -0.06085984360495963),
+        UnitVector3d(0.9950864205485712, -0.0607863703316013, 0.07815390471205888),
+        UnitVector3d(0.9938879923679332, 0.07805978038285497, 0.07805978038285499),
+        UnitVector3d(0.9950864205485711, 0.07815390471205892, -0.06078637033160138)
+    };
+    ConvexPolygon poly(points);
+    CHECK(poly.getVertices().size() == 4);
+    CHECK(poly.getVertices()[0] != poly.getVertices()[1]);
+}
