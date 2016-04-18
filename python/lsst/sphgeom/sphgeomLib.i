@@ -86,6 +86,9 @@ Python interface to lsst::sphgeom
 
 // Module level constants mirroring the constexprs in Relationship.h
 %pythoncode %{
+# Bit-mask indicating that two Regions intersect, but neither
+# contains the other.
+INTERSECTS = 0
 # Bit-mask indicating that two Regions are disjoint.
 DISJOINT = 1
 # Bit-mask indicating that a Region A contains another region B.
