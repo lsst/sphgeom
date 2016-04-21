@@ -107,7 +107,7 @@ public:
     virtual std::vector<uint8_t> encode() const;
 
     ///@{
-    /// `decode` deserializes an ConvexPolygon from a byte string produced by encode.
+    /// `decode` deserializes a ConvexPolygon from a byte string produced by encode.
     static std::unique_ptr<ConvexPolygon> decode(std::vector<uint8_t> const & s) {
         return decode(s.data(), s.size());
     }

@@ -41,7 +41,7 @@
     );
 }
 
-// This typemaps converts a unique Region pointer to a shared one.
+// This typemap converts a unique Region pointer to a shared one.
 %typemap(out) std::unique_ptr<lsst::sphgeom::Region> {
     $result = SWIG_NewPointerObj(
         SWIG_as_voidptr(new std::shared_ptr<lsst::sphgeom::Region>($1.release())),

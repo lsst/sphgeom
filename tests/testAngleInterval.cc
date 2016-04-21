@@ -149,7 +149,7 @@ TEST_CASE(IntervalIntervalRelations) {
 
 TEST_CASE(PointExpansion) {
     Angle a1(1), a2(2), a3(3), a4(4), a5(5), a6(6);
-    // Check expansions of  points.
+    // Check expansions of points.
     CHECK(AngleInterval(a1).expandedTo(a3).getSize() == a2);
     CHECK(AngleInterval(a1).expandedTo(AngleInterval(a3)) ==
           AngleInterval(a1).expandedTo(a3));
