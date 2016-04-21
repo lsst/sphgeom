@@ -36,31 +36,49 @@ namespace lsst {
 namespace sphgeom {
 
 double Vector3d::normalize() {
-    double scale = 1.0;
-    double invScale = 1.0;
-    double n2 = getSquaredNorm();
-    if (n2 < 4.008336720017946e-292) {
-        // If n2 is below 2^(-1022 + 54), i.e. close to the smallest normal
-        // double precision value, scale each component by 2^563 and
-        // recompute the squared norm.
-        scale = 3.019169939857233e+169;
-        invScale = 3.312168642111238e-170;
-        n2 = ((*this) * scale).getSquaredNorm();
-        if (n2 == 0.0) {
-            throw std::runtime_error("Cannot normalize zero vector");
-        }
-    } else if (n2 == std::numeric_limits<double>::infinity()) {
-        // In case of overflow, scale each component by 2^-513 and
-        // recompute the squared norm.
-        scale = 3.7291703656001034e-155;
-        invScale = 2.6815615859885194e+154;
-        n2 = ((*this) * scale).getSquaredNorm();
+    double maxabs;
+    double d;
+    double ax = std::fabs(_v[0]);
+    double ay = std::fabs(_v[1]);
+    double az = std::fabs(_v[2]);
+    if (ax + ay + az == 0.0) {
+        throw std::runtime_error("Cannot normalize zero vector");
     }
-    double norm = std::sqrt(n2);
-    _v[0] = (_v[0] * scale) / norm;
-    _v[1] = (_v[1] * scale) / norm;
-    _v[2] = (_v[2] * scale) / norm;
-    return norm * invScale;
+    if (ax < ay) {
+        if (ay < az) {
+            maxabs = az;
+            _v[0] /= az;
+            _v[1] /= az;
+            _v[2] = std::copysign(1.0, _v[2]);
+            d = _v[0] * _v[0] + _v[1] * _v[1];
+        } else {
+            maxabs = ay;
+            _v[0] /= ay;
+            _v[1] = std::copysign(1.0, _v[1]);
+            _v[2] /= ay;
+            d = _v[0] * _v[0] + _v[2] * _v[2];
+        }
+    } else {
+        if (ax < az) {
+            maxabs = az;
+            _v[0] /= az;
+            _v[1] /= az;
+            _v[2] = std::copysign(1.0, _v[2]);
+            d = _v[0] * _v[0] + _v[1] * _v[1];
+        } else {
+            maxabs = ax;
+            _v[0] = std::copysign(1.0, _v[0]);
+            _v[1] /= ax;
+            _v[2] /= ax;
+            d = _v[1] * _v[1] + _v[2] * _v[2];
+        }
+    }
+    double norm = std::sqrt(1.0 + d);
+    double s = 1.0 / norm;
+    _v[0] *= s;
+    _v[1] *= s;
+    _v[2] *= s;
+    return norm * maxabs;
 }
 
 Vector3d Vector3d::rotatedAround(UnitVector3d const & k, Angle a) const {
