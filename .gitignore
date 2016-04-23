@@ -16,7 +16,6 @@ python/lsst/sphgeom/sphgeomLib.py
 python/lsst/sphgeom/sphgeomLib_wrap.cc
 python/lsst/sphgeom/version.py
 tests/.tests/
-<<<<<<< master
 tests/testAngleInterval
 tests/testAngle
 tests/testBigInteger
@@ -36,4 +35,5 @@ tests/testUnitVector3d
 tests/testVector3d
 tests/.cache/*
 tests/curveTest
+tests/q3cTest
 ups/*.cfgc
