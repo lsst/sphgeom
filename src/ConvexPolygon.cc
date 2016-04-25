@@ -50,18 +50,6 @@ char const * const NOT_ENOUGH_POINTS =
     "The convex hull of a point set containing less than "
     "3 distinct, non-coplanar points is not a convex polygon";
 
-struct Vector3dLessThan {
-    bool operator()(Vector3d const & v0, Vector3d const & v1) const {
-        if (v0.x() == v1.x()) {
-            if (v0.y() == v1.y()) {
-                return v0.z() < v1.z();
-            }
-            return v0.y() < v1.y();
-        }
-        return v0.x() < v1.x();
-    }
-};
-
 // `findPlane` rearranges the entries of `points` such that the first two
 // entries are distinct. If it is unable to do so, or if it encounters any
 // antipodal points in the process, an exception is thrown. It returns an
@@ -250,18 +238,6 @@ void computeHull(std::vector<UnitVector3d> & points) {
         }
     }
     points.erase(hullEnd, end);
-    // Since the points in the hull are distinct, there is a unique minimum
-    // point - rotate the points vector to make it the first one. This allows
-    // operator== for ConvexPolygon to be implemented simply by comparing
-    // vertices.
-    VertexIterator minVertex = points.begin();
-    Vector3dLessThan lessThan;
-    for (VertexIterator v = minVertex + 1, e = points.end(); v != e; ++v) {
-        if (lessThan(*v, *minVertex)) {
-            minVertex = v;
-        }
-    }
-    std::rotate(points.begin(), minVertex, points.end());
 }
 
 // TODO(smm): for all of this to be fully rigorous, we must prove that no two
@@ -293,9 +269,26 @@ bool ConvexPolygon::operator==(ConvexPolygon const & p) const {
         return false;
     }
     VertexIterator i = _vertices.begin();
-    VertexIterator j = p._vertices.begin();
-    VertexIterator const end = _vertices.end();
-    for (; i != end; ++i, ++j) {
+    VertexIterator f = p._vertices.begin();
+    VertexIterator const ep = p._vertices.end();
+    // Find vertex f of p equal to the first vertex of this polygon.
+    for (; f != ep; ++f) {
+        if (*i == *f) {
+            break;
+        }
+    }
+    if (f == ep) {
+        // No vertex of p is equal to the first vertex of this polygon.
+        return false;
+    }
+    // Now, compare all vertices.
+    ++i;
+    for (VertexIterator j = f + 1; j != ep; ++i, ++j) {
+        if (*i != *j) {
+            return false;
+        }
+    }
+    for (VertexIterator j = p._vertices.begin(); j != f; ++i, ++j) {
         if (*i != *j) {
             return false;
         }
