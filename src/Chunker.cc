@@ -49,10 +49,10 @@ int32_t computeNumSegments(AngleInterval const & latitudes, Angle width) {
         std::floor(2.0 * PI / std::fabs(std::atan2(y, x))));
 }
 
+constexpr double BOX_EPSILON = 5.0e-12; // ~1 micro-arcsecond
+
 } // unnamed namespace
 
-
-Angle const Chunker::EPSILON(5.0e-12); // ~ 1 micro-arcsecond
 
 Chunker::Chunker(int32_t numStripes,
                  int32_t numSubStripesPerStripe) :
@@ -103,7 +103,7 @@ Chunker::Chunker(int32_t numStripes,
 std::vector<int32_t> Chunker::getChunksIntersecting(Region const & r) const {
     std::vector<int32_t> chunkIds;
     // Find the stripes that intersect the bounding box of r.
-    Box b = r.getBoundingBox().dilatedBy(EPSILON);
+    Box b = r.getBoundingBox().dilatedBy(Angle(BOX_EPSILON));
     double ya = std::floor((b.getLat().getA() + Angle(0.5 * PI)) / _subStripeHeight);
     double yb = std::floor((b.getLat().getB() + Angle(0.5 * PI)) / _subStripeHeight);
     int32_t minSS = std::min(static_cast<int32_t>(ya), _numSubStripes - 1);
@@ -150,7 +150,7 @@ std::vector<SubChunks> Chunker::getSubChunksIntersecting(
 {
     std::vector<SubChunks> chunks;
     // Find the stripes that intersect the bounding box of r.
-    Box b = r.getBoundingBox().dilatedBy(EPSILON);
+    Box b = r.getBoundingBox().dilatedBy(Angle(BOX_EPSILON));
     double ya = std::floor((b.getLat().getA() + Angle(0.5 * PI)) / _subStripeHeight);
     double yb = std::floor((b.getLat().getB() + Angle(0.5 * PI)) / _subStripeHeight);
     int32_t minSS = std::min(static_cast<int32_t>(ya), _numSubStripes - 1);
@@ -290,7 +290,7 @@ Box Chunker::_getChunkBoundingBox(int32_t stripe, int32_t chunk) const {
     int32_t ssEnd = ss + _numSubStripesPerStripe;
     AngleInterval lat(ss * _subStripeHeight - Angle(0.5 * PI),
                       ssEnd * _subStripeHeight - Angle(0.5 * PI));
-    return Box(lon, lat).dilatedBy(EPSILON);
+    return Box(lon, lat).dilatedBy(Angle(BOX_EPSILON));
 }
 
 Box Chunker::_getSubChunkBoundingBox(int32_t subStripe, int32_t subChunk) const {
@@ -299,7 +299,7 @@ Box Chunker::_getSubChunkBoundingBox(int32_t subStripe, int32_t subChunk) const 
                                 subChunkWidth * (subChunk + 1));
     AngleInterval lat(subStripe * _subStripeHeight - Angle(0.5 * PI),
                       (subStripe + 1) * _subStripeHeight - Angle(0.5 * PI));
-    return Box(lon, lat).dilatedBy(EPSILON);
+    return Box(lon, lat).dilatedBy(Angle(BOX_EPSILON));
 }
 
 }} // namespace lsst::sphgeom

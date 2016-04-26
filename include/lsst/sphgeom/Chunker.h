@@ -116,8 +116,6 @@ private:
         SubStripe() : subChunkWidth(), numSubChunksPerChunk(0) {}
     };
 
-    static Angle const EPSILON;
-
     int32_t _getStripe(int32_t chunkId) const {
         return chunkId / (2 * _numStripes);
     }
