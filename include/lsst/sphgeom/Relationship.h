@@ -26,12 +26,12 @@
 #include <bitset>
 
 /// \file
-/// \brief This file provides a type alias for describing spatial relationships.
+/// \brief This file provides a type alias for describing set relationships.
 
 namespace lsst {
 namespace sphgeom {
 
-/// `Relationship` describes how two spatial objects are related.
+/// `Relationship` describes how two sets are related.
 using Relationship = std::bitset<3>;
 
 /// A is disjoint from B  ⇔  A ⋂ B = ∅
@@ -49,7 +49,7 @@ static constexpr Relationship CONTAINS(2);
 /// A is within B  ⇔  A ⋂ B = A
 static constexpr Relationship WITHIN(4);
 
-/// Given the relationship between two regions A and B (i.e. the output of
+/// Given the relationship between two sets A and B (i.e. the output of
 /// `A.relate(B)`), `invert` returns the relationship between B and A
 /// (`B.relate(A)`).
 inline Relationship invert(Relationship r) {

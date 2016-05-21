@@ -37,4 +37,5 @@ tests/.cache/*
 tests/curveTest
 tests/htmTest
 tests/q3cTest
+tests/RangeSetTest
 ups/*.cfgc
