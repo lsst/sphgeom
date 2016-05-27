@@ -73,6 +73,8 @@ Python interface to lsst::sphgeom
     SWIG_CATCH_STDEXCEPT
 }
 
+// Wrapping the stream output operator is useless.
+%ignore lsst::sphgeom::operator<<;
 
 // Relationship is an alias for std::bitset<3>. SWIG does nothing good
 // with bitsets, so they are mapped to integers. Note that because there is
@@ -101,3 +103,4 @@ WITHIN = 4
 %include "basics.i"
 %include "intervals.i"
 %include "regions.i"
+%include "indexing.i"

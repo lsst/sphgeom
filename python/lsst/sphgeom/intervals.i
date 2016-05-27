@@ -30,13 +30,19 @@
 %include "lsst/sphgeom/Interval.h"
 
 %define %intervalBaseFor(DERIVED, SCALAR)
-%extend lsst::sphgeom::Interval<lsst::sphgeom::DERIVED, SCALAR> {
-    %returnSelf(clipTo);
-    %returnSelf(expandTo);
-    %returnSelf(dilateBy);
-    %returnSelf(erodeBy);
-}
-%template(DERIVED ## Base) lsst::sphgeom::Interval<lsst::sphgeom::DERIVED, SCALAR>;
+    %typemap(out) lsst::sphgeom::Interval<lsst::sphgeom::DERIVED, SCALAR> & {
+        Py_INCREF(Py_None);
+        $result = Py_None;
+    }
+    
+    %extend lsst::sphgeom::Interval<lsst::sphgeom::DERIVED, SCALAR> {
+        %returnSelf(clipTo);
+        %returnSelf(expandTo);
+        %returnSelf(dilateBy);
+        %returnSelf(erodeBy);
+    }
+
+    %template(DERIVED ## Base) lsst::sphgeom::Interval<lsst::sphgeom::DERIVED, SCALAR>;
 %enddef
 
 %intervalBaseFor(Interval1d, double); 

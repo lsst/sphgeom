@@ -28,12 +28,6 @@
     #include "lsst/sphgeom/Vector3d.h"
 %}
 
-%ignore operator<<(std::ostream & s, lsst::sphgeom::Angle const & a);
-%ignore operator<<(std::ostream & s, lsst::sphgeom::NormalizedAngle const & a);
-%ignore operator<<(std::ostream & s, lsst::sphgeom::LonLat const & p);
-%ignore operator<<(std::ostream & s, lsst::sphgeom::Vector3d const & v);
-%ignore operator<<(std::ostream & s, lsst::sphgeom::UnitVector3d const & v);
-
 %mimicCast(Angle, NormalizedAngle);
 
 %extend lsst::sphgeom::Vector3d {
@@ -130,7 +124,8 @@
 
 %{
     inline PyObject * _convertToList(std::vector<lsst::sphgeom::UnitVector3d> const & input) {
-        std::unique_ptr<PyObject> result(PyList_New(input.size()));
+        auto xdecref = [](PyObject * p) { Py_XDECREF(p); };
+        std::unique_ptr<PyObject, decltype(xdecref)> result(PyList_New(input.size()), xdecref);
         if (!result) {
             return nullptr;
         }

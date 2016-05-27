@@ -67,7 +67,6 @@
 
 
 %shared_ptr(lsst::sphgeom::Box3d);
-%ignore operator<<(std::ostream & s, lsst::sphgeom::Box3d const & a);
 
 
 // Even though this package does not use shared pointers, other packages may
@@ -82,8 +81,6 @@
 
 %define %prepareRegion(TYPE)
     %shared_ptr(lsst::sphgeom::TYPE);
-
-    %ignore operator<<(std::ostream & s, lsst::sphgeom::TYPE const & a);
 
     %typemap(out) std::unique_ptr<lsst::sphgeom::TYPE> {
         $result = SWIG_NewPointerObj(
