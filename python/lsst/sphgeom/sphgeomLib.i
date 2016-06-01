@@ -103,4 +103,4 @@ WITHIN = 4
 %include "basics.i"
 %include "intervals.i"
 %include "regions.i"
-%include "indexing.i"
+%include "pixelizations.i"

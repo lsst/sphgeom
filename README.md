@@ -1,4 +1,4 @@
-sphgeom: spherical geometry primitives
+sphgeom: spherical geometry primitives {#mainpage}
 ======================================
 
 Overview
@@ -23,28 +23,28 @@ Points
 ------
 
 There are 3 different classes for points -
-[LonLat](include/lsst/sphgeom/LonLat.h) for spherical coordinates,
-[Vector3d](include/lsst/sphgeom/Vector3d.h) for Cartesian vectors in ℝ³
+[LonLat](\ref lsst::sphgeom::LonLat) for spherical coordinates,
+[Vector3d](\ref lsst::sphgeom::Vector3d) for Cartesian vectors in ℝ³
 (not constrained to lie on the unit sphere), and
-[UnitVector3d](include/lsst/sphgeom/UnitVector3d.h) for vectors in ℝ³ with
+[UnitVector3d](\ref lsst::sphgeom::UnitVector3d) for vectors in ℝ³ with
 unit ℓ² norm.
 
 Regions
 -------
 
-Four basic spherical [Region](include/lsst/sphgeom/Region.h) types are
+Four basic spherical [Region](\ref lsst::sphgeom::Region) types are
 provided:
 
-  - [Box](include/lsst/sphgeom/Box.h), a longitude/latitude angle box
-  - [Circle](include/lsst/sphgeom/Circle.h), a small circle defined
+  - [Box](\ref lsst::sphgeom::Box), a longitude/latitude angle box
+  - [Circle](\ref lsst::sphgeom::Circle), a small circle defined
     by a center and opening angle/chord length
-  - [Ellipse](include/lsst/sphgeom/Ellipse.h), the intersection of an
+  - [Ellipse](\ref lsst::sphgeom::Ellipse), the intersection of an
     elliptical cone with the unit sphere
-  - [ConvexPolygon](include/lsst/sphgeom/ConvexPolygon.h), a convex
+  - [ConvexPolygon](\ref lsst::sphgeom::ConvexPolygon), a convex
     spherical polygon with unit vector vertices and great circle edges
 
 In addition to the spherical regions, there is a type for 3-D axis aligned
-boxes, [Box3d](include/lsst/sphgeom/Box3d.h). All spherical regions know how
+boxes, [Box3d](\ref lsst::sphgeom::Box3d). All spherical regions know how
 to compute their 3-D bounding boxes, which makes it possible to insert them
 into a 3-D [R-tree](https://en.wikipedia.org/wiki/R-tree). This is used by the
 exposure indexing task in the [daf_ingest](https://github.com/lsst/daf_ingest)
@@ -53,20 +53,22 @@ package to spatially index exposure bounding polygons using the
 [R*tree module](https://www.sqlite.org/rtree.html).
 
 A region can also determine its spatial
-[relationship](include/lsst/sphgeom/Relationship.h) to another region, and
+[relationship](\ref lsst::sphgeom::Relationship) to another region, and
 test whether or not it contains a given unit vector.
 
-Partitioning/Pixelization
--------------------------
+Pixelizations
+-------------
 
-This library also implements support for assigning points to cells of
-a partitioning (a.k.a pixelization) of the sphere, and for determining which
-cells intersect a region.
+This library also provides support for assigning points to pixels (a.k.a.
+cells or partitions) in a [Pixelization](\ref lsst::sphgeom::Pixelization)
+(a.k.a. partitioning) of the sphere, and for determining which pixels
+intersect a region.
 
-Currently, the [Chunker](include/lsst/sphgeom/Chunker.h) class implements
+Currently, the [Chunker](\ref lsst::sphgeom::Chunker) class implements
 the partitioning scheme employed by [Qserv](https://github.com/lsst/qserv).
-Support for the HTM (Hierarchical Triangular Mesh) and Q3C (Quad Tree
-Cube) pixelizations is planned.
+The [HtmPixelization](\ref lsst::sphgeom::HtmPixelization) class implements
+the HTM (Hierarchical Triangular Mesh) pixelization. Q3C (Quad Tree
+Cube) pixelizations are planned.
 
 See Also
 --------

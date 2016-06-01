@@ -22,8 +22,9 @@
 
 %{
     #include "lsst/sphgeom/curve.h"
+    #include "lsst/sphgeom/Pixelization.h"
     #include "lsst/sphgeom/RangeSet.h"
-    #include "lsst/sphgeom/htm.h"
+    #include "lsst/sphgeom/HtmPixelization.h"
     #include "lsst/sphgeom/q3c.h"
 %}
 
@@ -81,6 +82,8 @@
     $result = _rangesToList($1);
 }
 
+%shared_ptr(lsst::sphgeom::Pixelization)
+%shared_ptr(lsst::sphgeom::HtmPixelization)
 %shared_ptr(lsst::sphgeom::RangeSet)
 
 %copyctor lsst::sphgeom::RangeSet;
@@ -117,7 +120,7 @@
 
 %addStreamStr(RangeSet);
 
-
+%include "lsst/sphgeom/Pixelization.h"
 %include "lsst/sphgeom/curve.h"
-%include "lsst/sphgeom/htm.h"
+%include "lsst/sphgeom/HtmPixelization.h"
 %include "lsst/sphgeom/q3c.h"

@@ -23,8 +23,9 @@
 /// \file
 /// \brief This file contains tests for HTM indexing.
 
+#include "lsst/sphgeom/Circle.h"
 #include "lsst/sphgeom/LonLat.h"
-#include "lsst/sphgeom/htm.h"
+#include "lsst/sphgeom/HtmPixelization.h"
 #include "lsst/sphgeom/UnitVector3d.h"
 
 #include "test.h"
@@ -45,26 +46,26 @@ enum class Tri : unsigned int {
 TEST_CASE(Level) {
     int level = 0;
     for (uint64_t index = 8; index != 0; index *= 4, level += 1) {
-        CHECK(htmLevel(index) == level);
+        CHECK(HtmPixelization::level(index) == level);
     }
     for (uint64_t index = 4; index != 0; index <<= 2) {
-        CHECK(htmLevel(index) < 0);
+        CHECK(HtmPixelization::level(index) < 0);
     }
     for (uint64_t index = 0; index < 8; ++index) {
-        CHECK(htmLevel(index) < 0);
+        CHECK(HtmPixelization::level(index) < 0);
     }
 }
 
 TEST_CASE(InvalidTrixel) {
     for (uint64_t index = 4; index != 0; index *= 4) {
-        CHECK_THROW(htmTrixel(index), std::invalid_argument);
+        CHECK_THROW(HtmPixelization::triangle(index), std::invalid_argument);
     }
     for (uint64_t index = 0; index < 8; ++index) {
-        CHECK_THROW(htmTrixel(index), std::invalid_argument);
+        CHECK_THROW(HtmPixelization::triangle(index), std::invalid_argument);
     }
 }
 
-TEST_CASE(IndexPoint) {
+TEST_CASE(Index) {
     double const c = 0.2928932188134525; // 1/(2 + √2)
     // A collection of test points.
     UnitVector3d const points[] = {
@@ -133,9 +134,60 @@ TEST_CASE(IndexPoint) {
         Tri::S21, Tri::S20, Tri::S22, Tri::S31, Tri::S30, Tri::S32
     };
     for (size_t i = 0; i < sizeof(points) / sizeof(UnitVector3d); ++i) {
-        uint64_t trixel = static_cast<uint64_t>(results[i]);
-        CHECK(htmIndex(points[i], 0) == trixel >> 2);
-        CHECK(htmIndex(points[i], 1) == trixel);
-        CHECK(htmTrixel(trixel).contains(points[i]));
+        uint64_t index = static_cast<uint64_t>(results[i]);
+        CHECK(HtmPixelization(0).index(points[i]) == index >> 2);
+        CHECK(HtmPixelization(1).index(points[i]) == index);
+        CHECK(HtmPixelization::triangle(index).contains(points[i]));
+        if (i >= 26) {
+            // Test-point is the center of a level 2 trixel.
+            index = index * 4 + 3;
+            CHECK(HtmPixelization(2).index(points[i]) == index);
+            CHECK(HtmPixelization(2).envelope(Circle(points[i], 1e-8)) ==
+                  RangeSet(index));
+        }
+    }
+    // Check for consistency with values obtained from other libraries
+    CHECK(HtmPixelization(20).index(UnitVector3d(LonLat::fromDegrees(1, 1))) ==
+          UINT64_C(17043491373057));
+    HtmPixelization p(13);
+    RangeSet s = p.envelope(Circle(-UnitVector3d::Z(), 1.0e-16));
+    CHECK(s == RangeSet({553648128, 620756992, 687865856, 754974720}));
+    s = p.envelope(Circle(UnitVector3d::Z(), 1.0e-16));
+    CHECK(s == RangeSet({822083584, 889192448, 956301312, 1023410176}));
+    s = p.envelope(Circle(UnitVector3d::X(), 1.0e-16));
+    CHECK(s == RangeSet({536870912, 771751936, 805306368, 1040187392}));
+    s = p.envelope(Circle(UnitVector3d::Y(), 1.0e-16));
+    CHECK(s == RangeSet({570425344, 603979776, 973078528, 1006632960}));
+    s = p.envelope(Circle(-UnitVector3d::X(), 1.0e-16));
+    CHECK(s == RangeSet({637534208, 671088640, 905969664, 939524096}));
+    s = p.envelope(Circle(-UnitVector3d::Y(), 1.0e-16));
+    CHECK(s == RangeSet({704643072, 738197504, 838860800, 872415232}));
+}
+
+TEST_CASE(Adaptivity) {
+    UnitVector3d center(1.0, 1.0, 1.0);
+    for (int level = 0; level <= 13; ++level) {
+        HtmPixelization p(level);
+        Circle c0(center, Angle::fromDegrees(0.001));
+        Circle c1(center, Angle::fromDegrees(0.1));
+        Circle c2(center, Angle::fromDegrees(1.0));
+        RangeSet a0 = p.envelope(c0, 0);
+        RangeSet a1 = p.envelope(c1, 0);
+        RangeSet a2 = p.envelope(c2, 0);
+        CHECK(a2.contains(a1));
+        CHECK(a1.contains(a0));
+        for (size_t maxRanges = 64; maxRanges != 0; maxRanges /= 2) {
+            RangeSet s = p.envelope(c0, maxRanges);
+            CHECK(s.contains(a0));
+            a0 = s;
+            s = p.envelope(c1, maxRanges);
+            CHECK(s.contains(a1));
+            a1 = s;
+            s = p.envelope(c2, maxRanges);
+            CHECK(s.contains(a2));
+            a2 = s;
+            CHECK(a2.contains(a1));
+            CHECK(a1.contains(a0));
+        }
     }
 }
