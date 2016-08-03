@@ -51,9 +51,9 @@ class UnitVector3d;
 ///   relationships between two regions.
 /// - It provides transformation between objects and binary strings.
 ///
-/// Given a partitioning of the unit sphere with partitions that can be
+/// Given a pixelization of the unit sphere with pixels that can be
 /// bounded by Regions, this provides all the necessary functionality for
-/// determining which partitions may intersect a Region.
+/// determining which pixels may intersect a Region.
 ///
 /// When implementing a new concrete region subclass R, the Region interface
 /// should be extended with:
