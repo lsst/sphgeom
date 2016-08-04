@@ -22,10 +22,11 @@
 
 %{
     #include "lsst/sphgeom/curve.h"
-    #include "lsst/sphgeom/Pixelization.h"
     #include "lsst/sphgeom/RangeSet.h"
+    #include "lsst/sphgeom/Pixelization.h"
     #include "lsst/sphgeom/HtmPixelization.h"
-    #include "lsst/sphgeom/q3c.h"
+    #include "lsst/sphgeom/Mq3cPixelization.h"
+    #include "lsst/sphgeom/Q3cPixelization.h"
 %}
 
 %{
@@ -84,6 +85,9 @@
 
 %shared_ptr(lsst::sphgeom::Pixelization)
 %shared_ptr(lsst::sphgeom::HtmPixelization)
+%shared_ptr(lsst::sphgeom::Mq3cPixelization)
+%shared_ptr(lsst::sphgeom::Q3cPixelization)
+
 %shared_ptr(lsst::sphgeom::RangeSet)
 
 %copyctor lsst::sphgeom::RangeSet;
@@ -121,6 +125,6 @@
 %addStreamStr(RangeSet);
 
 %include "lsst/sphgeom/Pixelization.h"
-%include "lsst/sphgeom/curve.h"
 %include "lsst/sphgeom/HtmPixelization.h"
-%include "lsst/sphgeom/q3c.h"
+%include "lsst/sphgeom/Mq3cPixelization.h"
+%include "lsst/sphgeom/Q3cPixelization.h"

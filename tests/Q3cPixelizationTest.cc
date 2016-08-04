@@ -23,35 +23,32 @@
 /// \file
 /// \brief This file contains tests for Q3C indexing.
 
-#include "lsst/sphgeom/curve.h"
+#include <algorithm>
+
+#include "lsst/sphgeom/Circle.h"
 #include "lsst/sphgeom/LonLat.h"
-#include "lsst/sphgeom/q3c.h"
+#include "lsst/sphgeom/Q3cPixelization.h"
 #include "lsst/sphgeom/UnitVector3d.h"
 
 #include "test.h"
 
 using namespace lsst::sphgeom;
 
-void compareIndexes(uint64_t i0, uint64_t i1) {
-    uint64_t const mask = UINT64_C(0xfffffffffffffff);
-    uint32_t x0, y0;
-    uint32_t x1, y1;
-    // Compare face numbers for level 30 Q3C indexes i0 and i1.
-    CHECK(i0 >> 60 == i1 >> 60);
-    // Extract integer grid coordinates for level 30 Q3C indexes i0 and i1.
-    std::tie(x0, y0) = mortonIndexInverse(i0 & mask);
-    std::tie(x1, y1) = mortonIndexInverse(i1 & mask);
-    // The difference between the expected and computed x and y values
-    // must be at most 1. Note this code does not work for x1 or y1 = 0
-    // or 2^30 - 1, so test points must be chosen accordingly.
-    CHECK(x0 >= x1 - 1 && x0 <= x1 + 1);
-    CHECK(y0 >= y1 - 1 && y0 <= y1 + 1);
+void compareIndexes(Q3cPixelization const & p, uint64_t i0, uint64_t i1) {
+    // Check that the neighborhood of each index contains the other index.
+    // This ensures that the indexes are either the same, or correspond to
+    // to adjacent pixels.
+    std::vector<uint64_t> neighborhood = p.neighborhood(i0);
+    auto n = std::find(neighborhood.begin(), neighborhood.end(), i1);
+    CHECK(n != neighborhood.end());
+    neighborhood = p.neighborhood(i1);
+    n = std::find(neighborhood.begin(), neighborhood.end(), i0);
+    CHECK(n != neighborhood.end());
 }
 
-TEST_CASE(InvalidResolution) {
-    UnitVector3d v = UnitVector3d::X();
-    CHECK_THROW(q3cIndex(v, 0, false, false), std::invalid_argument);
-    CHECK_THROW(q3cIndex(v, MAX_Q3C_RESOLUTION + 1, false, false),
+TEST_CASE(InvalidLevel) {
+    CHECK_THROW(Q3cPixelization(-1), std::invalid_argument);
+    CHECK_THROW((Q3cPixelization(Q3cPixelization::MAX_LEVEL + 1)),
                 std::invalid_argument);
 }
 
@@ -78,20 +75,22 @@ TEST_CASE(IndexPoint) {
         LonLat::fromDegrees(250.0, -20.0),
         LonLat::fromDegrees(290.0,  20.0),
         LonLat::fromDegrees(290.0, -20.0),
-        LonLat::fromDegrees(20.0,  80.0),
-        LonLat::fromDegrees(110.0, 80.0),
-        LonLat::fromDegrees(200.0, 80.0),
-        LonLat::fromDegrees(290.0, 80.0),
-        LonLat::fromDegrees(20.0,  -80.0),
+        LonLat::fromDegrees( 20.0,  80.0),
+        LonLat::fromDegrees(110.0,  80.0),
+        LonLat::fromDegrees(200.0,  80.0),
+        LonLat::fromDegrees(290.0,  80.0),
+        LonLat::fromDegrees( 20.0, -80.0),
         LonLat::fromDegrees(110.0, -80.0),
         LonLat::fromDegrees(200.0, -80.0),
-        LonLat::fromDegrees(290.0, -80.0),
+        LonLat::fromDegrees(290.0, -80.0)
     };
     // Expected Q3C indexes for the above, computed using the reference
     // PostgreSQL implementation, i.e. via:
     //
     // SELECT q3c_ang2ipix(0, 0);
     // ...
+    //
+    // The PostgreSQL Q3C implementation uses a fixed grid resolution of 2^30.
     uint64_t const indexes[] = {
         UINT64_C(2017612633061982208),
         UINT64_C(3170534137668829184),
@@ -120,14 +119,51 @@ TEST_CASE(IndexPoint) {
         UINT64_C(6639278876168802299),
         UINT64_C(6249046108789368157),
         UINT64_C(6042857674506514436),
-        UINT64_C(6433090441885948578),
+        UINT64_C(6433090441885948578)
     };
-    // The PostgreSQL Q3C implementation uses a fixed grid resolution of 2^30.
-    uint32_t const n = 0x40000000;
-    // Check for close agreement with the PostgreSQL Q3C implementation.
-    for (size_t i = 0; i < sizeof(points) / sizeof(LonLat); ++i) {
-        UnitVector3d v(points[i]);
-        compareIndexes(q3cIndex(v, n, false, false), indexes[i]);
-        compareIndexes(q3cIndex(v, n - 1, false, false), indexes[i]);
+    for (int level = 30; level >= 0; --level) {
+        Q3cPixelization p(level);
+        // Check for close agreement with the PostgreSQL Q3C implementation.
+        for (size_t i = 0; i < sizeof(points) / sizeof(LonLat); ++i) {
+            compareIndexes(p, p.index(UnitVector3d(points[i])),
+                           indexes[i] >> (60 - 2*level));
+        }
+    }
+}
+
+
+TEST_CASE(Envelope) {
+    auto pixelization = Q3cPixelization(1);
+    for (uint64_t i = 0; i < 4*6; ++i) {
+        UnitVector3d v = pixelization.quad(i).getCentroid();
+        auto c = Circle(v, Angle::fromDegrees(0.1));
+        RangeSet rs = pixelization.envelope(c);
+        CHECK(rs == RangeSet(i));
+    }
+}
+
+
+TEST_CASE(Interior) {
+    auto pixelization = Q3cPixelization(2);
+    for (uint64_t i = 0; i < 4*4*6; ++i) {
+        auto p = pixelization.quad(i);
+        auto c = p.getBoundingCircle();
+        RangeSet rs = pixelization.interior(c);
+        CHECK(rs == RangeSet(i));
+        rs = pixelization.interior(p);
+        CHECK(rs == RangeSet(i));
+    }
+}
+
+
+TEST_CASE(Neighborhood) {
+    for (int level = 0; level < 3; ++level) {
+        Q3cPixelization p(level);
+        for (uint64_t i = 0; i < (6 << 2*level); ++i) {
+            ConvexPolygon q = p.quad(i);
+            RangeSet rs1 = p.envelope(q);
+            RangeSet rs2 = RangeSet(p.neighborhood(i));
+            CHECK(rs1 == rs2);
+        }
     }
 }

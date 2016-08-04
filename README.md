@@ -67,8 +67,11 @@ intersect a region.
 Currently, the [Chunker](\ref lsst::sphgeom::Chunker) class implements
 the partitioning scheme employed by [Qserv](https://github.com/lsst/qserv).
 The [HtmPixelization](\ref lsst::sphgeom::HtmPixelization) class implements
-the HTM (Hierarchical Triangular Mesh) pixelization. Q3C (Quad Tree
-Cube) pixelizations are planned.
+the HTM (Hierarchical Triangular Mesh) pixelization. The
+[Q3cPixelization](\ref lsst::sphgeom::Q3cPixelization) and
+[Mq3cPixelization](\ref lsst::sphgeom::Mq3cPixelization) classes implement
+the original Quad Tree Cube indexing scheme and a modified version with
+reduced pixel area variation.
 
 See Also
 --------

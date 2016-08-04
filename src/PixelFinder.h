@@ -88,7 +88,7 @@ public:
             // has been found.
             return;
         }
-        // Determine the relationship between the trixel and the search region.
+        // Determine the relationship between the pixel and the search region.
         Relationship r = detail::relate(pixel, pixel + NumVertices, *_region);
         if ((r & DISJOINT) != 0) {
             // The pixel is disjoint from the search region.
@@ -140,6 +140,7 @@ private:
     }
 };
 
-}}} // namespace lsst::sphgeom::detail
+} // unnamed namespace
+}} // namespace lsst::sphgeom
 
 #endif // LSST_SPHGEOM_PIXELFINDER_H_

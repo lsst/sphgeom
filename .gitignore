@@ -36,6 +36,6 @@ tests/testVector3d
 tests/.cache/*
 tests/curveTest
 tests/HtmPixelizationTest
-tests/q3cTest
+tests/Q3cPixelizationTest
 tests/RangeSetTest
 ups/*.cfgc
