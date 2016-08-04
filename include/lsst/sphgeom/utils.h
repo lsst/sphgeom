@@ -24,7 +24,7 @@
 #define LSST_SPHGEOM_UTILS_H_
 
 /// \file
-/// \brief This file declares miscellaneous utility methods.
+/// \brief This file declares miscellaneous utility functions.
 
 #include "Angle.h"
 
