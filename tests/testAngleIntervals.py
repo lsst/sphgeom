@@ -1,14 +1,37 @@
+#!/usr/bin/env python
+#
+# LSST Data Management System
+#
+# Copyright 2008-2016  AURA/LSST.
+#
+# This product includes software developed by the
+# LSST Project (http://www.lsst.org/).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
+# see <https://www.lsstcorp.org/LegalNotices/>.
+#
 from __future__ import absolute_import, division
 
-import sys
 import unittest
 
 from lsst.sphgeom import (Angle, AngleInterval,
                           NormalizedAngle, NormalizedAngleInterval,
-                          CONTAINS, DISJOINT, WITHIN)
+                          CONTAINS, DISJOINT)
 
 
-class IntervalTestCase(unittest.TestCase):
+class IntervalTests(object):
+
     def testConstruction(self):
         i = self.Interval(self.Scalar(1))
         self.assertEqual(i.getA(), i.getB())
@@ -69,7 +92,8 @@ class IntervalTestCase(unittest.TestCase):
         self.assertEqual(a, self.Scalar(2))
 
 
-class AngleIntervalTestCase(IntervalTestCase):
+class AngleIntervalTestCase(unittest.TestCase, IntervalTests):
+
     def setUp(self):
         self.Interval = AngleInterval
         self.Scalar = Angle
@@ -81,7 +105,8 @@ class AngleIntervalTestCase(IntervalTestCase):
                          "AngleInterval.fromRadians(1.0, 1.0)")
 
 
-class NormalizedAngleIntervalTestCase(IntervalTestCase):
+class NormalizedAngleIntervalTestCase(unittest.TestCase, IntervalTests):
+
     def setUp(self):
         self.Interval = NormalizedAngleInterval
         self.Scalar = NormalizedAngle
@@ -93,15 +118,5 @@ class NormalizedAngleIntervalTestCase(IntervalTestCase):
                          "NormalizedAngleInterval.fromRadians(1.0, 1.0)")
 
 
-def suite():
-    return unittest.TestSuite(map(unittest.makeSuite, [
-        AngleIntervalTestCase, NormalizedAngleIntervalTestCase]))
-
-def run(shouldExit=False):
-    status = 0 if unittest.TextTestRunner().run(suite()).wasSuccessful() else 1
-    if shouldExit:
-        sys.exit(status)
-    return status
-
 if __name__ == "__main__":
-    run(True)
+    unittest.main()
