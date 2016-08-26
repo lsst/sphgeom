@@ -298,3 +298,19 @@ TEST_CASE(Hull) {
     CHECK(poly.getVertices()[2] != poly.getVertices()[3]);
     CHECK(poly.getVertices()[3] != poly.getVertices()[0]);
 }
+
+TEST_CASE(Disjoint) {
+    std::vector<UnitVector3d> points1 = {
+        UnitVector3d(1.0, 0.0, -1.0),
+        UnitVector3d(1.0, 0.0, 1.0),
+        UnitVector3d(1.0, 1.0, 0.0)
+    };
+    std::vector<UnitVector3d> points2 = {
+        UnitVector3d(-1.0, 1.0, 0.0),
+        UnitVector3d(-1.0, -1.0, 0.0),
+        UnitVector3d(-1.0, 0.0, 1.0)
+    };
+    ConvexPolygon poly1(points1);
+    ConvexPolygon poly2(points2);
+    CHECK(poly1.relate(poly2) == DISJOINT);
+}

@@ -1,6 +1,6 @@
 /*
  * LSST Data Management System
- * Copyright 2014-2015 AURA/LSST.
+ * Copyright 2014-2016 AURA/LSST.
  *
  * This product includes software developed by the
  * LSST Project (http://www.lsst.org/).
@@ -28,9 +28,9 @@
 ///
 /// These functions are parametrized by vertex iterator type, making
 /// it possible to call them given only a fixed size vertex array. The
-/// functions which compute indexes of HTM trixels and Q3C quads intersecting
+/// functions which compute indexes of HTM triangles and Q3C quads intersecting
 /// a spherical region use them to avoid the cost of creating ConvexPolygon
-/// objects for each trixel/quad.
+/// objects for each triangle/quad.
 
 #include "lsst/sphgeom/Box.h"
 #include "lsst/sphgeom/Box3d.h"
@@ -376,11 +376,11 @@ Relationship relate(VertexIterator1 const begin1,
         for (VertexIterator2 c = std::prev(end2), d = begin2;
              d != end2; c = d, ++d) {
             int acd = orientation(*a, *c, *d);
-            int bcd = orientation(*b, *c, *d);
-            if (acd == -bcd && acd != 0) {
-                int cab = orientation(*c, *a, *b);
+            int bdc = orientation(*b, *d, *c);
+            if (acd == bdc && acd != 0) {
+                int cba = orientation(*c, *b, *a);
                 int dab = orientation(*d, *a, *b);
-                if (cab == -dab && cab != 0) {
+                if (cba == dab && cba == acd) {
                     // Found a non-degenerate edge crossing
                     return INTERSECTS;
                 }
