@@ -30,6 +30,7 @@ tests/testHtmPixelization
 tests/testInterval1d
 tests/testLonLat
 tests/testMatrix3d
+tests/testMq3cPixelization
 tests/testNormalizedAngleInterval
 tests/testNormalizedAngle
 tests/testOrientation

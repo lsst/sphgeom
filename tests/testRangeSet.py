@@ -1,12 +1,35 @@
+#!/usr/bin/env python
+#
+# LSST Data Management System
+#
+# Copyright 2008-2016  AURA/LSST.
+#
+# This product includes software developed by the
+# LSST Project (http://www.lsst.org/).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
+# see <https://www.lsstcorp.org/LegalNotices/>.
+#
 from __future__ import absolute_import, division
 
-import sys
 import unittest
 
 from lsst.sphgeom import RangeSet
 
 
 class RangeSetTestCase(unittest.TestCase):
+
     def testConstruction(self):
         s1 = RangeSet(1)
         s2 = RangeSet()
@@ -54,8 +77,8 @@ class RangeSetTestCase(unittest.TestCase):
 
     def testRanges(self):
         s = RangeSet()
-        s.insert(0,1)
-        s.insert(2,3)
+        s.insert(0, 1)
+        s.insert(2, 3)
         self.assertEqual(s.ranges(), [(0, 1), (2, 3)])
         s = RangeSet(4, 2)
         self.assertEqual(s.ranges(), [(0, 2), (4, 2**64)])
@@ -64,14 +87,5 @@ class RangeSetTestCase(unittest.TestCase):
         self.assertEqual(str(RangeSet(1)), '{"RangeSet": [[1, 2]]}')
 
 
-def suite():
-    return unittest.makeSuite(RangeSetTestCase)
-
-def run(shouldExit=False):
-    status = 0 if unittest.TextTestRunner().run(suite()).wasSuccessful() else 1
-    if shouldExit:
-        sys.exit(status)
-    return status
-
 if __name__ == "__main__":
-    run(True)
+    unittest.main()

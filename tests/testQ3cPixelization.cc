@@ -46,11 +46,13 @@ void compareIndexes(Q3cPixelization const & p, uint64_t i0, uint64_t i1) {
     CHECK(n != neighborhood.end());
 }
 
+
 TEST_CASE(InvalidLevel) {
     CHECK_THROW(Q3cPixelization(-1), std::invalid_argument);
     CHECK_THROW((Q3cPixelization(Q3cPixelization::MAX_LEVEL + 1)),
                 std::invalid_argument);
 }
+
 
 TEST_CASE(IndexPoint) {
     // A collection of test points distributed over all 6 Q3C cube faces.
@@ -122,10 +124,11 @@ TEST_CASE(IndexPoint) {
         UINT64_C(6433090441885948578)
     };
     for (int level = 30; level >= 0; --level) {
-        Q3cPixelization p(level);
+        Q3cPixelization pixelization(level);
         // Check for close agreement with the PostgreSQL Q3C implementation.
         for (size_t i = 0; i < sizeof(points) / sizeof(LonLat); ++i) {
-            compareIndexes(p, p.index(UnitVector3d(points[i])),
+            compareIndexes(pixelization,
+                           pixelization.index(UnitVector3d(points[i])),
                            indexes[i] >> (60 - 2*level));
         }
     }
@@ -134,36 +137,45 @@ TEST_CASE(IndexPoint) {
 
 TEST_CASE(Envelope) {
     auto pixelization = Q3cPixelization(1);
+    auto universe = pixelization.universe();
     for (uint64_t i = 0; i < 4*6; ++i) {
         UnitVector3d v = pixelization.quad(i).getCentroid();
         auto c = Circle(v, Angle::fromDegrees(0.1));
         RangeSet rs = pixelization.envelope(c);
         CHECK(rs == RangeSet(i));
+        CHECK(rs.isWithin(universe));
     }
 }
 
 
 TEST_CASE(Interior) {
     auto pixelization = Q3cPixelization(2);
+    auto universe = pixelization.universe();
     for (uint64_t i = 0; i < 4*4*6; ++i) {
         auto p = pixelization.quad(i);
         auto c = p.getBoundingCircle();
         RangeSet rs = pixelization.interior(c);
         CHECK(rs == RangeSet(i));
+        CHECK(rs.isWithin(universe));
         rs = pixelization.interior(p);
         CHECK(rs == RangeSet(i));
+        CHECK(rs.isWithin(universe));
     }
 }
 
 
 TEST_CASE(Neighborhood) {
     for (int level = 0; level < 3; ++level) {
-        Q3cPixelization p(level);
+        auto pixelization = Q3cPixelization(level);
+        auto universe = pixelization.universe();
         for (uint64_t i = 0; i < (6 << 2*level); ++i) {
-            ConvexPolygon q = p.quad(i);
-            RangeSet rs1 = p.envelope(q);
-            RangeSet rs2 = RangeSet(p.neighborhood(i));
+            ConvexPolygon q = pixelization.quad(i);
+            RangeSet rs1 = pixelization.envelope(q);
+            RangeSet rs2 = RangeSet(pixelization.neighborhood(i));
             CHECK(rs1 == rs2);
+            CHECK(rs1.isWithin(universe));
+            uint64_t n = rs1.cardinality();
+            CHECK(n == 5 || n == 8 || n == 9);
         }
     }
 }
