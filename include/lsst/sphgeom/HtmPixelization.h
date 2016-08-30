@@ -98,7 +98,6 @@ public:
 private:
     int _level;
 
-    template <bool> RangeSet _find(Region const &, size_t) const;
     RangeSet _envelope(Region const &, size_t) const override;
     RangeSet _interior(Region const &, size_t) const override;
 };

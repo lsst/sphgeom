@@ -140,6 +140,36 @@ private:
     }
 };
 
+
+// `findPixels` implements pixel-finding for an arbitrary Region, given a
+// PixelFinder subclass for a specific pixelization.
+template <
+    template <typename, bool> class Finder,
+    bool InteriorOnly
+>
+RangeSet findPixels(Region const & r, size_t maxRanges, int level) {
+    RangeSet s;
+    Circle const * c = nullptr;
+    Ellipse const * e = nullptr;
+    Box const * b = nullptr;
+    if ((c = dynamic_cast<Circle const *>(&r))) {
+        Finder<Circle, InteriorOnly> find(s, *c, level, maxRanges);
+        find();
+    } else if ((e = dynamic_cast<Ellipse const *>(&r))) {
+        Finder<Circle, InteriorOnly> find(
+            s, e->getBoundingCircle(), level, maxRanges);
+        find();
+    } else if ((b = dynamic_cast<Box const *>(&r))) {
+        Finder<Box, InteriorOnly> find(s, *b, level, maxRanges);
+        find();
+    } else {
+        Finder<ConvexPolygon, InteriorOnly> find(
+            s, dynamic_cast<ConvexPolygon const &>(r), level, maxRanges);
+        find();
+    }
+    return s;
+}
+
 } // unnamed namespace
 }} // namespace lsst::sphgeom
 

@@ -242,36 +242,12 @@ uint64_t HtmPixelization::index(UnitVector3d const & v) const {
     return i;
 }
 
-template <bool InteriorOnly>
-RangeSet HtmPixelization::_find(Region const & r, size_t maxRanges) const {
-    RangeSet s;
-    Circle const * c = nullptr;
-    Ellipse const * e = nullptr;
-    Box const * b = nullptr;
-    if ((c = dynamic_cast<Circle const *>(&r))) {
-        HtmPixelFinder<Circle, InteriorOnly> find(s, *c, _level, maxRanges);
-        find();
-    } else if ((e = dynamic_cast<Ellipse const *>(&r))) {
-        HtmPixelFinder<Circle, InteriorOnly> find(
-            s, e->getBoundingCircle(), _level, maxRanges);
-        find();
-    } else if ((b = dynamic_cast<Box const *>(&r))) {
-        HtmPixelFinder<Box, InteriorOnly> find(s, *b, _level, maxRanges);
-        find();
-    } else {
-        HtmPixelFinder<ConvexPolygon, InteriorOnly> find(
-            s, dynamic_cast<ConvexPolygon const &>(r), _level, maxRanges);
-        find();
-    }
-    return s;
-}
-
 RangeSet HtmPixelization::_envelope(Region const & r, size_t maxRanges) const {
-    return _find<false>(r, maxRanges);
+    return findPixels<HtmPixelFinder, false>(r, maxRanges, _level);
 }
 
 RangeSet HtmPixelization::_interior(Region const & r, size_t maxRanges) const {
-    return _find<true>(r, maxRanges);
+    return findPixels<HtmPixelFinder, true>(r, maxRanges, _level);
 }
 
 }} // namespace lsst::sphgeom
