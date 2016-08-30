@@ -28,6 +28,7 @@
 ///        indexing scheme.
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
 #include "ConvexPolygon.h"
@@ -72,6 +73,20 @@ public:
     /// If `i` is not a valid modified Q3C index, a std::invalid_argument
     /// is thrown.
     static std::vector<uint64_t> neighborhood(uint64_t i);
+
+    /// `toString` converts the given modified-Q3C index to a human readable
+    /// string.
+    ///
+    /// The first two characters in the return value are always '+X', '+Y',
+    /// '+Z', '-X', '-Y', or '-Z'. They give the normal vector of the cube
+    /// face F containing `i`. Each subsequent character is a digit in [0-3]
+    /// corresponding to a child pixel index, so that reading the string
+    /// from left to right corresponds to descent of the quad-tree overlaid
+    /// on F.
+    ///
+    /// If i is not a valid modified-Q3C index, a std::invalid_argument is
+    /// thrown.
+    static std::string toString(uint64_t i);
 
     /// This constructor creates a modified Q3C pixelization of the sphere
     /// with the given subdivision level. If `level` ∉ [0, MAX_LEVEL],

@@ -29,6 +29,7 @@
 
 #include <cstdint>
 #include <stdexcept>
+#include <string>
 
 #include "ConvexPolygon.h"
 #include "Pixelization.h"
@@ -61,6 +62,19 @@ public:
     ///
     /// If i is not a valid HTM index, a std::invalid_argument is thrown.
     static ConvexPolygon triangle(uint64_t i);
+
+    /// `toString` converts the given HTM index to a human readable string.
+    ///
+    /// The first character in the return value is always 'N' or 'S',
+    /// indicating whether the root triangle containing `i` is in the northern
+    /// or southern hemisphere. The second character is the index of the root
+    /// triangle within that hemisphere (a digit in [0-3]). Each subsequent
+    /// character is a digit in [0-3] corresponding to a child trixel index,
+    /// so that reading the string from left to right corresponds to descent
+    /// of the HTM triangle-tree.
+    ///
+    /// If i is not a valid HTM index, a std::invalid_argument is thrown.
+    static std::string toString(uint64_t i);
 
     /// This constructor creates an HTM pixelization of the sphere with
     /// the given subdivision level. If `level` ∉ [0, MAX_LEVEL],

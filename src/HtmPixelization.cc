@@ -159,6 +159,22 @@ ConvexPolygon HtmPixelization::triangle(uint64_t i) {
     return ConvexPolygon(v0, v1, v2);
 }
 
+std::string HtmPixelization::toString(uint64_t i) {
+    char s[MAX_LEVEL + 2];
+    int l = level(i);
+    if (l < 0 || l > MAX_LEVEL) {
+        throw std::invalid_argument("Invalid HTM index");
+    }
+    // Print in base-4, from least to most significant digit.
+    char * p = s + (sizeof(s) - 1);
+    for (; l >= 0; --l, --p, i >>= 2) {
+        *p = '0' + (i & 3);
+    }
+    // The remaining bit corresponds to the hemisphere.
+    *p = (i & 1) == 0 ? 'S' : 'N';
+    return std::string(p, sizeof(s) - static_cast<size_t>(p - s));
+}
+
 HtmPixelization::HtmPixelization(int level) : _level(level) {
     if (level < 0 || level > MAX_LEVEL) {
         throw std::invalid_argument("Invalid HTM subdivision level");

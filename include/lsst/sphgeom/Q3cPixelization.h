@@ -28,6 +28,7 @@
 ///        scheme.
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
 #include "ConvexPolygon.h"
@@ -73,6 +74,18 @@ public:
     ///
     /// If `i` is not a valid Q3C index, a std::invalid_argument is thrown.
     std::vector<uint64_t> neighborhood(uint64_t i) const;
+
+    /// `toString` converts the given Q3C index to a human readable string.
+    ///
+    /// The first two characters in the return value are always '+X', '+Y',
+    /// '+Z', '-X', '-Y', or '-Z'. They give the normal vector of the cube
+    /// face F containing `i`. Each subsequent character is a digit in [0-3]
+    /// corresponding to a child pixel index, so that reading the string
+    /// from left to right corresponds to descent of the quad-tree overlaid
+    /// on F.
+    ///
+    /// If i is not a valid Q3C index, a std::invalid_argument is thrown.
+    std::string toString(uint64_t i) const;
 
     RangeSet universe() const override {
         return RangeSet(0, static_cast<uint64_t>(6) << 2 * _level);

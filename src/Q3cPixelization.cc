@@ -277,6 +277,27 @@ std::vector<uint64_t> Q3cPixelization::neighborhood(uint64_t i) const {
     return std::vector<uint64_t>(indexes, indexes + n);
 }
 
+std::string Q3cPixelization::toString(uint64_t i) const {
+    static char const FACE_NORM[6][2] = {
+        {'+', 'Z'}, {'+', 'X'}, {'+', 'Y'},
+        {'-', 'X'}, {'-', 'Y'}, {'-', 'Z'},
+    };
+    char s[MAX_LEVEL + 2];
+    if (i >= static_cast<uint64_t>(6) << (2 * _level)) {
+        throw std::invalid_argument("Invalid Q3C index");
+    }
+    // Print in base-4, from least to most significant digit.
+    char * p = s + (sizeof(s) - 1);
+    for (int l = _level; l > 0; --l, --p, i >>= 2) {
+        *p = '0' + (i & 3);
+    }
+    // The remaining bits correspond to the cube face.
+    --p;
+    p[0] = FACE_NORM[i][0];
+    p[1] = FACE_NORM[i][1];
+    return std::string(p, sizeof(s) - static_cast<size_t>(p - s));
+}
+
 std::unique_ptr<Region> Q3cPixelization::pixel(uint64_t i) const {
     if (i >= static_cast<uint64_t>(6) << (2 * _level)) {
         throw std::invalid_argument("Invalid Q3C index");

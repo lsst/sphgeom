@@ -60,6 +60,14 @@ class HtmPixelizationTestCase(unittest.TestCase):
         rs = pixelization.interior(c)
         self.assertTrue(rs.empty())
 
+    def test_index_to_string(self):
+        strings = ['S0', 'S1', 'S2', 'S3', 'N0', 'N1', 'N2', 'N3']
+        for i in range(8, 16):
+            s = strings[i - 8]
+            self.assertEqual(HtmPixelization.toString(i), s)
+            for j in range(4):
+                self.assertEqual(HtmPixelization.toString(i*4 + j), s + str(j))
+
 
 if __name__ == '__main__':
     unittest.main()
