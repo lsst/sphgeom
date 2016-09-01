@@ -79,10 +79,10 @@ void checkProperties(Circle const & c) {
 }
 
 TEST_CASE(Stream) {
-    Circle c(UnitVector3d::X(), 1);
+    Circle c(UnitVector3d::X(), 0.0001220703125);
     std::stringstream ss;
     ss << c;
-    CHECK(ss.str() == "{\"Circle\": [[1, 0, 0], 1]}");
+    CHECK(ss.str() == "{\"Circle\": [[1, 0, 0], 0.0001220703125]}");
 }
 
 TEST_CASE(Construction) {

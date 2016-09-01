@@ -39,6 +39,11 @@
 %enddef
 
 %define %safeChainingFor(TYPE)
+    %typemap(out) lsst::sphgeom::TYPE & {
+        Py_INCREF(Py_None);
+        $result = Py_None;
+    }
+
     %extend lsst::sphgeom::TYPE {
         %returnSelf(clipTo);
         %returnSelf(expandTo);

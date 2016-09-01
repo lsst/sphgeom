@@ -31,7 +31,7 @@
 #include <vector>
 
 #include "Region.h"
-#include "Vector3d.h"
+#include "UnitVector3d.h"
 
 
 namespace lsst {
@@ -68,7 +68,31 @@ public:
 
     /// This constructor creates a convex polygon that is the convex hull of
     /// the given set of points.
-    ConvexPolygon(std::vector<UnitVector3d> const & points);
+    explicit ConvexPolygon(std::vector<UnitVector3d> const & points);
+
+#ifndef SWIG
+    /// This constructor creates a triangle with the given vertices.
+    ///
+    /// It is assumed that orientation(v0, v1, v2) = 1. Use with caution -
+    /// for performance reasons, this is not verified!
+    ConvexPolygon(UnitVector3d const & v0,
+                  UnitVector3d const & v1,
+                  UnitVector3d const & v2) :
+        _vertices{v0, v1, v2}
+    {}
+
+    /// This constructor creates a quadrilateral with the given vertices.
+    ///
+    /// It is assumed that orientation(v0, v1, v2), orientation(v1, v2, v3),
+    /// orientation(v2, v3, v0), and orientation (v3, v0, v1) are all 1.
+    /// Use with caution - for performance reasons, this is not verified!
+    ConvexPolygon(UnitVector3d const & v0,
+                  UnitVector3d const & v1,
+                  UnitVector3d const & v2,
+                  UnitVector3d const & v3) :
+        _vertices{v0, v1, v2, v3}
+    {}
+#endif
 
     /// Two convex polygons are equal iff they contain the same points.
     bool operator==(ConvexPolygon const & p) const;
@@ -107,7 +131,7 @@ public:
     virtual std::vector<uint8_t> encode() const;
 
     ///@{
-    /// `decode` deserializes an ConvexPolygon from a byte string produced by encode.
+    /// `decode` deserializes a ConvexPolygon from a byte string produced by encode.
     static std::unique_ptr<ConvexPolygon> decode(std::vector<uint8_t> const & s) {
         return decode(s.data(), s.size());
     }

@@ -352,8 +352,9 @@ std::unique_ptr<Circle> Circle::decode(uint8_t const * buffer, size_t n) {
 }
 
 std::ostream & operator<<(std::ostream & os, Circle const & c) {
-    return os << "{\"Circle\": [" << c.getCenter() << ", "
-              << c.getSquaredChordLength() << "]}";
+    char tail[32];
+    std::snprintf(tail, sizeof(tail), ", %.17g]}", c.getSquaredChordLength());
+    return os << "{\"Circle\": [" << c.getCenter() << tail;
 }
 
 }} // namespace lsst::sphgeom

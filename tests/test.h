@@ -225,9 +225,9 @@ struct DefaultTestFixture {};
 // Chris Lomont's optimized floating point closeness test. See
 // http://www.lomont.org/Math/Papers/2005/CompareFloat.pdf
 // for the details.
-__attribute__((unused)) static bool lomontCompare3(double a,
-                                                   double b,
-                                                   int64_t maxDiff)
+[[gnu::unused]] static bool lomontCompare3(double a,
+                                           double b,
+                                           int64_t maxDiff)
 {
     union { double d; int64_t i; } bits;
     bits.d = a;

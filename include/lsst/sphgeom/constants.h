@@ -33,24 +33,25 @@ namespace sphgeom {
 // Note: given a compiler that does correctly rounded decimal to
 // binary floating point conversions, PI = 0x1.921fb54442d18p1 in
 // IEEE double precision format. This is less than π.
-static double const PI = 3.1415926535897932384626433832795;
-static double const RAD_PER_DEG = 0.0174532925199432957692369076849;
-static double const DEG_PER_RAD = 57.2957795130823208767981548141;
+constexpr double PI = 3.1415926535897932384626433832795;
+constexpr double ONE_OVER_PI = 0.318309886183790671537767526745;
+constexpr double RAD_PER_DEG = 0.0174532925199432957692369076849;
+constexpr double DEG_PER_RAD = 57.2957795130823208767981548141;
 
 // The maximum error of std::asin in IEEE double precision arithmetic,
 // assuming 1 ulp of error in its argument, is about
 // π/2 - arcsin (1 - 2⁻⁵³), or a little less than 1.5e-8 radians
 // (3.1 milliarcsec).
-static double const MAX_ASIN_ERROR = 1.5e-8;
+constexpr double MAX_ASIN_ERROR = 1.5e-8;
 
 // The computation of squared chord length between two unit vectors
 // involves 8 elementary operations on numbers with magnitude ≤ 4. Its
 // maximum error can be shown to be < 2.5e-15.
-static double const MAX_SQUARED_CHORD_LENGTH_ERROR = 2.5e-15;
+constexpr double MAX_SQUARED_CHORD_LENGTH_ERROR = 2.5e-15;
 
-// The smallest value ε such that 1 + ε rounds to 1 in IEEE double
+// The largest value ε such that 1 + ε rounds to 1 in IEEE double
 // precision, assuming round-to-nearest-ties-to-even rounding.
-static double const EPSILON = 1.1102230246251565e-16;
+constexpr double EPSILON = 1.1102230246251565e-16;
 
 }} // namespace lsst::sphgeom
 

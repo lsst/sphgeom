@@ -1,0 +1,2 @@
+FILE_PATTERNS += *.md
+INPUT += README.md

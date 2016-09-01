@@ -25,6 +25,9 @@
 
 #include "lsst/sphgeom/Vector3d.h"
 
+#if !defined(NO_SIMD) && defined(__x86_64__)
+    #include <x86intrin.h>
+#endif
 #include <cstdio>
 #include <ostream>
 
@@ -36,31 +39,87 @@ namespace lsst {
 namespace sphgeom {
 
 double Vector3d::normalize() {
-    double scale = 1.0;
-    double invScale = 1.0;
-    double n2 = getSquaredNorm();
-    if (n2 < 4.008336720017946e-292) {
-        // If n2 is below 2^(-1022 + 54), i.e. close to the smallest normal
-        // double precision value, scale each component by 2^563 and
-        // recompute the squared norm.
-        scale = 3.019169939857233e+169;
-        invScale = 3.312168642111238e-170;
-        n2 = ((*this) * scale).getSquaredNorm();
-        if (n2 == 0.0) {
-            throw std::runtime_error("Cannot normalize zero vector");
-        }
-    } else if (n2 == std::numeric_limits<double>::infinity()) {
-        // In case of overflow, scale each component by 2^-513 and
-        // recompute the squared norm.
-        scale = 3.7291703656001034e-155;
-        invScale = 2.6815615859885194e+154;
-        n2 = ((*this) * scale).getSquaredNorm();
+    static constexpr uint8_t UNUSED = 255;
+    // Given a 3 component vector (x, y, z), this LUT provides the indexes
+    // of the components in order of smallest absolute value to largest.
+    // The index into the LUT must be computed as:
+    //
+    //      ((|x| > |z|) << 2) +
+    //      ((|x| > |y|) << 1) +
+    //       (|y| > |z|)
+    static uint8_t const COMPONENT[8][4] = {
+        {0, 1, 2, UNUSED},
+        {0, 2, 1, UNUSED},
+        {1, 0, 2, UNUSED},
+        {UNUSED, UNUSED, UNUSED, UNUSED},
+        {UNUSED, UNUSED, UNUSED, UNUSED},
+        {2, 0, 1, UNUSED},
+        {1, 2, 0, UNUSED},
+        {2, 1, 0, UNUSED}
+    };
+#if defined(NO_SIMD) || !defined(__x86_64__)
+    double ax = std::fabs(_v[0]);
+    double ay = std::fabs(_v[1]);
+    double az = std::fabs(_v[2]);
+    int index = ((ax > az) << 2) +
+                ((ax > ay) << 1) +
+                 (ay > az);
+    double w = _v[COMPONENT[index][2]];
+    if (w == 0.0) {
+        throw std::runtime_error("Cannot normalize zero vector");
     }
-    double norm = std::sqrt(n2);
-    _v[0] = (_v[0] * scale) / norm;
-    _v[1] = (_v[1] * scale) / norm;
-    _v[2] = (_v[2] * scale) / norm;
-    return norm * invScale;
+    // Divide components by the absolute value of the largest
+    // component to avoid overflow/underflow.
+    double maxabs = std::fabs(w);
+    double u = _v[COMPONENT[index][0]] / maxabs;
+    double v = _v[COMPONENT[index][1]] / maxabs;
+    w = std::copysign(1.0, w);
+    double d = u * u + v * v;
+    double norm = std::sqrt(1.0 + d);
+    _v[COMPONENT[index][0]] = u / norm;
+    _v[COMPONENT[index][1]] = v / norm;
+    _v[COMPONENT[index][2]] = w / norm;
+    return norm * maxabs;
+#else
+    static __m128d const m0m0 = _mm_set_pd(-0.0, -0.0);
+    __m128d ayaz = _mm_andnot_pd(m0m0, _mm_loadu_pd(_v + 1));
+    __m128d axax = _mm_andnot_pd(m0m0, _mm_set1_pd(_v[0]));
+    __m128d az = _mm_unpackhi_pd(ayaz, _mm_setzero_pd());
+    int index = (_mm_movemask_pd(_mm_cmpgt_pd(axax, ayaz)) << 1) |
+                 _mm_movemask_pd(_mm_cmplt_sd(az, ayaz));
+    // The lower double in uv contains the vector component
+    // with the lowest absolute value. The higher double contains
+    // the component with absolute value betweem the lowest and
+    // highest absolute values.
+    __m128d uv = _mm_set_pd(_v[COMPONENT[index][1]],
+                            _v[COMPONENT[index][0]]);
+    // ww contains two copies of the vector component with the
+    // highest absolute value.
+    __m128d ww = _mm_set1_pd(_v[COMPONENT[index][2]]);
+    __m128d maxabs = _mm_andnot_pd(m0m0, ww);
+    if (_mm_ucomieq_sd(ww, _mm_setzero_pd())) {
+        throw std::runtime_error("Cannot normalize zero vector");
+    }
+    // Divide components by the absolute value of the largest
+    // component to avoid overflow/underflow.
+    uv = _mm_div_pd(uv, maxabs);
+    ww = _mm_or_pd(_mm_and_pd(m0m0, ww), _mm_set1_pd(1.0));
+    __m128d norm = _mm_mul_pd(uv, uv);
+    norm = _mm_sqrt_sd(
+        _mm_setzero_pd(),
+        _mm_add_sd(
+            _mm_set_sd(1.0),
+            _mm_add_sd(norm, _mm_unpackhi_pd(norm, _mm_setzero_pd()))
+        )
+    );
+    // Normalize components and store the results.
+    ww = _mm_div_sd(ww, norm);
+    uv = _mm_div_pd(uv, _mm_shuffle_pd(norm, norm, 0));
+    _mm_store_sd(&_v[COMPONENT[index][0]], uv);
+    _mm_storeh_pd(&_v[COMPONENT[index][1]], uv);
+    _mm_store_sd(&_v[COMPONENT[index][2]], ww);
+    return _mm_cvtsd_f64(_mm_mul_sd(norm, maxabs));
+#endif
 }
 
 Vector3d Vector3d::rotatedAround(UnitVector3d const & k, Angle a) const {

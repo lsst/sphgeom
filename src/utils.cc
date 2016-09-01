@@ -21,7 +21,7 @@
  */
 
 /// \file
-/// \brief This file contains utility method implementations.
+/// \brief This file contains utility function implementations.
 
 #include "lsst/sphgeom/utils.h"
 

@@ -28,13 +28,10 @@
 #include <ostream>
 #include <stdexcept>
 
-#include "lsst/sphgeom/Box.h"
-#include "lsst/sphgeom/Box3d.h"
-#include "lsst/sphgeom/Circle.h"
-#include "lsst/sphgeom/Ellipse.h"
 #include "lsst/sphgeom/codec.h"
 #include "lsst/sphgeom/orientation.h"
-#include "lsst/sphgeom/utils.h"
+
+#include "ConvexPolygonImpl.h"
 
 
 namespace lsst {
@@ -49,18 +46,6 @@ char const * const FOUND_ANTIPODAL_POINT =
 char const * const NOT_ENOUGH_POINTS =
     "The convex hull of a point set containing less than "
     "3 distinct, non-coplanar points is not a convex polygon";
-
-struct Vector3dLessThan {
-    bool operator()(Vector3d const & v0, Vector3d const & v1) const {
-        if (v0.x() == v1.x()) {
-            if (v0.y() == v1.y()) {
-                return v0.z() < v1.z();
-            }
-            return v0.y() < v1.y();
-        }
-        return v0.x() < v1.x();
-    }
-};
 
 // `findPlane` rearranges the entries of `points` such that the first two
 // entries are distinct. If it is unable to do so, or if it encounters any
@@ -250,18 +235,6 @@ void computeHull(std::vector<UnitVector3d> & points) {
         }
     }
     points.erase(hullEnd, end);
-    // Since the points in the hull are distinct, there is a unique minimum
-    // point - rotate the points vector to make it the first one. This allows
-    // operator== for ConvexPolygon to be implemented simply by comparing
-    // vertices.
-    VertexIterator minVertex = points.begin();
-    Vector3dLessThan lessThan;
-    for (VertexIterator v = minVertex + 1, e = points.end(); v != e; ++v) {
-        if (lessThan(*v, *minVertex)) {
-            minVertex = v;
-        }
-    }
-    std::rotate(points.begin(), minVertex, points.end());
 }
 
 // TODO(smm): for all of this to be fully rigorous, we must prove that no two
@@ -293,9 +266,26 @@ bool ConvexPolygon::operator==(ConvexPolygon const & p) const {
         return false;
     }
     VertexIterator i = _vertices.begin();
-    VertexIterator j = p._vertices.begin();
-    VertexIterator const end = _vertices.end();
-    for (; i != end; ++i, ++j) {
+    VertexIterator f = p._vertices.begin();
+    VertexIterator const ep = p._vertices.end();
+    // Find vertex f of p equal to the first vertex of this polygon.
+    for (; f != ep; ++f) {
+        if (*i == *f) {
+            break;
+        }
+    }
+    if (f == ep) {
+        // No vertex of p is equal to the first vertex of this polygon.
+        return false;
+    }
+    // Now, compare all vertices.
+    ++i;
+    for (VertexIterator j = f + 1; j != ep; ++i, ++j) {
+        if (*i != *j) {
+            return false;
+        }
+    }
+    for (VertexIterator j = p._vertices.begin(); j != f; ++i, ++j) {
         if (*i != *j) {
             return false;
         }
@@ -304,337 +294,39 @@ bool ConvexPolygon::operator==(ConvexPolygon const & p) const {
 }
 
 UnitVector3d ConvexPolygon::getCentroid() const {
-    // The center of mass is obtained via trivial generalization of
-    // the formula for spherical triangles from:
-    //
-    // The centroid and inertia tensor for a spherical triangle
-    // John E. Brock
-    // 1974, Naval Postgraduate School, Monterey Calif.
-    Vector3d cm;
-    VertexIterator const end = _vertices.end();
-    VertexIterator i = end - 1;
-    VertexIterator j = _vertices.begin();
-    for (; j != end; i = j, ++j) {
-        Vector3d v = (*i).robustCross(*j);
-        double s = 0.5 * v.normalize();
-        double c = (*i).dot(*j);
-        double a = (s == 0.0 && c == 0.0) ? 0.0 : std::atan2(s, c);
-        cm += v * a;
-    }
-    return UnitVector3d(cm);
+    return detail::centroid(_vertices.begin(), _vertices.end());
 }
 
 Circle ConvexPolygon::getBoundingCircle() const {
-    UnitVector3d c = getCentroid();
-    // Compute the maximum squared chord length between the centroid and
-    // all vertices.
-    VertexIterator const end = _vertices.end();
-    VertexIterator i = _vertices.begin();
-    double cl2 = 0.0;
-    for (; i != end; ++i) {
-        cl2 = std::max(cl2, (*i - c).getSquaredNorm());
-    }
-    // Add double the maximum squared-chord-length error, so that the
-    // bounding circle we return also reliably CONTAINS this polygon.
-    return Circle(c, cl2 + 2.0 * MAX_SQUARED_CHORD_LENGTH_ERROR);
+    return detail::boundingCircle(_vertices.begin(), _vertices.end());
 }
 
 Box ConvexPolygon::getBoundingBox() const {
-    Angle const eps(5.0e-10); // ~ 0.1 milli-arcseconds
-    Box bbox;
-    VertexIterator const end = _vertices.end();
-    VertexIterator i = end - 1;
-    VertexIterator j = _vertices.begin();
-    bool haveCW = false;
-    bool haveCCW = false;
-    // Compute the bounding box for each vertex. When converting a Vector3d
-    // to a LonLat, the relative error on the longitude is about 4*2^-53,
-    // and the relative error on the latitude is about twice that (assuming
-    // std::atan2 and std::sqrt accurate to within 1 ulp). We convert each
-    // vertex to a conservative bounding box for its spherical coordinates,
-    // and compute a bounding box for the union of all these boxes.
-    //
-    // Furthermore, the latitude range of an edge can be greater than the
-    // latitude range of its endpoints - this occurs when the minimum or
-    // maximum latitude point on the great circle defined by the edge vertices
-    // lies in the edge interior.
-    for (; j != end; i = j, ++j) {
-        LonLat p(*j);
-        bbox.expandTo(Box(p, eps, eps));
-        if (!haveCW || !haveCCW) {
-            int o = orientationZ(*i, *j);
-            haveCCW = haveCCW || (o > 0);
-            haveCW = haveCW || (o < 0);
-        }
-        // Compute the plane normal for edge i, j.
-        Vector3d n = (*i).robustCross(*j);
-        // Compute a vector v with positive z component that lies on both the
-        // edge plane and on the plane defined by the z axis and the edge plane
-        // normal. This is the direction of maximum latitude for the great
-        // circle containing the edge, and -v is the direction of minimum
-        // latitude.
-        //
-        // TODO(smm): Do a proper error analysis.
-        Vector3d v(-n.x() * n.z(),
-                   -n.y() * n.z(),
-                   n.x() * n.x() + n.y() * n.y());
-        if (v != Vector3d()) {
-            // The plane defined by the z axis and n has normal
-            // (-n.y(), n.x(), 0.0). Compute the dot product of this plane
-            // normal with vertices i and j.
-            double zni = i->y() * n.x() - i->x() * n.y();
-            double znj = j->y() * n.x() - j->x() * n.y();
-            // Check if v or -v is in the edge interior.
-            if (zni > 0.0 && znj < 0.0) {
-                bbox = Box(bbox.getLon(), bbox.getLat().expandedTo(
-                    LonLat::latitudeOf(v) + eps));
-            } else if (zni < 0.0 && znj > 0.0) {
-                bbox = Box(bbox.getLon(), bbox.getLat().expandedTo(
-                    LonLat::latitudeOf(-v) - eps));
-            }
-        }
-    }
-    // If this polygon contains a pole, its bounding box must contain all
-    // longitudes.
-    if (!haveCW) {
-        Box northPole(Box::allLongitudes(), AngleInterval(Angle(0.5 * PI)));
-        bbox.expandTo(northPole);
-    } else if (!haveCCW) {
-        Box southPole(Box::allLongitudes(), AngleInterval(Angle(-0.5 * PI)));
-        bbox.expandTo(southPole);
-    }
-    return bbox;
+    return detail::boundingBox(_vertices.begin(), _vertices.end());
 }
 
 Box3d ConvexPolygon::getBoundingBox3d() const {
-    static double const maxError = 1.0e-14;
-    VertexIterator const end = _vertices.end();
-    // Compute the extrema of all vertex coordinates.
-    VertexIterator j = _vertices.begin();
-    double emin[3] = { j->x(), j->y(), j->z() };
-    double emax[3] = { j->x(), j->y(), j->z() };
-    for (++j; j != end; ++j) {
-        for (int i = 0; i < 3; ++i) {
-            double v = j->operator()(i);
-            emin[i] = std::min(emin[i], v);
-            emax[i] = std::max(emax[i], v);
-        }
-    }
-    // Compute the extrema of all edges.
-    //
-    // It can be shown that the great circle with unit normal vector
-    // n = (n₀, n₁, n₂) has extrema in x at:
-    //
-    //   (∓√(1 - n₀²), ±n₁n₀/√(1 - n₀²), ±n₂n₀/√(1 - n₀²))
-    //
-    // in y at:
-    //
-    //   (±n₀n₁/√(1 - n₁²), ∓√(1 - n₁²), ±n₂n₁/√(1 - n₁²))
-    //
-    // and in z at
-    //
-    //   (±n₀n₂/√(1 - n₂²), ±n₁n₂/√(1 - n₂²), ∓√(1 - n₂²))
-    //
-    // Compute these vectors for each edge, determine whether they lie in
-    // the edge, and update the extrema if so. Rounding errors in these
-    // computations are compensated for by expanding the bounding box
-    // prior to returning it.
-    j = end - 1;
-    VertexIterator k = _vertices.begin();
-    for (; k != end; j = k, ++k) {
-        UnitVector3d n(j->robustCross(*k));
-        for (int i = 0; i < 3; ++i) {
-            double ni = n(i);
-            double d = std::fabs(1.0 - ni * ni);
-            if (d > 0.0) {
-                Vector3d e(i == 0 ? -d : n.x() * ni,
-                           i == 1 ? -d : n.y() * ni,
-                           i == 2 ? -d : n.z() * ni);
-                // If e or -e lies in the lune defined by the half great
-                // circle passing through n and a and the half great circle
-                // passing through n and b, the edge contains an extremum.
-                Vector3d v = e.cross(n);
-                double vdj = v.dot(*j);
-                double vdk = v.dot(*k);
-                if (vdj >= 0.0 && vdk <= 0.0) {
-                    emin[i] = std::min(emin[i], -std::sqrt(d));
-                }
-                if (vdj <= 0.0 && vdk >= 0.0) {
-                    emax[i] = std::max(emax[i], std::sqrt(d));
-                }
-            }
-        }
-    }
-    // Check whether the standard basis vectors and their antipodes
-    // are inside this polygon.
-    bool a[3] = { true, true, true };
-    bool b[3] = { true, true, true };
-    j = end - 1;
-    k = _vertices.begin();
-    for (; k != end; j = k, ++k) {
-        // Test the standard basis vectors against the plane defined by
-        // vertices (j, k). Note that orientation(-x, *j, *k) =
-        // -orientation(x, *j, *k).
-        int ox = orientationX(*j, *k);
-        a[0] = a[0] && (ox <= 0);
-        b[0] = b[0] && (ox >= 0);
-        int oy = orientationY(*j, *k);
-        a[1] = a[1] && (oy <= 0);
-        b[1] = b[1] && (oy >= 0);
-        int oz = orientationZ(*j, *k);
-        a[2] = a[2] && (oz <= 0);
-        b[2] = b[2] && (oz >= 0);
-    }
-    // At this point, b[i] is true iff the standard basis vector eᵢ
-    // is inside all the half spaces defined by the polygon edges.
-    // Similarly, a[i] is true iff -eᵢ is inside the same half spaces.
-    for (int i = 0; i < 3; ++i) {
-        emin[i] = a[i] ? -1.0 : std::max(-1.0, emin[i] - maxError);
-        emax[i] = b[i] ? 1.0 : std::min(1.0, emax[i] + maxError);
-    }
-    return Box3d(Interval1d(emin[0], emax[0]),
-                 Interval1d(emin[1], emax[1]),
-                 Interval1d(emin[2], emax[2]));
+    return detail::boundingBox3d(_vertices.begin(), _vertices.end());
 }
 
 bool ConvexPolygon::contains(UnitVector3d const & v) const {
-    VertexIterator const end = _vertices.end();
-    VertexIterator i = end - 1;
-    VertexIterator j = _vertices.begin();
-    for (; j != end; i = j, ++j) {
-        if (orientation(v, *i, *j) < 0) {
-            return false;
-        }
-    }
-    return true;
+    return detail::contains(_vertices.begin(), _vertices.end(), v);
 }
 
 Relationship ConvexPolygon::relate(Box const & b) const {
-    // TODO(smm): be more accurate when computing box relations.
-    return getBoundingBox().relate(b) & (DISJOINT | WITHIN);
+    return detail::relate(_vertices.begin(), _vertices.end(), b);
 }
 
 Relationship ConvexPolygon::relate(Circle const & c) const {
-    if (c.isEmpty()) {
-        return CONTAINS | DISJOINT;
-    }
-    if (c.isFull()) {
-        return WITHIN;
-    }
-    // Determine whether or not the circle and polygon boundaries intersect.
-    // If the polygon vertices are not all inside or all outside of c, then the
-    // boundaries cross.
-    bool inside = false;
-    VertexIterator const end = _vertices.end();
-    for (VertexIterator v = _vertices.begin(); v != end; ++v) {
-        double d = (*v - c.getCenter()).getSquaredNorm();
-        if (std::fabs(d - c.getSquaredChordLength()) <
-            MAX_SQUARED_CHORD_LENGTH_ERROR) {
-            // A polygon vertex is close to the circle boundary.
-            return INTERSECTS;
-        }
-        bool b = d < c.getSquaredChordLength();
-        if (v == _vertices.begin()) {
-            inside = b;
-        } else if (inside != b) {
-            // There are box vertices both inside and outside of c.
-            return INTERSECTS;
-        }
-    }
-    if (inside) {
-        // All polygon vertices are inside c. Look for points in the polygon
-        // edge interiors that are outside c.
-        for (VertexIterator a = end - 1, b = _vertices.begin();
-             b != end; a = b, ++b) {
-            Vector3d n = a->robustCross(*b);
-            double d = getMaxSquaredChordLength(c.getCenter(), *a, *b, n);
-            if (d > c.getSquaredChordLength() -
-                    MAX_SQUARED_CHORD_LENGTH_ERROR) {
-                return INTERSECTS;
-            }
-        }
-        // The polygon boundary is conclusively inside c. It may still be the
-        // case that the circle punches a hole in the polygon. We check that
-        // the polygon does not contain the complement of c by testing whether
-        // or not it contains the anti-center of c.
-        if (contains(-c.getCenter())) {
-            return INTERSECTS;
-        }
-        return WITHIN;
-    }
-    // All polygon vertices are outside c. Look for points in the polygon edge
-    // interiors that are inside c.
-    for (VertexIterator a = end - 1, b = _vertices.begin();
-         b != end; a = b, ++b) {
-        Vector3d n = a->robustCross(*b);
-        double d = getMinSquaredChordLength(c.getCenter(), *a, *b, n);
-        if (d < c.getSquaredChordLength() + MAX_SQUARED_CHORD_LENGTH_ERROR) {
-            return INTERSECTS;
-        }
-    }
-    // The polygon boundary is conclusively outside of c. If the polygon
-    // contains the circle center, then the polygon contains c. Otherwise, the
-    // polygon and circle are disjoint.
-    if (contains(c.getCenter())) {
-        return CONTAINS;
-    }
-    return DISJOINT;
+    return detail::relate(_vertices.begin(), _vertices.end(), c);
 }
 
 Relationship ConvexPolygon::relate(ConvexPolygon const & p) const {
-    // TODO(smm): Make this more performant. Instead of the current quadratic
-    // implementation, it should be possible to determine whether the boundaries
-    // intersect by adapting the following method to the sphere:
-    //
-    // A new linear algorithm for intersecting convex polygons
-    // Computer Graphics and Image Processing, Volume 19, Issue 1, May 1982, Page 92
-    // Joseph O'Rourke, Chi-Bin Chien, Thomas Olson, David Naddor
-    //
-    // http://www.sciencedirect.com/science/article/pii/0146664X82900235
-    VertexIterator const e = _vertices.end();
-    VertexIterator const ep = p._vertices.end();
-    size_t n = 0; // number of vertices of this polygon in p
-    size_t m = 0; // number of vertices of p in this polygon
-    for (VertexIterator a = _vertices.begin(); a != e; ++a) {
-        n += p.contains(*a);
-    }
-    for (VertexIterator c = p._vertices.begin(); c != ep; ++c) {
-        m += contains(*c);
-    }
-    if (n == _vertices.size()) {
-        if (m == p._vertices.size()) {
-            return CONTAINS | WITHIN;
-        }
-        return WITHIN;
-    } else if (m == p._vertices.size()) {
-        return CONTAINS;
-    }
-    if (n > 0 || m > 0) {
-        // There is at least one point common to this polygon and p.
-        return INTERSECTS;
-    }
-    // Consider all possible edge pairs and look for a crossing.
-    for (VertexIterator a = e - 1, b = _vertices.begin();
-         b != e; a = b, ++b) {
-        for (VertexIterator c = ep - 1, d = p._vertices.begin();
-             d != ep; c = d, ++d) {
-            int acd = orientation(*a, *c, *d);
-            int bcd = orientation(*b, *c, *d);
-            if (acd == -bcd && acd != 0) {
-                int cab = orientation(*c, *a, *b);
-                int dab = orientation(*d, *a, *b);
-                if (cab == -dab && cab != 0) {
-                    // Found a non-degenerate edge crossing
-                    return INTERSECTS;
-                }
-            }
-        }
-    }
-    return DISJOINT;
+    return detail::relate(_vertices.begin(), _vertices.end(), p);
 }
 
 Relationship ConvexPolygon::relate(Ellipse const & e) const {
-    return relate(e.getBoundingCircle()) & (CONTAINS | DISJOINT);
+    return detail::relate(_vertices.begin(), _vertices.end(), e);
 }
 
 std::vector<uint8_t> ConvexPolygon::encode() const {

@@ -21,7 +21,7 @@
  */
 
 /// \file
-/// \brief This file contains the implementation of orientation().
+/// \brief This file contains the orientation function implementations.
 
 #include "lsst/sphgeom/orientation.h"
 

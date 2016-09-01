@@ -81,7 +81,7 @@ TEST_CASE(Stream) {
     ConvexPolygon p = makeSimpleTriangle();
     std::stringstream ss;
     ss << p;
-    CHECK(ss.str() == "{\"ConvexPolygon\": [[0, 0, 1], [1, 0, 0], [0, 1, 0]]}");
+    CHECK(ss.str() == "{\"ConvexPolygon\": [[1, 0, 0], [0, 1, 0], [0, 0, 1]]}");
 }
 
 TEST_CASE(Clone) {
@@ -90,6 +90,24 @@ TEST_CASE(Clone) {
     REQUIRE(dynamic_cast<ConvexPolygon *>(r.get()) != 0);
     CHECK(*dynamic_cast<ConvexPolygon *>(r.get()) == p);
     CHECK(dynamic_cast<ConvexPolygon *>(r.get()) != &p);
+}
+
+TEST_CASE(CylicPermutation) {
+    std::vector<UnitVector3d> points;
+    points.push_back(UnitVector3d::X());
+    points.push_back(UnitVector3d::Y());
+    points.push_back(UnitVector3d::Z());
+    ConvexPolygon p0 = ConvexPolygon(points);
+    std::rotate(points.begin(), points.begin() + 1, points.end());
+    ConvexPolygon p1 = ConvexPolygon(points);
+    std::rotate(points.begin(), points.begin() + 1, points.end());
+    ConvexPolygon p2 = ConvexPolygon(points);
+    std::rotate(points.begin(), points.begin() + 1, points.end());
+    ConvexPolygon p3 = ConvexPolygon(points);
+    CHECK(p0 == p0);
+    CHECK(p0 == p1);
+    CHECK(p1 == p2);
+    CHECK(p2 == p3);
 }
 
 TEST_CASE(Construction) {
@@ -110,9 +128,9 @@ TEST_CASE(Construction) {
     ConvexPolygon p(points);
     CHECK(p.getVertices().size() == 3);
     if (p.getVertices().size() >= 3) {
-        CHECK(p.getVertices()[0] == UnitVector3d::Z());
-        CHECK(p.getVertices()[1] == UnitVector3d::X());
-        CHECK(p.getVertices()[2] == UnitVector3d::Y());
+        CHECK(p.getVertices()[0] == UnitVector3d::X());
+        CHECK(p.getVertices()[1] == UnitVector3d::Y());
+        CHECK(p.getVertices()[2] == UnitVector3d::Z());
     }
     checkProperties(p);
     for (VertexIterator v = points.begin(), end = points.end(); v != end; ++v) {
@@ -276,4 +294,23 @@ TEST_CASE(Hull) {
     ConvexPolygon poly(points);
     CHECK(poly.getVertices().size() == 4);
     CHECK(poly.getVertices()[0] != poly.getVertices()[1]);
+    CHECK(poly.getVertices()[1] != poly.getVertices()[2]);
+    CHECK(poly.getVertices()[2] != poly.getVertices()[3]);
+    CHECK(poly.getVertices()[3] != poly.getVertices()[0]);
+}
+
+TEST_CASE(Disjoint) {
+    std::vector<UnitVector3d> points1 = {
+        UnitVector3d(1.0, 0.0, -1.0),
+        UnitVector3d(1.0, 0.0, 1.0),
+        UnitVector3d(1.0, 1.0, 0.0)
+    };
+    std::vector<UnitVector3d> points2 = {
+        UnitVector3d(-1.0, 1.0, 0.0),
+        UnitVector3d(-1.0, -1.0, 0.0),
+        UnitVector3d(-1.0, 0.0, 1.0)
+    };
+    ConvexPolygon poly1(points1);
+    ConvexPolygon poly2(points2);
+    CHECK(poly1.relate(poly2) == DISJOINT);
 }
