@@ -36,18 +36,20 @@ namespace sphgeom {
 
 namespace {
 
-// Raw HTM root vertex coordinates. UnitVector3d objects are avoided so that
-// library clients cannot run into the static initialization order fiasco.
-alignas(64) double const HTM_ROOT_VERTEX[8][3][3] = {
-    {{ 1.0,  0.0, 0.0}, {0.0, 0.0, -1.0}, { 0.0,  1.0, 0.0}},
-    {{ 0.0,  1.0, 0.0}, {0.0, 0.0, -1.0}, {-1.0,  0.0, 0.0}},
-    {{-1.0,  0.0, 0.0}, {0.0, 0.0, -1.0}, { 0.0, -1.0, 0.0}},
-    {{ 0.0, -1.0, 0.0}, {0.0, 0.0, -1.0}, { 1.0,  0.0, 0.0}},
-    {{ 1.0,  0.0, 0.0}, {0.0, 0.0,  1.0}, { 0.0, -1.0, 0.0}},
-    {{ 0.0, -1.0, 0.0}, {0.0, 0.0,  1.0}, {-1.0,  0.0, 0.0}},
-    {{-1.0,  0.0, 0.0}, {0.0, 0.0,  1.0}, { 0.0,  1.0, 0.0}},
-    {{ 0.0,  1.0, 0.0}, {0.0, 0.0,  1.0}, { 1.0,  0.0, 0.0}}
-};
+// `rootVertex` returns the i-th (0-3) root vertex of HTM root triangle r (0-8).
+UnitVector3d const & rootVertex(int r, int i) {
+    static UnitVector3d const VERTICES[8][3] = {
+        { UnitVector3d::X(), -UnitVector3d::Z(),  UnitVector3d::Y()},
+        { UnitVector3d::Y(), -UnitVector3d::Z(), -UnitVector3d::X()},
+        {-UnitVector3d::X(), -UnitVector3d::Z(), -UnitVector3d::Y()},
+        {-UnitVector3d::Y(), -UnitVector3d::Z(),  UnitVector3d::X()},
+        { UnitVector3d::X(),  UnitVector3d::Z(), -UnitVector3d::Y()},
+        {-UnitVector3d::Y(),  UnitVector3d::Z(), -UnitVector3d::X()},
+        {-UnitVector3d::X(),  UnitVector3d::Z(),  UnitVector3d::Y()},
+        { UnitVector3d::Y(),  UnitVector3d::Z(),  UnitVector3d::X()}
+    };
+    return VERTICES[r][i];
+}
 
 // `HtmPixelFinder` locates trixels that intersect a region.
 template <typename RegionType, bool InteriorOnly>
@@ -71,11 +73,7 @@ public:
         // Loop over HTM root triangles.
         for (uint64_t r = 0; r < 8; ++r) {
             for (int v = 0; v < 3; ++v) {
-                trixel[v] = UnitVector3d::fromNormalized(
-                    HTM_ROOT_VERTEX[r][v][0],
-                    HTM_ROOT_VERTEX[r][v][1],
-                    HTM_ROOT_VERTEX[r][v][2]
-                );
+                trixel[v] = rootVertex(r, v);
             }
             visit(trixel, r + 8, 0);
         }
@@ -129,21 +127,9 @@ ConvexPolygon HtmPixelization::triangle(uint64_t i) {
     }
     l *= 2;
     uint64_t r = (i >> l) & 7;
-    UnitVector3d v0 = UnitVector3d::fromNormalized(
-        HTM_ROOT_VERTEX[r][0][0],
-        HTM_ROOT_VERTEX[r][0][1],
-        HTM_ROOT_VERTEX[r][0][2]
-    );
-    UnitVector3d v1 = UnitVector3d::fromNormalized(
-        HTM_ROOT_VERTEX[r][1][0],
-        HTM_ROOT_VERTEX[r][1][1],
-        HTM_ROOT_VERTEX[r][1][2]
-    );
-    UnitVector3d v2 = UnitVector3d::fromNormalized(
-        HTM_ROOT_VERTEX[r][2][0],
-        HTM_ROOT_VERTEX[r][2][1],
-        HTM_ROOT_VERTEX[r][2][2]
-    );
+    UnitVector3d v0 = rootVertex(r, 0);
+    UnitVector3d v1 = rootVertex(r, 1);
+    UnitVector3d v2 = rootVertex(r, 2);
     for (l -= 2; l >= 0; l -= 2) {
         int child = (i >> l) & 3;
         UnitVector3d m12 = UnitVector3d(v1 + v2);
@@ -203,21 +189,9 @@ uint64_t HtmPixelization::index(UnitVector3d const & v) const {
             r = (v.x() < 0.0) ? 5 : 4;
         }
     }
-    UnitVector3d v0 = UnitVector3d::fromNormalized(
-        HTM_ROOT_VERTEX[r][0][0],
-        HTM_ROOT_VERTEX[r][0][1],
-        HTM_ROOT_VERTEX[r][0][2]
-    );
-    UnitVector3d v1 = UnitVector3d::fromNormalized(
-        HTM_ROOT_VERTEX[r][1][0],
-        HTM_ROOT_VERTEX[r][1][1],
-        HTM_ROOT_VERTEX[r][1][2]
-    );
-    UnitVector3d v2 = UnitVector3d::fromNormalized(
-        HTM_ROOT_VERTEX[r][2][0],
-        HTM_ROOT_VERTEX[r][2][1],
-        HTM_ROOT_VERTEX[r][2][2]
-    );
+    UnitVector3d v0 = rootVertex(r, 0);
+    UnitVector3d v1 = rootVertex(r, 1);
+    UnitVector3d v2 = rootVertex(r, 2);
     uint64_t i = r + 8;
     for (int l = 0; l < _level; ++l) {
         UnitVector3d m01 = UnitVector3d(v0 + v1);
