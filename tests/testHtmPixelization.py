@@ -63,10 +63,13 @@ class HtmPixelizationTestCase(unittest.TestCase):
     def test_index_to_string(self):
         strings = ['S0', 'S1', 'S2', 'S3', 'N0', 'N1', 'N2', 'N3']
         for i in range(8, 16):
-            s = strings[i - 8]
-            self.assertEqual(HtmPixelization.toString(i), s)
+            s0 = strings[i - 8]
+            self.assertEqual(HtmPixelization.asString(i), s0)
+            self.assertEqual(HtmPixelization(0).toString(i), s0)
             for j in range(4):
-                self.assertEqual(HtmPixelization.toString(i*4 + j), s + str(j))
+                s1 = s0 + str(j)
+                self.assertEqual(HtmPixelization.asString(i*4 + j), s1)
+                self.assertEqual(HtmPixelization(1).asString(i*4 + j), s1)
 
 
 if __name__ == '__main__':

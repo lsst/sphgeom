@@ -159,7 +159,7 @@ ConvexPolygon HtmPixelization::triangle(uint64_t i) {
     return ConvexPolygon(v0, v1, v2);
 }
 
-std::string HtmPixelization::toString(uint64_t i) {
+std::string HtmPixelization::asString(uint64_t i) {
     char s[MAX_LEVEL + 2];
     int l = level(i);
     if (l < 0 || l > MAX_LEVEL) {

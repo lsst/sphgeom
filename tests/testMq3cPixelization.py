@@ -67,15 +67,17 @@ class Mq3cPixelizationTestCase(unittest.TestCase):
     def test_index_to_string(self):
         strings = ['+X', '+Y', '+Z', '-X', '-Y', '-Z']
         for i in range(6):
-            s = strings[i]
+            s0 = strings[i]
             components = [0.0]*3
             components[i % 3] = 1.0 if i < 3 else -1.0
             v = UnitVector3d(*components)
             f = Mq3cPixelization(0).index(v)
-            self.assertEqual(Mq3cPixelization.toString(f), s)
+            self.assertEqual(Mq3cPixelization.asString(f), s0)
+            self.assertEqual(Mq3cPixelization(0).toString(f), s0)
             for j in range(4):
-                self.assertEqual(Mq3cPixelization.toString(f*4 + j),
-                                 s + str(j))
+                s1 = s0 + str(j)
+                self.assertEqual(Mq3cPixelization.asString(f*4 + j), s1)
+                self.assertEqual(Mq3cPixelization(1).toString(f*4 + j), s1)
 
 
 if __name__ == '__main__':

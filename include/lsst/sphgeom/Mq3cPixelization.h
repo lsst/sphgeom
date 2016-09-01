@@ -28,7 +28,6 @@
 ///        indexing scheme.
 
 #include <cstdint>
-#include <string>
 #include <vector>
 
 #include "ConvexPolygon.h"
@@ -86,7 +85,7 @@ public:
     ///
     /// If i is not a valid modified-Q3C index, a std::invalid_argument is
     /// thrown.
-    static std::string toString(uint64_t i);
+    static std::string asString(uint64_t i);
 
     /// This constructor creates a modified Q3C pixelization of the sphere
     /// with the given subdivision level. If `level` ∉ [0, MAX_LEVEL],
@@ -104,6 +103,8 @@ public:
     std::unique_ptr<Region> pixel(uint64_t i) const override;
 
     uint64_t index(UnitVector3d const & v) const override;
+
+    std::string toString(uint64_t i) const override { return asString(i); }
 
 private:
     int _level;

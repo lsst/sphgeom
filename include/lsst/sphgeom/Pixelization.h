@@ -26,6 +26,8 @@
 /// \file
 /// \brief This file defines an interface for pixelizations of the sphere.
 
+#include <string>
+
 #include "RangeSet.h"
 
 
@@ -93,6 +95,9 @@ public:
 
     /// `index` computes the index of the pixel for v.
     virtual uint64_t index(UnitVector3d const & v) const = 0;
+
+    /// `toString` converts the given pixel index to a human-readable string.
+    virtual std::string toString(uint64_t i) const = 0;
 
     /// `envelope` returns the indexes of the pixels intersecting the
     /// spherical region r.

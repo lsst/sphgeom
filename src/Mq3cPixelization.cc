@@ -267,7 +267,7 @@ std::vector<uint64_t> Mq3cPixelization::neighborhood(uint64_t i) {
     return std::vector<uint64_t>(indexes, indexes + n);
 }
 
-std::string Mq3cPixelization::toString(uint64_t i) {
+std::string Mq3cPixelization::asString(uint64_t i) {
     static char const FACE_NORM[6][2] = {
         {'-', 'Z'}, {'+', 'X'}, {'+', 'Y'},
         {'+', 'Z'}, {'-', 'X'}, {'-', 'Y'},
