@@ -51,10 +51,10 @@ alignas(64) double const HTM_ROOT_VERTEX[8][3][3] = {
 
 // `HtmPixelFinder` locates trixels that intersect a region.
 template <typename RegionType, bool InteriorOnly>
-class HtmPixelFinder: public PixelFinder<
+class HtmPixelFinder: public detail::PixelFinder<
     HtmPixelFinder<RegionType, InteriorOnly>, RegionType, InteriorOnly, 3>
 {
-    using Base = PixelFinder<
+    using Base = detail::PixelFinder<
         HtmPixelFinder<RegionType, InteriorOnly>, RegionType, InteriorOnly, 3>;
     using Base::visit;
 
@@ -243,11 +243,11 @@ uint64_t HtmPixelization::index(UnitVector3d const & v) const {
 }
 
 RangeSet HtmPixelization::_envelope(Region const & r, size_t maxRanges) const {
-    return findPixels<HtmPixelFinder, false>(r, maxRanges, _level);
+    return detail::findPixels<HtmPixelFinder, false>(r, maxRanges, _level);
 }
 
 RangeSet HtmPixelization::_interior(Region const & r, size_t maxRanges) const {
-    return findPixels<HtmPixelFinder, true>(r, maxRanges, _level);
+    return detail::findPixels<HtmPixelFinder, true>(r, maxRanges, _level);
 }
 
 }} // namespace lsst::sphgeom

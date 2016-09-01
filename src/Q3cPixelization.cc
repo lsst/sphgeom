@@ -215,11 +215,11 @@ int findNeighborhood(int level, uint64_t i, uint64_t * dst) {
 //
 // This is left as a future optimization.
 template <typename RegionType, bool InteriorOnly>
-class Q3cPixelFinder: public PixelFinder<
+class Q3cPixelFinder: public detail::PixelFinder<
     Q3cPixelFinder<RegionType, InteriorOnly>, RegionType, InteriorOnly, 4>
 {
 private:
-    using Base = PixelFinder<
+    using Base = detail::PixelFinder<
         Q3cPixelFinder<RegionType, InteriorOnly>, RegionType, InteriorOnly, 4>;
     using Base::visit;
 
@@ -334,11 +334,11 @@ std::unique_ptr<Region> Q3cPixelization::pixel(uint64_t i) const {
 #endif
 
 RangeSet Q3cPixelization::_envelope(Region const & r, size_t maxRanges) const {
-    return findPixels<Q3cPixelFinder, false>(r, maxRanges, _level);
+    return detail::findPixels<Q3cPixelFinder, false>(r, maxRanges, _level);
 }
 
 RangeSet Q3cPixelization::_interior(Region const & r, size_t maxRanges) const {
-    return findPixels<Q3cPixelFinder, true>(r, maxRanges, _level);
+    return detail::findPixels<Q3cPixelFinder, true>(r, maxRanges, _level);
 }
 
 }} // namespace lsst::sphgeom

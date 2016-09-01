@@ -33,7 +33,7 @@
 
 namespace lsst {
 namespace sphgeom {
-namespace {
+namespace detail {
 
 // `PixelFinder` is a CRTP base class that locates pixels intersecting a
 // region. It assumes a hierarchical pixelization, and that pixels are
@@ -170,7 +170,6 @@ RangeSet findPixels(Region const & r, size_t maxRanges, int level) {
     return s;
 }
 
-} // unnamed namespace
-}} // namespace lsst::sphgeom
+}}} // namespace lsst::sphgeom::detail
 
 #endif // LSST_SPHGEOM_PIXELFINDER_H_
