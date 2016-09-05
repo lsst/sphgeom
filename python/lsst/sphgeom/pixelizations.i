@@ -41,11 +41,7 @@
             o = PyNumber_Multiply(tmp, tmp);
             Py_DECREF(tmp);
         } else {
-            if (p <= static_cast<unsigned long long>(PyInt_GetMax())) {
-                o = PyInt_FromLong(static_cast<long>(p));
-            } else {
-                o = PyLong_FromUnsignedLongLong(p);
-            }
+            o = PyLong_FromUnsignedLongLong(p);
         }
         return o;
     }
