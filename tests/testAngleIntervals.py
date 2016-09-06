@@ -22,6 +22,8 @@
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
 from __future__ import absolute_import, division
+from builtins import str
+from builtins import object
 
 import unittest
 

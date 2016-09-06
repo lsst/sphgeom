@@ -29,6 +29,7 @@ functions in `lsst/sphgeom/curve.h`.
 """
 
 from __future__ import division, print_function
+from builtins import range
 
 import math
 

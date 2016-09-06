@@ -20,6 +20,11 @@
  * see <https://www.lsstcorp.org/LegalNotices/>.
  */
 
+// Allow Python2 to accept unicode strings
+%begin %{
+#define SWIG_PYTHON_2_UNICODE
+%}
+
 %define sphgeomLib_DOCSTRING
 "
 Python interface to lsst::sphgeom
