@@ -38,6 +38,13 @@ namespace sphgeom {
 class Vector3d;
 
 /// `LonLat` represents a spherical coordinate (longitude/latitude angle) pair.
+///
+/// This class supports conversion from a `Vector3d`. All methods that accept a
+/// `Vector3d` parameter shall convert from vector to longitude/latitude
+/// coordinates according to the following conventions:
+/// * (1, 0, 0) → (0°, 0°)
+/// * (0, 1, 0) → (90°, 0°)
+/// * (0, 0, 1) → (0°, +90°)
 class LonLat {
 public:
     static LonLat fromDegrees(double lon, double lat) {
