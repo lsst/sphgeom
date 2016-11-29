@@ -45,6 +45,13 @@ namespace sphgeom {
 /// components yielding non-unit norm. For a class this compact and performance
 /// critical, the addition of a vtable pointer per instance and the potential
 /// for virtual call overhead on assignment is deemed prohibitive.
+///
+/// This class supports conversion from longitude and latitude angles. All
+/// methods that accept a `LonLat` or equivalent angles shall convert from
+/// longitude/latitude to a unit vector according to the following conventions:
+/// * (0°, 0°) → (1, 0, 0)
+/// * (90°, 0°) → (0, 1, 0)
+/// * (0°, +90°) → (0, 0, 1)
 class UnitVector3d {
 public:
     /// `orthogonalTo` returns an arbitrary unit vector that is
