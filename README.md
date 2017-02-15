@@ -17,7 +17,8 @@ efficiently in files or VARBINARY database columns. They can also be
 approximated with simpler regions - for example, one can ask for the
 bounding circle of a convex polygon.
 
-Python bindings that expose most of the C++ API are also provided via SWIG.
+Python bindings that expose most of the C++ API are also provided via
+[pybind11](https://pybind11.readthedocs.io/).
 
 Points
 ------

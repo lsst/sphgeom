@@ -22,10 +22,15 @@
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
 from __future__ import absolute_import, division
-from builtins import str
+
+try:
+    import cPickle as pickle   # Use cPickle on Python 2.7
+except ImportError:
+    import pickle
 
 import math
 import unittest
+from builtins import str
 
 from lsst.sphgeom import Angle, LonLat, UnitVector3d, Vector3d
 
@@ -46,7 +51,7 @@ class UnitVector3dTestCase(unittest.TestCase):
         self.assertAlmostEqual(u.x(), 0.5, places=15)
         self.assertAlmostEqual(u.y(), 0.5, places=15)
         self.assertAlmostEqual(u.z(), 0.5 * math.sqrt(2.0), places=15)
-        u = UnitVector3d.northFrom(u.asVector3d())
+        u = UnitVector3d.northFrom(u)
         w = UnitVector3d(LonLat.fromDegrees(225, 45))
         self.assertAlmostEqual(u.x(), w.x(), places=15)
         self.assertAlmostEqual(u.y(), w.y(), places=15)
@@ -69,32 +74,44 @@ class UnitVector3dTestCase(unittest.TestCase):
             v[-4]
         with self.assertRaises(IndexError):
             v[3]
-        self.assertEqual(v[0:2], (1, 0))
 
     def testDot(self):
         self.assertEqual(UnitVector3d.X().dot(UnitVector3d.Z()), 0)
 
     def testCross(self):
-        self.assertEqual(UnitVector3d.X().cross(UnitVector3d.Y()), Vector3d(0, 0, 1))
-        self.assertEqual(UnitVector3d.X().robustCross(UnitVector3d.Y()), Vector3d(0, 0, 2))
+        self.assertEqual(UnitVector3d.X().cross(UnitVector3d.Y()),
+                         Vector3d(0, 0, 1))
+        self.assertEqual(UnitVector3d.X().robustCross(UnitVector3d.Y()),
+                         Vector3d(0, 0, 2))
 
     def testArithmeticOperators(self):
         self.assertEqual(-UnitVector3d.X(), UnitVector3d(-1, 0, 0))
         self.assertEqual(UnitVector3d.X() - UnitVector3d.X(), Vector3d(0, 0, 0))
-        self.assertEqual(UnitVector3d.X() + UnitVector3d(1, 0, 0), UnitVector3d.X() * 2)
-        self.assertEqual(UnitVector3d.Y() - Vector3d(0, 0.5, 0), UnitVector3d.Y() / 2)
-        self.assertEqual(UnitVector3d.Z().cwiseProduct(Vector3d(2, 3, 4)), Vector3d(0, 0, 4))
+        self.assertEqual(UnitVector3d.X() + UnitVector3d(1, 0, 0),
+                         UnitVector3d.X() * 2)
+        self.assertEqual(UnitVector3d.Y() - Vector3d(0, 0.5, 0),
+                         UnitVector3d.Y() / 2)
+        self.assertEqual(UnitVector3d.Z().cwiseProduct(Vector3d(2, 3, 4)),
+                         Vector3d(0, 0, 4))
 
     def testRotation(self):
-        v = UnitVector3d.Y().rotatedAround(UnitVector3d.X(), Angle(0.5 * math.pi))
+        v = UnitVector3d.Y().rotatedAround(UnitVector3d.X(),
+                                           Angle(0.5 * math.pi))
         self.assertAlmostEqual(v.x(), 0.0, places=15)
         self.assertAlmostEqual(v.y(), 0.0, places=15)
         self.assertAlmostEqual(v.z(), 1.0, places=15)
 
     def testString(self):
-        self.assertEqual(str(UnitVector3d(1, 0, 0)), "[1, 0, 0]")
-        self.assertEqual(repr(UnitVector3d(1, 0, 0)), "UnitVector3d(1.0, 0.0, 0.0)")
+        v = UnitVector3d.X()
+        self.assertEqual(str(v), '[1.0, 0.0, 0.0]')
+        self.assertEqual(repr(v), 'UnitVector3d(1.0, 0.0, 0.0)')
+        self.assertEqual(v, eval(repr(v), dict(UnitVector3d=UnitVector3d)))
+
+    def testPickle(self):
+        v = UnitVector3d(1, 1, 1)
+        w = pickle.loads(pickle.dumps(v, pickle.HIGHEST_PROTOCOL))
+        self.assertEqual(v, w)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

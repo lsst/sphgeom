@@ -1,2 +1,27 @@
 from lsst.sconsUtils import scripts
-scripts.BasicSConscript.python()
+scripts.BasicSConscript.pybind11([
+    'angle',
+    'angleInterval',
+    'box',
+    'box3d',
+    'circle',
+    'convexPolygon',
+    'curve',
+    'ellipse',
+    'htmPixelization',
+    'interval1d',
+    'lonLat',
+    'matrix3d',
+    'mq3cPixelization',
+    'normalizedAngle',
+    'normalizedAngleInterval',
+    'orientation',
+    'pixelization',
+    'q3cPixelization',
+    'rangeSet',
+    'region',
+    'relationship',
+    'unitVector3d',
+    'utils',
+    'vector3d',
+], addUnderscore=False)

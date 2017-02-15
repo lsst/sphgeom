@@ -22,14 +22,15 @@
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
 from __future__ import absolute_import, division
-from builtins import str
-from builtins import object
 
+import pickle
 import unittest
+from builtins import object
+from builtins import str
 
 from lsst.sphgeom import (Angle, AngleInterval,
-                          NormalizedAngle, NormalizedAngleInterval,
-                          CONTAINS, DISJOINT)
+                          CONTAINS, DISJOINT,
+                          NormalizedAngle, NormalizedAngleInterval)
 
 
 class IntervalTests(object):
@@ -93,18 +94,25 @@ class IntervalTests(object):
         self.assertEqual(a, b)
         self.assertEqual(a, self.Scalar(2))
 
+    def testString(self):
+        a = self.Interval.fromRadians(0.5, 1.5)
+        self.assertEqual(str(a), '[0.5, 1.5]')
+        self.assertEqual(repr(a),
+                         self.Interval.__name__ + '.fromRadians(0.5, 1.5)')
+        self.assertEqual(
+            a, eval(repr(a), dict([(self.Interval.__name__, self.Interval)])))
+
+    def testPickle(self):
+        a = self.Interval.fromRadians(1, 3)
+        b = pickle.loads(pickle.dumps(a))
+        self.assertEqual(a, b)
+
 
 class AngleIntervalTestCase(unittest.TestCase, IntervalTests):
 
     def setUp(self):
         self.Interval = AngleInterval
         self.Scalar = Angle
-
-    def testString(self):
-        self.assertEqual(str(AngleInterval.fromRadians(1, 1)),
-                         "[1, 1]")
-        self.assertEqual(repr(AngleInterval.fromRadians(1, 1)),
-                         "AngleInterval.fromRadians(1.0, 1.0)")
 
 
 class NormalizedAngleIntervalTestCase(unittest.TestCase, IntervalTests):
@@ -113,12 +121,6 @@ class NormalizedAngleIntervalTestCase(unittest.TestCase, IntervalTests):
         self.Interval = NormalizedAngleInterval
         self.Scalar = NormalizedAngle
 
-    def testString(self):
-        self.assertEqual(str(NormalizedAngleInterval.fromRadians(1, 1)),
-                         "[1, 1]")
-        self.assertEqual(repr(NormalizedAngleInterval.fromRadians(1, 1)),
-                         "NormalizedAngleInterval.fromRadians(1.0, 1.0)")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

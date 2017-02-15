@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 #
 # LSST Data Management System
-#
-# Copyright 2008-2016  AURA/LSST.
+# See COPYRIGHT file at the top of the source tree.
 #
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
@@ -22,10 +21,11 @@
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
 from __future__ import absolute_import, division
-from builtins import str
-from builtins import range
 
+import pickle
 import unittest
+from builtins import range
+from builtins import str
 
 from lsst.sphgeom import Angle, Circle, Q3cPixelization, RangeSet, UnitVector3d
 
@@ -37,8 +37,12 @@ class Q3cPixelizationTestCase(unittest.TestCase):
             Q3cPixelization(-1)
         with self.assertRaises(ValueError):
             Q3cPixelization(Q3cPixelization.MAX_LEVEL + 1)
-        pixelization = Q3cPixelization(0)
-        self.assertEqual(pixelization.getLevel(), 0)
+        q1 = Q3cPixelization(0)
+        self.assertEqual(q1.getLevel(), 0)
+        q2 = Q3cPixelization(1)
+        q3 = Q3cPixelization(q2)
+        self.assertNotEqual(q1, q2)
+        self.assertEqual(q2, q3)
 
     def test_indexing(self):
         pixelization = Q3cPixelization(1)
@@ -67,6 +71,18 @@ class Q3cPixelizationTestCase(unittest.TestCase):
             for j in range(4):
                 self.assertEqual(Q3cPixelization(1).toString(f*4 + j),
                                  s + str(j))
+
+    def test_string(self):
+        p = Q3cPixelization(3)
+        self.assertEqual(str(p), 'Q3cPixelization(3)')
+        self.assertEqual(str(p), repr(p))
+        self.assertEqual(
+            p, eval(repr(p), dict(Q3cPixelization=Q3cPixelization)))
+
+    def test_pickle(self):
+        a = Q3cPixelization(20)
+        b = pickle.loads(pickle.dumps(a))
+        self.assertEqual(a, b)
 
 
 if __name__ == '__main__':
