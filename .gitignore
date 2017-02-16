@@ -4,6 +4,7 @@
 *.pyc
 *.so
 *~
+_build.*
 core.*
 .sconf_temp
 .sconsign.dblite
@@ -12,8 +13,6 @@ doc/doxygen.conf
 doc/html
 doc/xml
 doc/*.tag
-python/lsst/sphgeom/sphgeomLib.py
-python/lsst/sphgeom/sphgeomLib_wrap.cc
 python/lsst/sphgeom/version.py
 tests/.tests/
 tests/testAngleInterval
