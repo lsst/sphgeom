@@ -120,10 +120,16 @@ void RangeSet::insert(uint64_t first, uint64_t last) {
 
 void RangeSet::erase(uint64_t first, uint64_t last) {
     // To erase [first, last), insert it into the complement of this set,
-    // then complement the result.
-    complement();
+    // then complement the result. The complements are performed in the
+    // constructor and destructor of a local object, so that the second
+    // complement is executed even if insert throws.
+    struct Complementor {
+        RangeSet & set;
+        Complementor(RangeSet & s) : set(s) { set.complement(); }
+        ~Complementor() { set.complement(); }
+    };
+    Complementor c(*this);
     insert(first, last);
-    complement();
 }
 
 RangeSet RangeSet::intersection(RangeSet const & s) const {
