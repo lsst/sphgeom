@@ -107,28 +107,27 @@ public:
     UnitVector3d getCentroid() const;
 
     // Region interface
-    virtual std::unique_ptr<Region> clone() const {
+    std::unique_ptr<Region> clone() const override {
         return std::unique_ptr<ConvexPolygon>(new ConvexPolygon(*this));
     }
 
+    Box getBoundingBox() const override;
+    Box3d getBoundingBox3d() const override;
+    Circle getBoundingCircle() const override;
 
-    virtual Box getBoundingBox() const;
-    virtual Box3d getBoundingBox3d() const;
-    virtual Circle getBoundingCircle() const;
+    bool contains(UnitVector3d const & v) const override;
 
-    virtual bool contains(UnitVector3d const & v) const;
-
-    virtual Relationship relate(Region const & r) const {
+    Relationship relate(Region const & r) const override {
         // Dispatch on the type of r.
         return invert(r.relate(*this));
     }
 
-    virtual Relationship relate(Box const &) const;
-    virtual Relationship relate(Circle const &) const;
-    virtual Relationship relate(ConvexPolygon const &) const;
-    virtual Relationship relate(Ellipse const &) const;
+    Relationship relate(Box const &) const override;
+    Relationship relate(Circle const &) const override;
+    Relationship relate(ConvexPolygon const &) const override;
+    Relationship relate(Ellipse const &) const override;
 
-    virtual std::vector<uint8_t> encode() const;
+    std::vector<uint8_t> encode() const override;
 
     ///@{
     /// `decode` deserializes a ConvexPolygon from a byte string produced by encode.

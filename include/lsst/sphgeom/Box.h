@@ -298,24 +298,24 @@ public:
     double getArea() const;
 
     // Region interface
-    virtual std::unique_ptr<Region> clone() const {
+    std::unique_ptr<Region> clone() const override {
         return std::unique_ptr<Box>(new Box(*this));
     }
 
-    virtual Box getBoundingBox() const { return *this; }
-    virtual Box3d getBoundingBox3d() const;
-    virtual Circle getBoundingCircle() const;
+    Box getBoundingBox() const override { return *this; }
+    Box3d getBoundingBox3d() const override;
+    Circle getBoundingCircle() const override;
 
-    virtual bool contains(UnitVector3d const & v) const {
+    bool contains(UnitVector3d const & v) const override {
         return contains(LonLat(v));
     }
 
-    virtual Relationship relate(Region const & r) const {
+    Relationship relate(Region const & r) const override {
         // Dispatch on the type of r.
         return invert(r.relate(*this));
     }
 
-    virtual Relationship relate(Box const & b) const {
+    Relationship relate(Box const & b) const override {
         Relationship r1 = _lon.relate(b._lon);
         Relationship r2 = _lat.relate(b._lat);
         // If the box longitude or latitude intervals are disjoint, then the
@@ -325,11 +325,11 @@ public:
         return ((r1 & r2) & (CONTAINS | WITHIN)) | ((r1 | r2) & DISJOINT);
     }
 
-    virtual Relationship relate(Circle const &) const;
-    virtual Relationship relate(ConvexPolygon const &) const;
-    virtual Relationship relate(Ellipse const &) const;
+    Relationship relate(Circle const &) const override;
+    Relationship relate(ConvexPolygon const &) const override;
+    Relationship relate(Ellipse const &) const override;
 
-    virtual std::vector<uint8_t> encode() const;
+    std::vector<uint8_t> encode() const override;
 
     ///@{
     /// `decode` deserializes a Box from a byte string produced by encode.
