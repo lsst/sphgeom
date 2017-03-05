@@ -56,9 +56,7 @@ public:
 
     Interval1d(double x, double y) : Base(x, y) {}
 
-#ifndef SWIG
     Interval1d(Base const & base) : Base(base) {}
-#endif
 
     /// `isFull` returns true if this interval = ℝ.
     bool isFull() const {

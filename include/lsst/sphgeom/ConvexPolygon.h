@@ -70,7 +70,6 @@ public:
     /// the given set of points.
     explicit ConvexPolygon(std::vector<UnitVector3d> const & points);
 
-#ifndef SWIG
     /// This constructor creates a triangle with the given vertices.
     ///
     /// It is assumed that orientation(v0, v1, v2) = 1. Use with caution -
@@ -92,7 +91,6 @@ public:
                   UnitVector3d const & v3) :
         _vertices{v0, v1, v2, v3}
     {}
-#endif
 
     /// Two convex polygons are equal iff they contain the same points.
     bool operator==(ConvexPolygon const & p) const;
