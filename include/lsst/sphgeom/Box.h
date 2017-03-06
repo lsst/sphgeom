@@ -289,7 +289,9 @@ public:
     /// not `dilateBy(r, r)`.
     Box & dilateBy(Angle w, Angle h);
     Box dilatedBy(Angle w, Angle h) const { return Box(*this).dilateBy(w, h); }
+    Box & erodeBy(Angle r) { return dilateBy(-r); }
     Box & erodeBy(Angle w, Angle h) { return dilateBy(-w, -h); }
+    Box erodedBy(Angle r) const { return dilatedBy(-r);  }
     Box erodedBy(Angle w, Angle h) const { return dilatedBy(-w, -h);  }
 
     Relationship relate(LonLat const & p) const { return relate(Box(p)); }
