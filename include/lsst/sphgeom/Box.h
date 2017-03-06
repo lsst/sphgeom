@@ -109,8 +109,8 @@ public:
         _enforceInvariants();
     }
 
-    /// This constructor creates a box with center p, width
-    /// (in longitude angle) w and height (in latitude angle) h.
+    /// This constructor creates a box with center p, half-width
+    /// (in longitude angle) w and half-height (in latitude angle) h.
     Box(LonLat const & p, Angle w, Angle h) :
         _lon(NormalizedAngleInterval(p.getLon()).dilatedBy(w)),
         _lat(AngleInterval(p.getLat()).dilatedBy(h))
