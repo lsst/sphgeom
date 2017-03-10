@@ -24,7 +24,6 @@ from __future__ import absolute_import, division, print_function
 
 import pickle
 import unittest
-from builtins import str
 
 from lsst.sphgeom import Box3d, CONTAINS, DISJOINT, Interval1d, Vector3d
 

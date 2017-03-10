@@ -29,7 +29,6 @@ except ImportError:
 
 import math
 import unittest
-from builtins import str
 
 from lsst.sphgeom import (Angle, CONTAINS, Circle, Ellipse, Region,
                           UnitVector3d, WITHIN)

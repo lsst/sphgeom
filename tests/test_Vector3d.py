@@ -26,7 +26,6 @@ from __future__ import absolute_import, division, print_function
 import math
 import pickle
 import unittest
-from builtins import str
 
 from lsst.sphgeom import Angle, UnitVector3d, Vector3d
 

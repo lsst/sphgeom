@@ -30,7 +30,6 @@ except ImportError:
 
 import math
 import unittest
-from builtins import str
 
 from lsst.sphgeom import Angle, LonLat, UnitVector3d, Vector3d
 

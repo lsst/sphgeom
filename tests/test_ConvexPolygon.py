@@ -28,7 +28,6 @@ except ImportError:
     import pickle
 
 import unittest
-from builtins import str
 
 from lsst.sphgeom import CONTAINS, ConvexPolygon, Region, UnitVector3d
 

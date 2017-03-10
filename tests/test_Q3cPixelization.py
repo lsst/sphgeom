@@ -25,7 +25,6 @@ from __future__ import absolute_import, division, print_function
 import pickle
 import unittest
 from builtins import range
-from builtins import str
 
 from lsst.sphgeom import Angle, Circle, Q3cPixelization, RangeSet, UnitVector3d
 
