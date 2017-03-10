@@ -1,6 +1,6 @@
 /*
  * LSST Data Management System
- * Copyright 2016 AURA/LSST.
+ * See COPYRIGHT file at the top of the source tree.
  *
  * This product includes software developed by the
  * LSST Project (http://www.lsst.org/).
@@ -293,6 +293,8 @@ public:
     Box3d dilatedBy(double w, double h, double d) const {
         return Box3d(*this).dilateBy(w, h, d);
     }
+    Box3d & erodeBy(double r) { return dilateBy(-r); }
+    Box3d erodedBy(double r) const { return dilatedBy(-r); }
     Box3d & erodeBy(double w, double h, double d) {
         return dilateBy(-w, -h, -d);
     }

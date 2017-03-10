@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 #
 # LSST Data Management System
-#
-# Copyright 2008-2016  AURA/LSST.
+# See COPYRIGHT file at the top of the source tree.
 #
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
@@ -21,9 +20,10 @@
 # the GNU General Public License along with this program.  If not,
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
-from __future__ import absolute_import, division
-from builtins import str
+from __future__ import absolute_import, division, print_function
 
+import pickle
+import sys
 import unittest
 
 from lsst.sphgeom import RangeSet
@@ -82,11 +82,24 @@ class RangeSetTestCase(unittest.TestCase):
         s.insert(2, 3)
         self.assertEqual(s.ranges(), [(0, 1), (2, 3)])
         s = RangeSet(4, 2)
-        self.assertEqual(s.ranges(), [(0, 2), (4, 2**64)])
+        self.assertEqual(list(s), [(0, 2), (4, 0)])
 
     def testString(self):
-        self.assertEqual(str(RangeSet(1)), '{"RangeSet": [[1, 2]]}')
+        s = RangeSet(1, 10)
+        if sys.version_info[0] >= 3:
+            self.assertEqual(str(s), '[(1, 10)]')
+            self.assertEqual(repr(s), 'RangeSet([(1, 10)])')
+        else:
+            # pybind11 maps C++ integers to Python long instances in Python 2.
+            self.assertEqual(str(s), '[(1L, 10L)]')
+            self.assertEqual(repr(s), 'RangeSet([(1L, 10L)])')
+        self.assertEqual(s, eval(repr(s), dict(RangeSet=RangeSet)))
+
+    def testPickle(self):
+        r = RangeSet([2, 3, 5, 7, 11, 13, 17, 19])
+        s = pickle.loads(pickle.dumps(r))
+        self.assertEqual(r, s)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

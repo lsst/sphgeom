@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 #
 # LSST Data Management System
-#
-# Copyright 2008-2016  AURA/LSST.
+# See COPYRIGHT file at the top of the source tree.
 #
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
@@ -21,9 +20,9 @@
 # the GNU General Public License along with this program.  If not,
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
-from __future__ import absolute_import, division
-from builtins import str
+from __future__ import absolute_import, division, print_function
 
+import pickle
 import unittest
 
 from lsst.sphgeom import Angle
@@ -64,9 +63,16 @@ class AngleTestCase(unittest.TestCase):
         self.assertEqual(a.asRadians(), 1)
 
     def testString(self):
-        self.assertEqual(str(Angle(1)), "1.0")
-        self.assertEqual(repr(Angle(1)), "Angle(1.0)")
+        self.assertEqual(str(Angle(1)), '1.0')
+        self.assertEqual(repr(Angle(1)), 'Angle(1.0)')
+        a = Angle(2.5)
+        self.assertEqual(a, eval(repr(a), dict(Angle=Angle)))
+
+    def testPickle(self):
+        a = Angle(1.5)
+        b = pickle.loads(pickle.dumps(a))
+        self.assertEqual(a, b)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 #
 # LSST Data Management System
-#
-# Copyright 2008-2016  AURA/LSST.
+# See COPYRIGHT file at the top of the source tree.
 #
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
@@ -21,9 +20,9 @@
 # the GNU General Public License along with this program.  If not,
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
-from __future__ import absolute_import, division
-from builtins import str
+from __future__ import absolute_import, division, print_function
 
+import pickle
 import unittest
 
 from lsst.sphgeom import Angle, LonLat, NormalizedAngle, UnitVector3d
@@ -37,19 +36,34 @@ class LonLatTestCase(unittest.TestCase):
                                    Angle.fromDegrees(45)))
         u = UnitVector3d(p)
         q = LonLat(u)
-        self.assertAlmostEqual(p.getLon().asRadians(), q.getLon().asRadians(), places=13)
-        self.assertAlmostEqual(p.getLat().asRadians(), q.getLat().asRadians(), places=13)
-        self.assertAlmostEqual(p.getLon().asRadians(), LonLat.latitudeOf(u).asRadians(), places=13)
-        self.assertAlmostEqual(p.getLon().asRadians(), LonLat.longitudeOf(u).asRadians(), places=13)
+        self.assertAlmostEqual(
+            p.getLon().asRadians(), q.getLon().asRadians(), places=13)
+        self.assertAlmostEqual(
+            p.getLat().asRadians(), q.getLat().asRadians(), places=13)
+        self.assertAlmostEqual(p.getLon().asRadians(),
+                               LonLat.latitudeOf(u).asRadians(),
+                               places=13)
+        self.assertAlmostEqual(p.getLon().asRadians(),
+                               LonLat.longitudeOf(u).asRadians(),
+                               places=13)
 
     def testComparisonOperators(self):
-        self.assertEqual(LonLat.fromDegrees(45, 45), LonLat.fromDegrees(45, 45))
-        self.assertNotEqual(LonLat.fromDegrees(0, 0), LonLat.fromDegrees(45, 45))
+        self.assertEqual(LonLat.fromDegrees(45, 45),
+                         LonLat.fromDegrees(45, 45))
+        self.assertNotEqual(LonLat.fromDegrees(0, 0),
+                            LonLat.fromDegrees(45, 45))
 
     def testString(self):
-        self.assertEqual(str(LonLat.fromRadians(1, 1)), "[1, 1]")
-        self.assertEqual(repr(LonLat.fromRadians(1, 1)), "LonLat.fromRadians(1.0, 1.0)")
+        p = LonLat.fromRadians(1, 1)
+        self.assertEqual(str(p), '[1.0, 1.0]')
+        self.assertEqual(repr(p), 'LonLat.fromRadians(1.0, 1.0)')
+        self.assertEqual(p, eval(repr(p), dict(LonLat=LonLat)))
+
+    def testPickle(self):
+        p = LonLat.fromRadians(2, 1)
+        q = pickle.loads(pickle.dumps(p))
+        self.assertEqual(p, q)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

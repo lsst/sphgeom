@@ -99,8 +99,6 @@ namespace sphgeom {
 class RangeSet {
 public:
 
-#ifndef SWIG
-
     /// A constant iterator over the ranges (represented as 2-tuples) in a
     /// RangeSet.
     ///
@@ -183,7 +181,6 @@ public:
     RangeSet(RangeSet &&) = default;
     RangeSet & operator=(RangeSet const &) = default;
     RangeSet & operator=(RangeSet &&) = default;
-#endif
 
     /// The default constructor creates an empty set.
     RangeSet() = default;
@@ -198,8 +195,6 @@ public:
     RangeSet(uint64_t first, uint64_t last) {
         insert(first, last);
     }
-
-#ifndef SWIG
 
     template <
         typename U,
@@ -269,8 +264,6 @@ public:
     explicit RangeSet(Container const & c) :
         RangeSet(std::begin(c), std::end(c)) {}
 
-#endif
-
     ///@{
     /// Two RangeSet instances are equal iff they contain the same integers.
     bool operator==(RangeSet const & rs) const {
@@ -293,7 +286,6 @@ public:
         insert(u, u + 1);
     }
 
-#ifndef SWIG
     template <
         typename U,
         typename = typename std::enable_if<
@@ -303,7 +295,6 @@ public:
     void insert(std::tuple<U, U> const & range) {
         insert(std::get<0>(range), std::get<1>(range));
     }
-#endif
 
     void insert(uint64_t first, uint64_t last);
     ///@}
@@ -316,7 +307,6 @@ public:
         erase(u, u + 1);
     }
 
-#ifndef SWIG
     template <
         typename U,
         typename = typename std::enable_if<
@@ -326,7 +316,6 @@ public:
     void erase(std::tuple<U, U> const & range) {
         erase(std::get<0>(range), std::get<1>(range));
     }
-#endif
 
     void erase(uint64_t first, uint64_t last);
     ///@}
@@ -521,8 +510,6 @@ public:
     /// [0, 2^64), are in this set.
     bool full() const { return _beginc() == _endc(); }
 
-#ifndef SWIG
-
     ///@{
     /// This function returns a constant iterator to the first range
     /// in this set.
@@ -547,8 +534,6 @@ public:
 
     /// `max_size` returns the maximum number of ranges a set can hold.
     size_t max_size() const { return _ranges.max_size() / 2; }
-
-#endif
 
     /// `size` returns the number of ranges in this set.
     size_t size() const { return (_ranges.size() - _offset) / 2; }

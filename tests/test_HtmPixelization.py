@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 #
 # LSST Data Management System
-#
-# Copyright 2008-2016  AURA/LSST.
+# See COPYRIGHT file at the top of the source tree.
 #
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
@@ -21,11 +20,11 @@
 # the GNU General Public License along with this program.  If not,
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
-from __future__ import absolute_import, division
-from builtins import str
-from builtins import range
+from __future__ import absolute_import, division, print_function
 
+import pickle
 import unittest
+from builtins import range
 
 from lsst.sphgeom import Angle, Circle, HtmPixelization, RangeSet, UnitVector3d
 
@@ -37,8 +36,12 @@ class HtmPixelizationTestCase(unittest.TestCase):
             HtmPixelization(-1)
         with self.assertRaises(ValueError):
             HtmPixelization(HtmPixelization.MAX_LEVEL + 1)
-        h = HtmPixelization(0)
-        self.assertEqual(h.getLevel(), 0)
+        h1 = HtmPixelization(0)
+        self.assertEqual(h1.getLevel(), 0)
+        h2 = HtmPixelization(1)
+        h3 = HtmPixelization(h2)
+        self.assertNotEqual(h1, h2)
+        self.assertEqual(h2, h3)
 
     def test_indexing(self):
         h = HtmPixelization(1)
@@ -72,6 +75,18 @@ class HtmPixelizationTestCase(unittest.TestCase):
                 s1 = s0 + str(j)
                 self.assertEqual(HtmPixelization.asString(i*4 + j), s1)
                 self.assertEqual(HtmPixelization(1).asString(i*4 + j), s1)
+
+    def test_string(self):
+        p = HtmPixelization(3)
+        self.assertEqual(str(p), 'HtmPixelization(3)')
+        self.assertEqual(str(p), repr(p))
+        self.assertEqual(
+            p, eval(repr(p), dict(HtmPixelization=HtmPixelization)))
+
+    def test_pickle(self):
+        a = HtmPixelization(20)
+        b = pickle.loads(pickle.dumps(a))
+        self.assertEqual(a, b)
 
 
 if __name__ == '__main__':

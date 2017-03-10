@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 #
 # LSST Data Management System
-#
-# Copyright 2008-2016  AURA/LSST.
+# See COPYRIGHT file at the top of the source tree.
 #
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
@@ -21,11 +20,12 @@
 # the GNU General Public License along with this program.  If not,
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
-from __future__ import absolute_import, division
+from __future__ import absolute_import, division, print_function
 
+import pickle
 import unittest
 
-from lsst.sphgeom import Interval1d, CONTAINS, DISJOINT
+from lsst.sphgeom import CONTAINS, DISJOINT, Interval1d
 
 
 class Interval1dTestCase(unittest.TestCase):
@@ -87,6 +87,17 @@ class Interval1dTestCase(unittest.TestCase):
         self.assertEqual(a, b)
         self.assertEqual(a, 2)
 
+    def testString(self):
+        i = Interval1d(1, 2)
+        self.assertEqual(str(i), '[1.0, 2.0]')
+        self.assertEqual(repr(i), 'Interval1d(1.0, 2.0)')
+        self.assertEqual(i, eval(repr(i), dict(Interval1d=Interval1d)))
 
-if __name__ == "__main__":
+    def testPickle(self):
+        a = Interval1d(1.5, 3.5)
+        b = pickle.loads(pickle.dumps(a))
+        self.assertEqual(a, b)
+
+
+if __name__ == '__main__':
     unittest.main()

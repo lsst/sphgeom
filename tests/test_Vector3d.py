@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 #
 # LSST Data Management System
-#
-# Copyright 2008-2016  AURA/LSST.
+# See COPYRIGHT file at the top of the source tree.
 #
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
@@ -21,10 +20,10 @@
 # the GNU General Public License along with this program.  If not,
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
-from __future__ import absolute_import, division
-from builtins import str
+from __future__ import absolute_import, division, print_function
 
 import math
+import pickle
 import unittest
 
 from lsst.sphgeom import Angle, UnitVector3d, Vector3d
@@ -60,7 +59,6 @@ class Vector3dTestCase(unittest.TestCase):
             v[-4]
         with self.assertRaises(IndexError):
             v[3]
-        self.assertEqual(v[0:2], (1, 2))
 
     def testNormal(self):
         v = Vector3d(0, 2, 0)
@@ -84,7 +82,8 @@ class Vector3dTestCase(unittest.TestCase):
         self.assertEqual(-Vector3d(1, 1, 1), Vector3d(-1, -1, -1))
         self.assertEqual(Vector3d(1, 1, 1) * 2, Vector3d(2, 2, 2))
         self.assertEqual(Vector3d(2, 2, 2) / 2, Vector3d(1, 1, 1))
-        self.assertEqual(Vector3d(1, 1, 1) + Vector3d(1, 1, 1), Vector3d(2, 2, 2))
+        self.assertEqual(Vector3d(1, 1, 1) + Vector3d(1, 1, 1),
+                         Vector3d(2, 2, 2))
         self.assertEqual(Vector3d(1, 1, 1) - Vector3d(1, 1, 1), Vector3d())
         v = Vector3d(1, 1, 1)
         v += Vector3d(3, 3, 3)
@@ -95,15 +94,23 @@ class Vector3dTestCase(unittest.TestCase):
         self.assertEqual(v.cwiseProduct(Vector3d(2, 3, 4)), Vector3d(2, 3, 4))
 
     def testRotation(self):
-        v = Vector3d(0, 1, 0).rotatedAround(UnitVector3d.X(), Angle(0.5 * math.pi))
+        v = Vector3d(0, 1, 0).rotatedAround(UnitVector3d.X(),
+                                            Angle(0.5 * math.pi))
         self.assertAlmostEqual(v.x(), 0.0, places=15)
         self.assertAlmostEqual(v.y(), 0.0, places=15)
         self.assertAlmostEqual(v.z(), 1.0, places=15)
 
     def testString(self):
-        self.assertEqual(str(Vector3d(1, 0, 0)), "[1, 0, 0]")
-        self.assertEqual(repr(Vector3d(1, 0, 0)), "Vector3d(1.0, 0.0, 0.0)")
+        v = Vector3d(1, 0, 0)
+        self.assertEqual(str(v), '[1.0, 0.0, 0.0]')
+        self.assertEqual(repr(v), 'Vector3d(1.0, 0.0, 0.0)')
+        self.assertEqual(v, eval(repr(v), dict(Vector3d=Vector3d)))
+
+    def testPickle(self):
+        v = Vector3d(1, 2, 3)
+        w = pickle.loads(pickle.dumps(v))
+        self.assertEqual(v, w)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
