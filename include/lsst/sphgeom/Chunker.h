@@ -68,6 +68,16 @@ public:
     Chunker(int32_t numStripes,
             int32_t numSubStripesPerStripe);
 
+    bool operator==(Chunker const & c) const {
+        return _numStripes == c._numStripes &&
+               _numSubStripesPerStripe == c._numSubStripesPerStripe;
+    }
+
+    bool operator!=(Chunker const & c) const {
+        return _numStripes != c._numStripes ||
+               _numSubStripesPerStripe != c._numSubStripesPerStripe;
+    }
+
     /// `getNumStripes` returns the number of fixed-height latitude intervals
     /// in the sky subdivision.
     int32_t getNumStripes() const {
