@@ -201,7 +201,7 @@ void Chunker::_getSubChunks(std::vector<SubChunks> & chunks,
         // for intersection with r.
         subChunks.subChunkIds = getAllSubChunks(subChunks.chunkId);
     } else {
-        // Find the sub-stripes to iterator over.
+        // Find the sub-stripes to iterate over.
         minSS = std::max(minSS, stripe * _numSubStripesPerStripe);
         maxSS = std::min(maxSS, (stripe + 1) * _numSubStripesPerStripe - 1);
         int32_t const nc = _stripes[stripe].numChunksPerStripe;
