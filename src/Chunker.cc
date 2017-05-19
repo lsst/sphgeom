@@ -270,11 +270,11 @@ std::vector<int32_t> Chunker::getAllSubChunks(int32_t chunkId) const {
     std::vector<int32_t> subChunkIds;
     int32_t s = _getStripe(chunkId);
     subChunkIds.reserve(_stripes.at(s).numSubChunksPerChunk);
-    int32_t ss = s * _numSubStripesPerStripe;
-    int32_t const ssEnd = ss + _numSubStripesPerStripe;
-    for (; ss < ssEnd; ++ss) {
+    int32_t const ssBeg = s * _numSubStripesPerStripe;
+    int32_t const ssEnd = ssBeg + _numSubStripesPerStripe;
+    for (int32_t ss = ssBeg; ss < ssEnd; ++ss) {
         int32_t const scEnd = _subStripes[ss].numSubChunksPerChunk;
-        int32_t const subChunkIdBase = _maxSubChunksPerSubStripeChunk * ss;
+        int32_t const subChunkIdBase = _maxSubChunksPerSubStripeChunk * (ss - ssBeg);
         for (int32_t sc = 0; sc < scEnd; ++sc) {
             subChunkIds.push_back(subChunkIdBase + sc);
         }
