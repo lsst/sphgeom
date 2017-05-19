@@ -4,6 +4,7 @@ scripts.BasicSConscript.pybind11([
     'angleInterval',
     'box',
     'box3d',
+    'chunker',
     'circle',
     'convexPolygon',
     'curve',
