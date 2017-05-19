@@ -30,6 +30,7 @@ from .angle import *
 from .angleInterval import *
 from .box import *
 from .box3d import *
+from .chunker import *
 from .circle import *
 from .convexPolygon import *
 from .curve import *
