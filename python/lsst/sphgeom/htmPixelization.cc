@@ -21,6 +21,8 @@
  */
 #include "pybind11/pybind11.h"
 
+#include "sphgeom.h"
+
 #include "lsst/sphgeom/HtmPixelization.h"
 
 namespace py = pybind11;
@@ -28,14 +30,9 @@ using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
-PYBIND11_MODULE(htmPixelization, mod) {
-    py::module::import("lsst.sphgeom.pixelization");
-    py::module::import("lsst.sphgeom.region");
-
-    py::class_<HtmPixelization, Pixelization> cls(mod, "HtmPixelization");
-
+template <>
+void defineClass(py::class_<HtmPixelization, Pixelization> &cls) {
     cls.attr("MAX_LEVEL") = py::int_(HtmPixelization::MAX_LEVEL);
 
     cls.def_static("level", &HtmPixelization::level, "i"_a);
@@ -63,6 +60,5 @@ PYBIND11_MODULE(htmPixelization, mod) {
     });
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

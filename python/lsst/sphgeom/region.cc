@@ -21,7 +21,7 @@
  */
 #include "pybind11/pybind11.h"
 
-#include <memory>
+#include "sphgeom.h"
 
 #include "lsst/sphgeom/Box.h"
 #include "lsst/sphgeom/Box3d.h"
@@ -39,13 +39,17 @@ using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
+
 namespace {
+py::bytes encode(Region const &self) {
+    std::vector<uint8_t> bytes = self.encode();
+    return py::bytes(reinterpret_cast<char const *>(bytes.data()),
+                     bytes.size());
+}
+}
 
-PYBIND11_MODULE(region, mod) {
-    py::class_<Region, std::unique_ptr<Region>> cls(mod, "Region");
-
-    // clone() is wrapped by Region subclasses. It returns wrapper
-    // objects specific to the subclass, rather than a generic one.
+template <>
+void defineClass(py::class_<Region, std::unique_ptr<Region>> &cls) {
     cls.def("clone", [](Region const &self) { return self.clone().release(); });
     cls.def("getBoundingBox", &Region::getBoundingBox);
     cls.def("getBoundingBox3d", &Region::getBoundingBox3d);
@@ -72,6 +76,5 @@ PYBIND11_MODULE(region, mod) {
             "bytes"_a);
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

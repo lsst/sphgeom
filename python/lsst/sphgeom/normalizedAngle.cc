@@ -21,6 +21,8 @@
  */
 #include "pybind11/pybind11.h"
 
+#include "sphgeom.h"
+
 #include "lsst/sphgeom/LonLat.h"
 #include "lsst/sphgeom/NormalizedAngle.h"
 #include "lsst/sphgeom/Vector3d.h"
@@ -30,12 +32,9 @@ using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
-PYBIND11_MODULE(normalizedAngle, mod) {
-    py::module::import("lsst.sphgeom.angle");
-
-    py::class_<NormalizedAngle> cls(mod, "NormalizedAngle");
+template <>
+void defineClass(py::class_<NormalizedAngle> &cls) {
     // Provide the equivalent of the NormalizedAngle to Angle C++ cast
     // operator in Python
     py::implicitly_convertible<NormalizedAngle, Angle>();
@@ -95,6 +94,5 @@ PYBIND11_MODULE(normalizedAngle, mod) {
     });
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

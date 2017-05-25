@@ -21,7 +21,7 @@
  */
 #include "pybind11/pybind11.h"
 
-#include <memory>
+#include "sphgeom.h"
 
 #include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/python/relationship.h"
@@ -32,14 +32,9 @@ using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
-PYBIND11_MODULE(box3d, mod) {
-    py::module::import("lsst.sphgeom.interval1d");
-    py::module::import("lsst.sphgeom.vector3d");
-
-    py::class_<Box3d, std::shared_ptr<Box3d>> cls(mod, "Box3d");
-
+template <>
+void defineClass(py::class_<Box3d, std::shared_ptr<Box3d>> &cls) {
     cls.def_static("empty", &Box3d::empty);
     cls.def_static("full", &Box3d::full);
     cls.def_static("aroundUnitSphere", &Box3d::aroundUnitSphere);
@@ -163,6 +158,5 @@ PYBIND11_MODULE(box3d, mod) {
     });
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

@@ -21,7 +21,7 @@
  */
 #include "pybind11/pybind11.h"
 
-#include <memory>
+#include "sphgeom.h"
 
 #include "lsst/sphgeom/LonLat.h"
 #include "lsst/sphgeom/Vector3d.h"
@@ -31,11 +31,9 @@ using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
-PYBIND11_MODULE(lonLat, mod) {
-    py::class_<LonLat, std::shared_ptr<LonLat>> cls(mod, "LonLat");
-
+template <>
+void defineClass(py::class_<LonLat, std::shared_ptr<LonLat>> &cls) {
     cls.def_static("fromDegrees", &LonLat::fromDegrees);
     cls.def_static("fromRadians", &LonLat::fromRadians);
     cls.def_static("latitudeOf", &LonLat::latitudeOf);
@@ -76,6 +74,5 @@ PYBIND11_MODULE(lonLat, mod) {
     });
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

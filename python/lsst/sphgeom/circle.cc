@@ -21,7 +21,7 @@
  */
 #include "pybind11/pybind11.h"
 
-#include <memory>
+#include "sphgeom.h"
 
 #include "lsst/sphgeom/Box.h"
 #include "lsst/sphgeom/Circle.h"
@@ -38,20 +38,18 @@ using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
+namespace {
 std::unique_ptr<Circle> decode(py::bytes bytes) {
     uint8_t const *buffer = reinterpret_cast<uint8_t const *>(
             PYBIND11_BYTES_AS_STRING(bytes.ptr()));
     size_t n = static_cast<size_t>(PYBIND11_BYTES_SIZE(bytes.ptr()));
     return Circle::decode(buffer, n);
 }
+}
 
-PYBIND11_MODULE(circle, mod) {
-    py::module::import("lsst.sphgeom.region");
-
-    py::class_<Circle, std::unique_ptr<Circle>, Region> cls(mod, "Circle");
-
+template <>
+void defineClass(py::class_<Circle, std::unique_ptr<Circle>, Region> &cls) {
     cls.attr("TYPE_CODE") = py::int_(Circle::TYPE_CODE);
 
     cls.def_static("empty", &Circle::empty);
@@ -149,6 +147,5 @@ PYBIND11_MODULE(circle, mod) {
             [](py::bytes bytes) { return decode(bytes).release(); }));
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

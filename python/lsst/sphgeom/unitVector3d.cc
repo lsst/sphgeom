@@ -21,13 +21,12 @@
  */
 #include "pybind11/pybind11.h"
 
-#include <memory>
-#include <string>
+#include "sphgeom.h"
 
 #include "lsst/sphgeom/Angle.h"
 #include "lsst/sphgeom/LonLat.h"
-#include "lsst/sphgeom/UnitVector3d.h"
 #include "lsst/sphgeom/Vector3d.h"
+#include "lsst/sphgeom/UnitVector3d.h"
 #include "lsst/sphgeom/python/utils.h"
 
 namespace py = pybind11;
@@ -35,13 +34,9 @@ using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
-PYBIND11_MODULE(unitVector3d, mod) {
-    py::module::import("lsst.sphgeom.vector3d");
-
-    py::class_<UnitVector3d, std::shared_ptr<UnitVector3d>> cls(mod,
-                                                                "UnitVector3d");
+template <>
+void defineClass(py::class_<UnitVector3d, std::shared_ptr<UnitVector3d>> &cls) {
     // Provide the equivalent of the UnitVector3d to Vector3d C++ cast
     // operator in Python
     py::implicitly_convertible<UnitVector3d, Vector3d>();
@@ -129,6 +124,5 @@ PYBIND11_MODULE(unitVector3d, mod) {
                        }));
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

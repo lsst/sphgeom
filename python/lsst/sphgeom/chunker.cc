@@ -22,7 +22,7 @@
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
 
-#include <memory>
+#include "sphgeom.h"
 
 #include "lsst/sphgeom/Chunker.h"
 
@@ -31,17 +31,16 @@ using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
-py::str toString(Chunker const & self) {
+namespace {
+py::str toString(Chunker const &self) {
     return py::str("Chunker({!s}, {!s})")
             .format(self.getNumStripes(), self.getNumSubStripesPerStripe());
 }
+}
 
-
-PYBIND11_MODULE(chunker, mod) {
-    py::class_<Chunker, std::shared_ptr<Chunker>> cls(mod, "Chunker");
-
+template <>
+void defineClass(py::class_<Chunker, std::shared_ptr<Chunker>> &cls) {
     cls.def(py::init<int32_t, int32_t>(), "numStripes"_a,
             "numSubStripesPerStripe"_a);
 
@@ -57,7 +56,7 @@ PYBIND11_MODULE(chunker, mod) {
     cls.def("getSubChunksIntersecting",
             [](Chunker const &self, Region const &region) {
                 py::list results;
-                for (auto const & sc: self.getSubChunksIntersecting(region)) {
+                for (auto const &sc : self.getSubChunksIntersecting(region)) {
                     results.append(py::make_tuple(sc.chunkId, sc.subChunkIds));
                 }
                 return results;
@@ -76,6 +75,5 @@ PYBIND11_MODULE(chunker, mod) {
     });
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

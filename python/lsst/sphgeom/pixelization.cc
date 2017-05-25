@@ -21,6 +21,8 @@
  */
 #include "pybind11/pybind11.h"
 
+#include "sphgeom.h"
+
 #include "lsst/sphgeom/Pixelization.h"
 #include "lsst/sphgeom/Region.h"
 #include "lsst/sphgeom/UnitVector3d.h"
@@ -30,11 +32,9 @@ using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
-PYBIND11_MODULE(pixelization, mod) {
-    py::class_<Pixelization> cls(mod, "Pixelization");
-
+template <>
+void defineClass(py::class_<Pixelization> &cls) {
     cls.def("universe", &Pixelization::universe);
     cls.def("pixel", &Pixelization::pixel, "i"_a);
     cls.def("index", &Pixelization::index, "i"_a);
@@ -43,6 +43,5 @@ PYBIND11_MODULE(pixelization, mod) {
     cls.def("interior", &Pixelization::interior, "region"_a, "maxRanges"_a = 0);
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst
