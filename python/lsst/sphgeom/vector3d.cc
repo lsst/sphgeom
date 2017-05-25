@@ -21,7 +21,7 @@
  */
 #include "pybind11/pybind11.h"
 
-#include <memory>
+#include "sphgeom.h"
 
 #include "lsst/sphgeom/Angle.h"
 #include "lsst/sphgeom/UnitVector3d.h"
@@ -33,13 +33,9 @@ using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
-PYBIND11_PLUGIN(vector3d) {
-    py::module mod("vector3d");
-
-    py::class_<Vector3d, std::shared_ptr<Vector3d>> cls(mod, "Vector3d");
-
+template <>
+void defineClass(py::class_<Vector3d, std::shared_ptr<Vector3d>> &cls) {
     cls.def(py::init<>());
     cls.def(py::init<double, double, double>(), "x"_a, "y"_a, "z"_a);
     cls.def(py::init<Vector3d const &>(), "vector"_a);
@@ -97,10 +93,7 @@ PYBIND11_PLUGIN(vector3d) {
         return py::make_tuple(cls,
                               py::make_tuple(self.x(), self.y(), self.z()));
     });
-
-    return mod.ptr();
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

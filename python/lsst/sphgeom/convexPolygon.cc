@@ -22,14 +22,13 @@
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
 
-#include <memory>
+#include "sphgeom.h"
 
 #include "lsst/sphgeom/Box.h"
 #include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/Circle.h"
 #include "lsst/sphgeom/ConvexPolygon.h"
 #include "lsst/sphgeom/Ellipse.h"
-#include "lsst/sphgeom/Region.h"
 #include "lsst/sphgeom/UnitVector3d.h"
 
 #include "lsst/sphgeom/python/relationship.h"
@@ -39,22 +38,19 @@ using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
+namespace {
 std::unique_ptr<ConvexPolygon> decode(py::bytes bytes) {
     uint8_t const *buffer = reinterpret_cast<uint8_t const *>(
             PYBIND11_BYTES_AS_STRING(bytes.ptr()));
     size_t n = static_cast<size_t>(PYBIND11_BYTES_SIZE(bytes.ptr()));
     return ConvexPolygon::decode(buffer, n);
 }
+}
 
-PYBIND11_PLUGIN(convexPolygon) {
-    py::module mod("convexPolygon");
-    py::module::import("lsst.sphgeom.region");
-
-    py::class_<ConvexPolygon, std::shared_ptr<ConvexPolygon>, Region> cls(
-            mod, "ConvexPolygon");
-
+template <>
+void defineClass(py::class_<ConvexPolygon, std::shared_ptr<ConvexPolygon>,
+                            Region> &cls) {
     cls.attr("TYPE_CODE") = py::int_(ConvexPolygon::TYPE_CODE);
 
     cls.def_static("convexHull", &ConvexPolygon::convexHull, "points"_a);
@@ -83,10 +79,7 @@ PYBIND11_PLUGIN(convexPolygon) {
     cls.def("__setstate__", [](ConvexPolygon &self, py::bytes bytes) {
         new (&self) ConvexPolygon(*decode(bytes));
     });
-
-    return mod.ptr();
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

@@ -19,33 +19,17 @@
  * the GNU General Public License along with this program.  If not,
  * see <https://www.lsstcorp.org/LegalNotices/>.
  */
-#include "pybind11/pybind11.h"
 
-#include "lsst/sphgeom/curve.h"
-
-namespace py = pybind11;
-using namespace pybind11::literals;
+#ifndef PYTHON_LSST_SPHGEOM_SPHGEOM_H
+#define PYTHON_LSST_SPHGEOM_SPHGEOM_H
 
 namespace lsst {
 namespace sphgeom {
 
-void defineCurve(py::module &mod) {
-    mod.def("log2", (uint8_t(*)(uint64_t)) & log2);
-    mod.def("mortonIndex", (uint64_t(*)(uint32_t, uint32_t)) & mortonIndex,
-            "x"_a, "y"_a);
-    mod.def("mortonIndexInverse",
-            (std::tuple<uint32_t, uint32_t>(*)(uint64_t)) & mortonIndexInverse,
-            "z"_a);
-    mod.def("mortonToHilbert", &mortonToHilbert, "z"_a, "m"_a);
-    mod.def("hilbertToMorton", &hilbertToMorton, "h"_a, "m"_a);
-    mod.def("hilbertIndex",
-            (uint64_t(*)(uint32_t, uint32_t, int)) & hilbertIndex, "x"_a, "y"_a,
-            "m"_a);
-    mod.def("hilbertIndexInverse",
-            (std::tuple<uint32_t, uint32_t>(*)(uint64_t, int)) &
-                    hilbertIndexInverse,
-            "h"_a, "m"_a);
-}
+template <typename Pybind11Class>
+void defineClass(Pybind11Class &cls);
 
 }  // sphgeom
 }  // lsst
+
+#endif  // PYTHON_LSST_SPHGEOM_SPHGEOM_H

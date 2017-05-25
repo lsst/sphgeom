@@ -21,8 +21,7 @@
  */
 #include "pybind11/pybind11.h"
 
-#include <memory>
-#include <stdexcept>
+#include "sphgeom.h"
 
 #include "lsst/sphgeom/NormalizedAngleInterval.h"
 #include "lsst/sphgeom/python/interval.h"
@@ -32,16 +31,10 @@ using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
-PYBIND11_PLUGIN(normalizedAngleInterval) {
-    py::module mod("normalizedAngleInterval");
-    py::module::import("lsst.sphgeom.normalizedAngle");
-
-    py::class_<NormalizedAngleInterval,
-               std::shared_ptr<NormalizedAngleInterval>>
-            cls(mod, "NormalizedAngleInterval");
-
+template <>
+void defineClass(py::class_<NormalizedAngleInterval,
+                            std::shared_ptr<NormalizedAngleInterval>> &cls) {
     python::defineInterval<decltype(cls), NormalizedAngleInterval,
                            NormalizedAngle>(cls);
 
@@ -72,10 +65,7 @@ PYBIND11_PLUGIN(normalizedAngleInterval) {
                        " {!r})")
                 .format(self.getA().asRadians(), self.getB().asRadians());
     });
-
-    return mod.ptr();
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

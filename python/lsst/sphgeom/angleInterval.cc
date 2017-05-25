@@ -21,8 +21,7 @@
  */
 #include "pybind11/pybind11.h"
 
-#include <memory>
-#include <stdexcept>
+#include "sphgeom.h"
 
 #include "lsst/sphgeom/AngleInterval.h"
 #include "lsst/sphgeom/python/interval.h"
@@ -32,15 +31,10 @@ using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
-PYBIND11_PLUGIN(angleInterval) {
-    py::module mod("angleInterval");
-    py::module::import("lsst.sphgeom.angle");
-
-    py::class_<AngleInterval, std::shared_ptr<AngleInterval>> cls(
-            mod, "AngleInterval");
-
+template <>
+void defineClass(
+        py::class_<AngleInterval, std::shared_ptr<AngleInterval>> &cls) {
     python::defineInterval<decltype(cls), AngleInterval, Angle>(cls);
 
     cls.def_static("fromDegrees", &AngleInterval::fromDegrees, "x"_a, "y"_a);
@@ -61,10 +55,7 @@ PYBIND11_PLUGIN(angleInterval) {
         return py::str("AngleInterval.fromRadians({!r}, {!r})")
                 .format(self.getA().asRadians(), self.getB().asRadians());
     });
-
-    return mod.ptr();
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

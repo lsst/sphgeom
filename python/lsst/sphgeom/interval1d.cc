@@ -21,8 +21,7 @@
  */
 #include "pybind11/pybind11.h"
 
-#include <memory>
-#include <stdexcept>
+#include "sphgeom.h"
 
 #include "lsst/sphgeom/Interval1d.h"
 #include "lsst/sphgeom/python/interval.h"
@@ -32,13 +31,9 @@ using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
-PYBIND11_PLUGIN(interval1d) {
-    py::module mod("interval1d");
-
-    py::class_<Interval1d, std::shared_ptr<Interval1d>> cls(mod, "Interval1d");
-
+template <>
+void defineClass(py::class_<Interval1d, std::shared_ptr<Interval1d>> &cls) {
     python::defineInterval<decltype(cls), Interval1d, double>(cls);
 
     cls.def_static("empty", &Interval1d::empty);
@@ -58,10 +53,7 @@ PYBIND11_PLUGIN(interval1d) {
         return py::str("Interval1d({!r}, {!r})")
                 .format(self.getA(), self.getB());
     });
-
-    return mod.ptr();
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

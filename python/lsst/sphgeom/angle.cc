@@ -21,6 +21,8 @@
  */
 #include "pybind11/pybind11.h"
 
+#include "sphgeom.h"
+
 #include "lsst/sphgeom/Angle.h"
 #include "lsst/sphgeom/NormalizedAngle.h"
 
@@ -29,13 +31,9 @@ using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
-PYBIND11_PLUGIN(angle) {
-    py::module mod("angle");
-
-    py::class_<Angle> cls(mod, "Angle");
-
+template <>
+void defineClass(py::class_<Angle> &cls) {
     cls.def_static("nan", &Angle::nan);
     cls.def_static("fromDegrees", &Angle::fromDegrees);
     cls.def_static("fromRadians", &Angle::fromRadians);
@@ -92,10 +90,7 @@ PYBIND11_PLUGIN(angle) {
     cls.def("__reduce__", [cls](Angle const &self) {
         return py::make_tuple(cls, py::make_tuple(self.asRadians()));
     });
-
-    return mod.ptr();
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

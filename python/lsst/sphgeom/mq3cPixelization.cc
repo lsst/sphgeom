@@ -21,6 +21,8 @@
  */
 #include "pybind11/pybind11.h"
 
+#include "sphgeom.h"
+
 #include "lsst/sphgeom/Mq3cPixelization.h"
 
 namespace py = pybind11;
@@ -28,15 +30,9 @@ using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
-PYBIND11_PLUGIN(mq3cPixelization) {
-    py::module mod("mq3cPixelization");
-    py::module::import("lsst.sphgeom.pixelization");
-    py::module::import("lsst.sphgeom.region");
-
-    py::class_<Mq3cPixelization, Pixelization> cls(mod, "Mq3cPixelization");
-
+template <>
+void defineClass(py::class_<Mq3cPixelization, Pixelization> &cls) {
     cls.attr("MAX_LEVEL") = py::int_(Mq3cPixelization::MAX_LEVEL);
 
     cls.def_static("level", &Mq3cPixelization::level);
@@ -63,10 +59,7 @@ PYBIND11_PLUGIN(mq3cPixelization) {
     cls.def("__reduce__", [cls](Mq3cPixelization const &self) {
         return py::make_tuple(cls, py::make_tuple(self.getLevel()));
     });
-
-    return mod.ptr();
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

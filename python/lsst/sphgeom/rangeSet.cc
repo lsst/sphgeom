@@ -21,7 +21,7 @@
  */
 #include "pybind11/pybind11.h"
 
-#include <stdexcept>
+#include "sphgeom.h"
 
 #include "lsst/sphgeom/RangeSet.h"
 #include "lsst/sphgeom/python/utils.h"
@@ -31,10 +31,11 @@ using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
+
 namespace {
 
 /// Convert a Python integer to a uint64_t.
-uint64_t _uint64(py::handle const & obj) {
+uint64_t _uint64(py::handle const &obj) {
     try {
         return obj.cast<uint64_t>();
     } catch (py::cast_error const &) {
@@ -80,11 +81,10 @@ py::list ranges(RangeSet const &self) {
 // range end-point values of 0 and the Python integer 2**64. Since this is
 // somewhat involved, it is left as future work.
 
-PYBIND11_PLUGIN(rangeSet) {
-    py::module mod("rangeSet");
+}  // <anonymous>
 
-    py::class_<RangeSet, std::shared_ptr<RangeSet>> cls(mod, "RangeSet");
-
+template <>
+void defineClass(py::class_<RangeSet, std::shared_ptr<RangeSet>> &cls) {
     cls.def(py::init<>());
     cls.def(py::init<uint64_t>(), "integer"_a);
     cls.def(py::init<uint64_t, uint64_t>(), "first"_a, "last"_a);
@@ -209,10 +209,7 @@ PYBIND11_PLUGIN(rangeSet) {
     cls.def("__reduce__", [cls](RangeSet const &self) {
         return py::make_tuple(cls, py::make_tuple(ranges(self)));
     });
-
-    return mod.ptr();
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

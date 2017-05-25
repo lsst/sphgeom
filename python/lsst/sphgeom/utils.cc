@@ -21,6 +21,8 @@
  */
 #include "pybind11/pybind11.h"
 
+#include "sphgeom.h"
+
 #include "lsst/sphgeom/Angle.h"
 #include "lsst/sphgeom/UnitVector3d.h"
 #include "lsst/sphgeom/utils.h"
@@ -31,11 +33,8 @@ using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
-PYBIND11_PLUGIN(utils) {
-    py::module mod("utils");
-
+void defineUtils(py::module &mod) {
     mod.def("getMinSquaredChordLength", &getMinSquaredChordLength, "v"_a, "a"_a,
             "b"_a, "n"_a);
     mod.def("getMaxSquaredChordLength", &getMaxSquaredChordLength, "v"_a, "a"_a,
@@ -44,10 +43,7 @@ PYBIND11_PLUGIN(utils) {
     mod.def("getMaxAngleToCircle", &getMaxAngleToCircle, "x"_a, "c"_a);
     mod.def("getWeightedCentroid", &getWeightedCentroid, "vector0"_a,
             "vector1"_a, "vector2"_a);
-
-    return mod.ptr();
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst
