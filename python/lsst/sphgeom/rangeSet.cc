@@ -87,14 +87,15 @@ template <>
 void defineClass(py::class_<RangeSet, std::shared_ptr<RangeSet>> &cls) {
     cls.def(py::init<>());
     cls.def(py::init<uint64_t>(), "integer"_a);
-    cls.def(py::init<uint64_t, uint64_t>(), "first"_a, "last"_a);
+    cls.def(py::init([](uint64_t a, uint64_t b) {
+                return new RangeSet(a, b);
+            }),
+            "first"_a, "last"_a);
     cls.def(py::init<RangeSet const &>(), "rangeSet"_a);
-    cls.def("__init__",
-            [](RangeSet &self, py::iterable iterable) {
-                new (&self) RangeSet(makeRangeSet(iterable));
-            },
+    cls.def(py::init([](py::iterable iterable) {
+                return new RangeSet(makeRangeSet(iterable));
+            }),
             "iterable"_a);
-
     cls.def("__eq__", &RangeSet::operator==, py::is_operator());
     cls.def("__ne__", &RangeSet::operator!=, py::is_operator());
 

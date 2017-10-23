@@ -57,9 +57,7 @@ void defineUtils(py::module&);
 
 namespace {
 
-PYBIND11_PLUGIN(sphgeom) {
-    py::module mod("sphgeom");
-
+PYBIND11_MODULE(sphgeom, mod) {
     // Create all Python class instances up front, then define them.
     //
     // This results in docstrings containing only Python type names, even
@@ -137,8 +135,6 @@ PYBIND11_PLUGIN(sphgeom) {
     defineOrientation(mod);
     defineRelationship(mod);
     defineUtils(mod);
-
-    return mod.ptr();
 }
 
 }  // <anonymous>
