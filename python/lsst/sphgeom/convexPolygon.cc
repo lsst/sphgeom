@@ -69,7 +69,12 @@ PYBIND11_PLUGIN(convexPolygon) {
     cls.def("getVertices", &ConvexPolygon::getVertices);
     cls.def("getCentroid", &ConvexPolygon::getCentroid);
 
-    // Note that the Region interface has already been wrapped.
+    // Note that much of the Region interface has already been wrapped. Here are bits that have not:
+    cls.def("contains", py::overload_cast<UnitVector3d const &>(&ConvexPolygon::contains, py::const_));
+    cls.def("contains", py::overload_cast<Region const &>(&ConvexPolygon::contains, py::const_));
+    cls.def("isDisjointFrom", &ConvexPolygon::isDisjointFrom);
+    cls.def("intersects", &ConvexPolygon::intersects);
+    cls.def("isWithin", &ConvexPolygon::isWithin);
 
     // The lambda is necessary for now; returning the unique pointer
     // directly leads to incorrect results and crashes.
