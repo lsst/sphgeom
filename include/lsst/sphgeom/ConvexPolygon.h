@@ -113,7 +113,30 @@ public:
     Box3d getBoundingBox3d() const override;
     Circle getBoundingCircle() const override;
 
+    ///@{
+    /// `contains` returns true if the intersection of this convex polygon and x
+    /// is equal to x.
     bool contains(UnitVector3d const & v) const override;
+    bool contains(Region const & r) const;
+    ///@}
+
+    ///@{
+    /// `isDisjointFrom` returns true if the intersection of this convex polygon
+    /// and x is empty.
+    bool isDisjointFrom(Region const & r) const;
+    ///@}
+
+    ///@{
+    /// `intersects` returns true if the intersection of this convex polygon and x
+    /// is non-empty.
+    bool intersects(Region const & r) const;
+    ///@}
+
+    ///@{
+    /// `isWithin` returns true if the intersection of this convex polygon and x
+    /// is this convex polygon.
+    bool isWithin(Region const & r) const;
+    ///@}
 
     Relationship relate(Region const & r) const override {
         // Dispatch on the type of r.

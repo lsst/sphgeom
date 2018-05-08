@@ -28,7 +28,7 @@ except ImportError:
 
 import unittest
 
-from lsst.sphgeom import CONTAINS, ConvexPolygon, Region, UnitVector3d
+from lsst.sphgeom import CONTAINS, ConvexPolygon, Circle, Region, UnitVector3d
 
 
 class ConvexPolygonTestCase(unittest.TestCase):
@@ -62,7 +62,17 @@ class ConvexPolygonTestCase(unittest.TestCase):
                            UnitVector3d.X(),
                            UnitVector3d.Y()])
         self.assertTrue(p.contains(p.getCentroid()))
-        self.assertEqual(p.getBoundingCircle().relate(p), CONTAINS)
+        boundingCircle = p.getBoundingCircle()
+        self.assertEqual(boundingCircle.relate(p), CONTAINS)
+        self.assertTrue(p.isWithin(boundingCircle))
+        self.assertTrue(p.intersects(boundingCircle))
+        self.assertFalse(p.isDisjointFrom(boundingCircle))
+        self.assertFalse(p.contains(boundingCircle))
+        tinyCircle = Circle(boundingCircle.getCenter())
+        self.assertFalse(p.isWithin(tinyCircle))
+        self.assertTrue(p.intersects(tinyCircle))
+        self.assertFalse(p.isDisjointFrom(tinyCircle))
+        self.assertTrue(p.contains(tinyCircle))
 
     def testString(self):
         p = ConvexPolygon([UnitVector3d.Z(),
