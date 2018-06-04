@@ -282,6 +282,12 @@ std::vector<int32_t> Chunker::getAllSubChunks(int32_t chunkId) const {
     return subChunkIds;
 }
 
+bool Chunker::valid(int32_t chunkId) const {
+    int32_t const s = _getStripe(chunkId);
+    return s >= 0 and s < _numStripes and
+           _getChunk(chunkId, s) < _stripes.at(s).numChunksPerStripe;
+}
+
 Box Chunker::_getChunkBoundingBox(int32_t stripe, int32_t chunk) const {
     Angle chunkWidth = _stripes[stripe].chunkWidth;
     NormalizedAngleInterval lon(chunkWidth * chunk,

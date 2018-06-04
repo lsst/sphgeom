@@ -106,6 +106,9 @@ public:
     /// for the given chunk.
     std::vector<int32_t> getAllSubChunks(int32_t chunkId) const;
 
+    /// Return 'true' if the specified chunk number is valid
+    bool valid(int32_t chunkId) const;
+
 private:
     struct Stripe {
         Angle chunkWidth;
@@ -128,6 +131,10 @@ private:
 
     int32_t _getStripe(int32_t chunkId) const {
         return chunkId / (2 * _numStripes);
+    }
+
+    int32_t _getChunk(int32_t chunkId, int32_t stripe) const {
+        return chunkId - stripe*2*_numStripes;
     }
 
     int32_t _getChunkId(int32_t stripe, int32_t chunk) const {
