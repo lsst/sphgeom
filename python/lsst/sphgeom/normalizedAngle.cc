@@ -32,8 +32,7 @@ namespace lsst {
 namespace sphgeom {
 namespace {
 
-PYBIND11_PLUGIN(normalizedAngle) {
-    py::module mod("normalizedAngle");
+PYBIND11_MODULE(normalizedAngle, mod) {
     py::module::import("lsst.sphgeom.angle");
 
     py::class_<NormalizedAngle> cls(mod, "NormalizedAngle");
@@ -94,8 +93,6 @@ PYBIND11_PLUGIN(normalizedAngle) {
     cls.def("__reduce__", [cls](NormalizedAngle const &self) {
         return py::make_tuple(cls, py::make_tuple(self.asRadians()));
     });
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

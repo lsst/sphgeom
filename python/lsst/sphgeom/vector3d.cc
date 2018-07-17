@@ -35,9 +35,7 @@ namespace lsst {
 namespace sphgeom {
 namespace {
 
-PYBIND11_PLUGIN(vector3d) {
-    py::module mod("vector3d");
-
+PYBIND11_MODULE(vector3d, mod) {
     py::class_<Vector3d, std::shared_ptr<Vector3d>> cls(mod, "Vector3d");
 
     cls.def(py::init<>());
@@ -97,8 +95,6 @@ PYBIND11_PLUGIN(vector3d) {
         return py::make_tuple(cls,
                               py::make_tuple(self.x(), self.y(), self.z()));
     });
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

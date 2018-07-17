@@ -34,8 +34,7 @@ namespace lsst {
 namespace sphgeom {
 namespace {
 
-PYBIND11_PLUGIN(box3d) {
-    py::module mod("box3d");
+PYBIND11_MODULE(box3d, mod) {
     py::module::import("lsst.sphgeom.interval1d");
     py::module::import("lsst.sphgeom.vector3d");
 
@@ -162,8 +161,6 @@ PYBIND11_PLUGIN(box3d) {
         return py::make_tuple(cls,
                               py::make_tuple(self.x(), self.y(), self.z()));
     });
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

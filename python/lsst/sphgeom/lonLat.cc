@@ -33,9 +33,7 @@ namespace lsst {
 namespace sphgeom {
 namespace {
 
-PYBIND11_PLUGIN(lonLat) {
-    py::module mod("lonLat");
-
+PYBIND11_MODULE(lonLat, mod) {
     py::class_<LonLat, std::shared_ptr<LonLat>> cls(mod, "LonLat");
 
     cls.def_static("fromDegrees", &LonLat::fromDegrees);
@@ -76,8 +74,6 @@ PYBIND11_PLUGIN(lonLat) {
         return py::make_tuple(cls,
                               py::make_tuple(self.getLon(), self.getLat()));
     });
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

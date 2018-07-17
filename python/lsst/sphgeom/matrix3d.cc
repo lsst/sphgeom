@@ -37,8 +37,7 @@ Vector3d getRow(Matrix3d const &self, py::int_ row) {
     return self.getRow(static_cast<int>(python::convertIndex(3, row)));
 }
 
-PYBIND11_PLUGIN(matrix3d) {
-    py::module mod("matrix3d");
+PYBIND11_MODULE(matrix3d, mod) {
     py::module::import("lsst.sphgeom.vector3d");
 
     py::class_<Matrix3d, std::shared_ptr<Matrix3d>> cls(mod, "Matrix3d");
@@ -122,8 +121,6 @@ PYBIND11_PLUGIN(matrix3d) {
                                    self(2, 0), self(2, 1), self(2, 2));
         return py::make_tuple(cls, args);
     });
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

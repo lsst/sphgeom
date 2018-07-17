@@ -46,8 +46,7 @@ std::unique_ptr<Circle> decode(py::bytes bytes) {
     return Circle::decode(buffer, n);
 }
 
-PYBIND11_PLUGIN(circle) {
-    py::module mod("circle");
+PYBIND11_MODULE(circle, mod) {
     py::module::import("lsst.sphgeom.region");
 
     py::class_<Circle, std::shared_ptr<Circle>, Region> cls(mod, "Circle");
@@ -147,8 +146,6 @@ PYBIND11_PLUGIN(circle) {
     cls.def("__setstate__", [](Circle &self, py::bytes bytes) {
         new (&self) Circle(*decode(bytes));
     });
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

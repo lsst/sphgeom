@@ -48,8 +48,7 @@ std::unique_ptr<ConvexPolygon> decode(py::bytes bytes) {
     return ConvexPolygon::decode(buffer, n);
 }
 
-PYBIND11_PLUGIN(convexPolygon) {
-    py::module mod("convexPolygon");
+PYBIND11_MODULE(convexPolygon, mod) {
     py::module::import("lsst.sphgeom.region");
 
     py::class_<ConvexPolygon, std::shared_ptr<ConvexPolygon>, Region> cls(
@@ -88,8 +87,6 @@ PYBIND11_PLUGIN(convexPolygon) {
     cls.def("__setstate__", [](ConvexPolygon &self, py::bytes bytes) {
         new (&self) ConvexPolygon(*decode(bytes));
     });
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

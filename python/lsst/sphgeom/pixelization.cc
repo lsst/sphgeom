@@ -32,9 +32,7 @@ namespace lsst {
 namespace sphgeom {
 namespace {
 
-PYBIND11_PLUGIN(pixelization) {
-    py::module mod("pixelization");
-
+PYBIND11_MODULE(pixelization, mod) {
     py::class_<Pixelization> cls(mod, "Pixelization");
 
     cls.def("universe", &Pixelization::universe);
@@ -43,8 +41,6 @@ PYBIND11_PLUGIN(pixelization) {
     cls.def("toString", &Pixelization::toString, "i"_a);
     cls.def("envelope", &Pixelization::envelope, "region"_a, "maxRanges"_a = 0);
     cls.def("interior", &Pixelization::interior, "region"_a, "maxRanges"_a = 0);
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

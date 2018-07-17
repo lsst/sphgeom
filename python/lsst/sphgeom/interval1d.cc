@@ -34,9 +34,7 @@ namespace lsst {
 namespace sphgeom {
 namespace {
 
-PYBIND11_PLUGIN(interval1d) {
-    py::module mod("interval1d");
-
+PYBIND11_MODULE(interval1d, mod) {
     py::class_<Interval1d, std::shared_ptr<Interval1d>> cls(mod, "Interval1d");
 
     python::defineInterval<decltype(cls), Interval1d, double>(cls);
@@ -58,8 +56,6 @@ PYBIND11_PLUGIN(interval1d) {
         return py::str("Interval1d({!r}, {!r})")
                 .format(self.getA(), self.getB());
     });
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

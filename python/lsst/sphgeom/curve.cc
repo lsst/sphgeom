@@ -30,9 +30,7 @@ namespace lsst {
 namespace sphgeom {
 namespace {
 
-PYBIND11_PLUGIN(curve) {
-    py::module mod("curve");
-
+PYBIND11_MODULE(curve, mod) {
     mod.def("log2", (uint8_t(*)(uint64_t)) & log2);
     mod.def("mortonIndex", (uint64_t(*)(uint32_t, uint32_t)) & mortonIndex,
             "x"_a, "y"_a);
@@ -48,8 +46,6 @@ PYBIND11_PLUGIN(curve) {
             (std::tuple<uint32_t, uint32_t>(*)(uint64_t, int)) &
                     hilbertIndexInverse,
             "h"_a, "m"_a);
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

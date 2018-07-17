@@ -31,9 +31,7 @@ namespace lsst {
 namespace sphgeom {
 namespace {
 
-PYBIND11_PLUGIN(angle) {
-    py::module mod("angle");
-
+PYBIND11_MODULE(angle, mod) {
     py::class_<Angle> cls(mod, "Angle");
 
     cls.def_static("nan", &Angle::nan);
@@ -92,8 +90,6 @@ PYBIND11_PLUGIN(angle) {
     cls.def("__reduce__", [cls](Angle const &self) {
         return py::make_tuple(cls, py::make_tuple(self.asRadians()));
     });
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

@@ -48,8 +48,7 @@ std::unique_ptr<Ellipse> decode(py::bytes bytes) {
     return Ellipse::decode(buffer, n);
 }
 
-PYBIND11_PLUGIN(ellipse) {
-    py::module mod("ellipse");
+PYBIND11_MODULE(ellipse, mod) {
     py::module::import("lsst.sphgeom.region");
 
     py::class_<Ellipse, std::shared_ptr<Ellipse>, Region> cls(mod, "Ellipse");
@@ -105,8 +104,6 @@ PYBIND11_PLUGIN(ellipse) {
     cls.def("__setstate__", [](Ellipse &self, py::bytes bytes) {
         new (&self) Ellipse(*decode(bytes));
     });
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

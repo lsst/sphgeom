@@ -30,17 +30,13 @@ namespace lsst {
 namespace sphgeom {
 namespace {
 
-PYBIND11_PLUGIN(relationship) {
-    py::module mod("relationship");
-
+PYBIND11_MODULE(relationship, mod) {
     mod.attr("DISJOINT") = py::cast(DISJOINT.to_ulong());
     mod.attr("INTERSECTS") = py::cast(INTERSECTS.to_ulong());
     mod.attr("CONTAINS") = py::cast(CONTAINS.to_ulong());
     mod.attr("WITHIN") = py::cast(WITHIN.to_ulong());
 
     mod.def("invert", &invert, "relationship"_a);
-
-    return mod.ptr();
 }
 
 }  // <anonymous>
