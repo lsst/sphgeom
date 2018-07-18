@@ -8,6 +8,10 @@ _build.*
 core.*
 .sconf_temp
 .sconsign.dblite
+.cache
+.pytest_cache
+pytest_session.txt
+.coverage
 config.log
 doc/doxygen.conf
 doc/html
