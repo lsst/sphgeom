@@ -46,10 +46,10 @@ PYBIND11_PLUGIN(angle) {
     // Construct an Angle from a NormalizedAngle, enabling implicit
     // conversion from NormalizedAngle to Angle in python via
     // py::implicitly_convertible
-    cls.def("__init__",
-            [](Angle &self, NormalizedAngle &a) {
-                new (&self) Angle(a.asRadians());
-            },
+    cls.def(py::init(
+            [](NormalizedAngle &a) {
+                return new Angle(a.asRadians());
+            }),
             "normalizedAngle"_a);
 
     cls.def("__eq__", &Angle::operator==, py::is_operator());
