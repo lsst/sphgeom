@@ -39,9 +39,7 @@ py::str toString(Chunker const & self) {
 }
 
 
-PYBIND11_PLUGIN(chunker) {
-    py::module mod("chunker");
-
+PYBIND11_MODULE(chunker, mod) {
     py::class_<Chunker, std::shared_ptr<Chunker>> cls(mod, "Chunker");
 
     cls.def(py::init<int32_t, int32_t>(), "numStripes"_a,
@@ -76,8 +74,6 @@ PYBIND11_PLUGIN(chunker) {
                               py::make_tuple(self.getNumStripes(),
                                              self.getNumSubStripesPerStripe()));
     });
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

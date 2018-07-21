@@ -36,8 +36,7 @@ namespace lsst {
 namespace sphgeom {
 namespace {
 
-PYBIND11_PLUGIN(unitVector3d) {
-    py::module mod("unitVector3d");
+PYBIND11_MODULE(unitVector3d, mod) {
     py::module::import("lsst.sphgeom.vector3d");
 
     py::class_<UnitVector3d, std::shared_ptr<UnitVector3d>> cls(mod,
@@ -128,8 +127,6 @@ PYBIND11_PLUGIN(unitVector3d) {
         new (&self) UnitVector3d(UnitVector3d::fromNormalized(
                 t[0].cast<double>(), t[1].cast<double>(), t[2].cast<double>()));
     });
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

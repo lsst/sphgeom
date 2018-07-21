@@ -46,9 +46,7 @@ py::bytes encode(Region const &self) {
                      bytes.size());
 }
 
-PYBIND11_PLUGIN(region) {
-    py::module mod("region");
-
+PYBIND11_MODULE(region, mod) {
     py::class_<Region, std::shared_ptr<Region>> cls(mod, "Region");
 
     // clone() is wrapped by Region subclasses. It returns wrapper
@@ -79,8 +77,6 @@ PYBIND11_PLUGIN(region) {
                 return Region::decode(buffer, n).release();
             },
             "bytes"_a);
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

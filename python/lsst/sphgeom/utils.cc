@@ -33,9 +33,7 @@ namespace lsst {
 namespace sphgeom {
 namespace {
 
-PYBIND11_PLUGIN(utils) {
-    py::module mod("utils");
-
+PYBIND11_MODULE(utils, mod) {
     mod.def("getMinSquaredChordLength", &getMinSquaredChordLength, "v"_a, "a"_a,
             "b"_a, "n"_a);
     mod.def("getMaxSquaredChordLength", &getMaxSquaredChordLength, "v"_a, "a"_a,
@@ -44,8 +42,6 @@ PYBIND11_PLUGIN(utils) {
     mod.def("getMaxAngleToCircle", &getMaxAngleToCircle, "x"_a, "c"_a);
     mod.def("getWeightedCentroid", &getWeightedCentroid, "vector0"_a,
             "vector1"_a, "vector2"_a);
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

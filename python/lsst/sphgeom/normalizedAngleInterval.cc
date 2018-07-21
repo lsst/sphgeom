@@ -34,8 +34,7 @@ namespace lsst {
 namespace sphgeom {
 namespace {
 
-PYBIND11_PLUGIN(normalizedAngleInterval) {
-    py::module mod("normalizedAngleInterval");
+PYBIND11_MODULE(normalizedAngleInterval, mod) {
     py::module::import("lsst.sphgeom.normalizedAngle");
 
     py::class_<NormalizedAngleInterval,
@@ -72,8 +71,6 @@ PYBIND11_PLUGIN(normalizedAngleInterval) {
                        " {!r})")
                 .format(self.getA().asRadians(), self.getB().asRadians());
     });
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

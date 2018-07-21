@@ -80,19 +80,17 @@ py::list ranges(RangeSet const &self) {
 // range end-point values of 0 and the Python integer 2**64. Since this is
 // somewhat involved, it is left as future work.
 
-PYBIND11_PLUGIN(rangeSet) {
-    py::module mod("rangeSet");
-
+PYBIND11_MODULE(rangeSet, mod) {
     py::class_<RangeSet, std::shared_ptr<RangeSet>> cls(mod, "RangeSet");
 
     cls.def(py::init<>());
     cls.def(py::init<uint64_t>(), "integer"_a);
     cls.def(py::init<uint64_t, uint64_t>(), "first"_a, "last"_a);
     cls.def(py::init<RangeSet const &>(), "rangeSet"_a);
-    cls.def("__init__",
-            [](RangeSet &self, py::iterable iterable) {
-                new (&self) RangeSet(makeRangeSet(iterable));
-            },
+    cls.def(py::init(
+            [](py::iterable iterable) {
+                return new RangeSet(makeRangeSet(iterable));
+            }),
             "iterable"_a);
 
     cls.def("__eq__", &RangeSet::operator==, py::is_operator());
@@ -209,8 +207,6 @@ PYBIND11_PLUGIN(rangeSet) {
     cls.def("__reduce__", [cls](RangeSet const &self) {
         return py::make_tuple(cls, py::make_tuple(ranges(self)));
     });
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

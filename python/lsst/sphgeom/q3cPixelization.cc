@@ -30,8 +30,7 @@ namespace lsst {
 namespace sphgeom {
 namespace {
 
-PYBIND11_PLUGIN(q3cPixelization) {
-    py::module mod("q3cPixelization");
+PYBIND11_MODULE(q3cPixelization, mod) {
     py::module::import("lsst.sphgeom.pixelization");
     py::module::import("lsst.sphgeom.region");
 
@@ -60,8 +59,6 @@ PYBIND11_PLUGIN(q3cPixelization) {
     cls.def("__reduce__", [cls](Q3cPixelization const &self) {
         return py::make_tuple(cls, py::make_tuple(self.getLevel()));
     });
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

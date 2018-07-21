@@ -50,8 +50,7 @@ std::unique_ptr<Box> decode(py::bytes bytes) {
     return Box::decode(buffer, n);
 }
 
-PYBIND11_PLUGIN(box) {
-    py::module mod("box");
+PYBIND11_MODULE(box, mod) {
     py::module::import("lsst.sphgeom.region");
 
     py::class_<Box, std::shared_ptr<Box>, Region> cls(mod, "Box");
@@ -165,8 +164,6 @@ PYBIND11_PLUGIN(box) {
     cls.def("__setstate__", [](Box &self, py::bytes bytes) {
         new (&self) Box(*decode(bytes));
     });
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

@@ -34,8 +34,7 @@ namespace lsst {
 namespace sphgeom {
 namespace {
 
-PYBIND11_PLUGIN(angleInterval) {
-    py::module mod("angleInterval");
+PYBIND11_MODULE(angleInterval, mod) {
     py::module::import("lsst.sphgeom.angle");
 
     py::class_<AngleInterval, std::shared_ptr<AngleInterval>> cls(
@@ -61,8 +60,6 @@ PYBIND11_PLUGIN(angleInterval) {
         return py::str("AngleInterval.fromRadians({!r}, {!r})")
                 .format(self.getA().asRadians(), self.getB().asRadians());
     });
-
-    return mod.ptr();
 }
 
 }  // <anonymous>

@@ -30,8 +30,7 @@ namespace lsst {
 namespace sphgeom {
 namespace {
 
-PYBIND11_PLUGIN(orientation) {
-    py::module mod("orientation");
+PYBIND11_MODULE(orientation, mod) {
     py::module::import("lsst.sphgeom.vector3d");
     py::module::import("lsst.sphgeom.unitVector3d");
 
@@ -40,8 +39,6 @@ PYBIND11_PLUGIN(orientation) {
     mod.def("orientationX", &orientationX, "b"_a, "c"_a);
     mod.def("orientationY", &orientationY, "b"_a, "c"_a);
     mod.def("orientationZ", &orientationZ, "b"_a, "c"_a);
-
-    return mod.ptr();
 }
 
 }  // <anonymous>
