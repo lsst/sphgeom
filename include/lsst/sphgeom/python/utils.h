@@ -29,6 +29,8 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "lsst/sphgeom/Region.h"
+
 namespace lsst {
 namespace sphgeom {
 namespace python {
@@ -45,6 +47,14 @@ ptrdiff_t convertIndex(ptrdiff_t len, pybind11::int_ i) {
                         .format(i, -len, len));
     }
     return (j < 0) ? j + len : j;
+}
+
+
+/// Encode a Region as a pybind11 bytes object
+pybind11::bytes encode(Region const &self) {
+    std::vector<uint8_t> bytes = self.encode();
+    return pybind11::bytes(reinterpret_cast<char const *>(bytes.data()),
+                     bytes.size());
 }
 
 }  // <anonymous>
