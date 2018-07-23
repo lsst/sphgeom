@@ -32,6 +32,7 @@
 #include "lsst/sphgeom/UnitVector3d.h"
 
 #include "lsst/sphgeom/python/relationship.h"
+#include "lsst/sphgeom/python/utils.h"
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -39,12 +40,6 @@ using namespace pybind11::literals;
 namespace lsst {
 namespace sphgeom {
 namespace {
-
-py::bytes encode(Region const &self) {
-    std::vector<uint8_t> bytes = self.encode();
-    return py::bytes(reinterpret_cast<char const *>(bytes.data()),
-                     bytes.size());
-}
 
 PYBIND11_MODULE(region, mod) {
     py::class_<Region, std::shared_ptr<Region>> cls(mod, "Region");
@@ -63,9 +58,7 @@ PYBIND11_MODULE(region, mod) {
     cls.def("relate",
             (Relationship(Region::*)(Region const &) const) & Region::relate,
             "region"_a);
-    cls.def("encode", &encode);
-
-    cls.def("__getstate__", &encode);
+    cls.def("encode", &python::encode);
 
     cls.def_static(
             "decode",
