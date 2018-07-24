@@ -33,6 +33,7 @@
 #include "lsst/sphgeom/UnitVector3d.h"
 
 #include "lsst/sphgeom/python/relationship.h"
+#include "lsst/sphgeom/python/utils.h"
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -101,9 +102,9 @@ PYBIND11_MODULE(ellipse, mod) {
         return py::str("Ellipse({!r}, {!r}, {!r})")
                 .format(self.getF1(), self.getF2(), self.getAlpha());
     });
-    cls.def("__setstate__", [](Ellipse &self, py::bytes bytes) {
-        new (&self) Ellipse(*decode(bytes));
-    });
+    cls.def(py::pickle(
+            [](const Ellipse &self) { return python::encode(self); },
+            [](py::bytes bytes) { return decode(bytes).release(); }));
 }
 
 }  // <anonymous>

@@ -33,6 +33,7 @@
 #include "lsst/sphgeom/UnitVector3d.h"
 
 #include "lsst/sphgeom/python/relationship.h"
+#include "lsst/sphgeom/python/utils.h"
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -84,9 +85,9 @@ PYBIND11_MODULE(convexPolygon, mod) {
     cls.def("__repr__", [](ConvexPolygon const &self) {
         return py::str("ConvexPolygon({!r})").format(self.getVertices());
     });
-    cls.def("__setstate__", [](ConvexPolygon &self, py::bytes bytes) {
-        new (&self) ConvexPolygon(*decode(bytes));
-    });
+    cls.def(py::pickle(
+            [](const ConvexPolygon &self) { return python::encode(self); },
+            [](py::bytes bytes) { return decode(bytes).release(); }));
 }
 
 }  // <anonymous>

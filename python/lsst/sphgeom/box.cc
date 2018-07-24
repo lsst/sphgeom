@@ -35,6 +35,7 @@
 #include "lsst/sphgeom/UnitVector3d.h"
 
 #include "lsst/sphgeom/python/relationship.h"
+#include "lsst/sphgeom/python/utils.h"
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -161,9 +162,9 @@ PYBIND11_MODULE(box, mod) {
     cls.def("__repr__", [](Box const &self) {
         return py::str("Box({!r}, {!r})").format(self.getLon(), self.getLat());
     });
-    cls.def("__setstate__", [](Box &self, py::bytes bytes) {
-        new (&self) Box(*decode(bytes));
-    });
+    cls.def(py::pickle(
+            [](const Box &self) { return python::encode(self); },
+            [](py::bytes bytes) { return decode(bytes).release(); }));
 }
 
 }  // <anonymous>

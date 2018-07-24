@@ -22,6 +22,7 @@
 #include "pybind11/pybind11.h"
 
 #include <memory>
+#include <string>
 
 #include "lsst/sphgeom/Angle.h"
 #include "lsst/sphgeom/LonLat.h"
@@ -117,16 +118,15 @@ PYBIND11_MODULE(unitVector3d, mod) {
     // components. Furthermore, UnitVector3d::fromNormalized is not visible to
     // Python, and even if it were, pybind11 is currently incapable of returning
     // a picklable reference to it.
-    cls.def("__getstate__", [](UnitVector3d const &self) {
-        return py::make_tuple(self.x(), self.y(), self.z());
-    });
-    cls.def("__setstate__", [](UnitVector3d &self, py::tuple t) {
-        if (t.size() != 3) {
-            throw std::runtime_error("Invalid state!");
-        }
-        new (&self) UnitVector3d(UnitVector3d::fromNormalized(
-                t[0].cast<double>(), t[1].cast<double>(), t[2].cast<double>()));
-    });
+    cls.def(py::pickle([](UnitVector3d const &self) { return py::make_tuple(self.x(), self.y(), self.z()); },
+                       [](py::tuple t) {
+                           if (t.size() != 3) {
+                               throw std::runtime_error("Tuple size = " + std::to_string(t.size()) +
+                                                        "; must be 3 for a UnitVector3d");
+                           }
+                           return new UnitVector3d(UnitVector3d::fromNormalized(
+                                   t[0].cast<double>(), t[1].cast<double>(), t[2].cast<double>()));
+                       }));
 }
 
 }  // <anonymous>

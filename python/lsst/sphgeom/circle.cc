@@ -31,6 +31,7 @@
 #include "lsst/sphgeom/UnitVector3d.h"
 
 #include "lsst/sphgeom/python/relationship.h"
+#include "lsst/sphgeom/python/utils.h"
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -143,9 +144,9 @@ PYBIND11_MODULE(circle, mod) {
         return py::str("Circle({!r}, {!r})")
                 .format(self.getCenter(), self.getOpeningAngle());
     });
-    cls.def("__setstate__", [](Circle &self, py::bytes bytes) {
-        new (&self) Circle(*decode(bytes));
-    });
+    cls.def(py::pickle(
+            [](const Circle &self) { return python::encode(self); },
+            [](py::bytes bytes) { return decode(bytes).release(); }));
 }
 
 }  // <anonymous>
