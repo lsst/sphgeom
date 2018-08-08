@@ -25,7 +25,7 @@ import pickle
 import unittest
 from builtins import range
 
-from lsst.sphgeom import Angle, Circle, HtmPixelization, RangeSet, UnitVector3d
+from lsst.sphgeom import Angle, Circle, HtmPixelization, RangeSet, UnitVector3d, ConvexPolygon
 
 
 class HtmPixelizationTestCase(unittest.TestCase):
@@ -45,6 +45,10 @@ class HtmPixelizationTestCase(unittest.TestCase):
     def test_indexing(self):
         h = HtmPixelization(1)
         self.assertEqual(h.index(UnitVector3d(1, 1, 1)), 63)
+
+    def test_pixel(self):
+        h = HtmPixelization(1)
+        self.assertIsInstance(h.pixel(10), ConvexPolygon)
 
     def test_level(self):
         for index in (0, 16 * 4**HtmPixelization.MAX_LEVEL):

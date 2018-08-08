@@ -54,7 +54,7 @@ std::unique_ptr<Box> decode(py::bytes bytes) {
 PYBIND11_MODULE(box, mod) {
     py::module::import("lsst.sphgeom.region");
 
-    py::class_<Box, std::shared_ptr<Box>, Region> cls(mod, "Box");
+    py::class_<Box, std::unique_ptr<Box>, Region> cls(mod, "Box");
 
     cls.attr("TYPE_CODE") = py::int_(Box::TYPE_CODE);
 
