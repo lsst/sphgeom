@@ -52,7 +52,7 @@ std::unique_ptr<ConvexPolygon> decode(py::bytes bytes) {
 PYBIND11_MODULE(convexPolygon, mod) {
     py::module::import("lsst.sphgeom.region");
 
-    py::class_<ConvexPolygon, std::shared_ptr<ConvexPolygon>, Region> cls(
+    py::class_<ConvexPolygon, std::unique_ptr<ConvexPolygon>, Region> cls(
             mod, "ConvexPolygon");
 
     cls.attr("TYPE_CODE") = py::int_(ConvexPolygon::TYPE_CODE);

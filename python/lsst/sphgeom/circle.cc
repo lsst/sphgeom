@@ -50,7 +50,7 @@ std::unique_ptr<Circle> decode(py::bytes bytes) {
 PYBIND11_MODULE(circle, mod) {
     py::module::import("lsst.sphgeom.region");
 
-    py::class_<Circle, std::shared_ptr<Circle>, Region> cls(mod, "Circle");
+    py::class_<Circle, std::unique_ptr<Circle>, Region> cls(mod, "Circle");
 
     cls.attr("TYPE_CODE") = py::int_(Circle::TYPE_CODE);
 

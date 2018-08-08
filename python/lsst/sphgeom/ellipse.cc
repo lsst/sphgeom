@@ -52,7 +52,7 @@ std::unique_ptr<Ellipse> decode(py::bytes bytes) {
 PYBIND11_MODULE(ellipse, mod) {
     py::module::import("lsst.sphgeom.region");
 
-    py::class_<Ellipse, std::shared_ptr<Ellipse>, Region> cls(mod, "Ellipse");
+    py::class_<Ellipse, std::unique_ptr<Ellipse>, Region> cls(mod, "Ellipse");
 
     cls.attr("TYPE_CODE") = py::int_(Ellipse::TYPE_CODE);
 

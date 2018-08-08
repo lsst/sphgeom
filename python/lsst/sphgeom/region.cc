@@ -42,7 +42,7 @@ namespace sphgeom {
 namespace {
 
 PYBIND11_MODULE(region, mod) {
-    py::class_<Region, std::shared_ptr<Region>> cls(mod, "Region");
+    py::class_<Region, std::unique_ptr<Region>> cls(mod, "Region");
 
     // clone() is wrapped by Region subclasses. It returns wrapper
     // objects specific to the subclass, rather than a generic one.
