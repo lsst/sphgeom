@@ -1,7 +1,5 @@
 setupRequired(base)
 setupRequired(sconsUtils)
-setupRequired(pybind11)
-setupOptional(doxygen)
 
 envPrepend(LD_LIBRARY_PATH, ${PRODUCT_DIR}/lib)
 envPrepend(DYLD_LIBRARY_PATH, ${PRODUCT_DIR}/lib)
