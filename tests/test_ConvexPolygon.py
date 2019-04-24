@@ -28,6 +28,8 @@ except ImportError:
 
 import unittest
 
+import numpy as np
+
 from lsst.sphgeom import CONTAINS, ConvexPolygon, Circle, Region, UnitVector3d
 
 
@@ -73,6 +75,17 @@ class ConvexPolygonTestCase(unittest.TestCase):
         self.assertTrue(p.intersects(tinyCircle))
         self.assertFalse(p.isDisjointFrom(tinyCircle))
         self.assertTrue(p.contains(tinyCircle))
+
+    def test_vectorized_contains(self):
+        b = ConvexPolygon([UnitVector3d.Z(), UnitVector3d.X(), UnitVector3d.Y()])
+        x = np.random.rand(5, 3)
+        y = np.random.rand(5, 3)
+        z = np.random.rand(5, 3)
+        c = b.contains(x, y, z)
+        for i in range(x.shape[0]):
+            for j in range(x.shape[1]):
+                u = UnitVector3d(x[i, j], y[i, j], z[i, j])
+                self.assertEqual(c[i, j], b.contains(u))
 
     def testString(self):
         p = ConvexPolygon([UnitVector3d.Z(),

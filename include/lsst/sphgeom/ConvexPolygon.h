@@ -120,6 +120,8 @@ public:
     bool contains(Region const & r) const;
     ///@}
 
+    using Region::contains;
+
     ///@{
     /// `isDisjointFrom` returns true if the intersection of this convex polygon
     /// and x is empty.

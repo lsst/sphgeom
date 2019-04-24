@@ -29,12 +29,17 @@ except ImportError:
 import math
 import unittest
 
+import numpy as np
+
 from lsst.sphgeom import (Angle, AngleInterval, Box, CONTAINS, DISJOINT,
                           LonLat, NormalizedAngle, NormalizedAngleInterval,
                           Region, UnitVector3d)
 
 
 class BoxTestCase(unittest.TestCase):
+
+    def setUp(self):
+        np.random.seed(1)
 
     def test_construction(self):
         b = Box(Box.allLongitudes(), Box.allLatitudes())
@@ -95,6 +100,17 @@ class BoxTestCase(unittest.TestCase):
         self.assertEqual(r, CONTAINS)
         r = b4.relate(b1)
         self.assertEqual(r, DISJOINT)
+
+    def test_vectorized_contains(self):
+        b = Box.fromDegrees(200, 10, 300, 20)
+        x = np.random.rand(5, 3)
+        y = np.random.rand(5, 3)
+        z = np.random.rand(5, 3)
+        c = b.contains(x, y, z)
+        for i in range(x.shape[0]):
+            for j in range(x.shape[1]):
+                u = UnitVector3d(x[i, j], y[i, j], z[i, j])
+                self.assertEqual(c[i, j], b.contains(u))
 
     def test_expanding_and_clipping(self):
         a = Box.fromDegrees(0, 0, 10, 10)

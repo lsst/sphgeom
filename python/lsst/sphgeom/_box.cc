@@ -20,6 +20,7 @@
  * see <https://www.lsstcorp.org/LegalNotices/>.
  */
 #include "pybind11/pybind11.h"
+#include "pybind11/numpy.h"
 
 #include "lsst/sphgeom/python.h"
 
@@ -103,9 +104,11 @@ void defineClass(py::class_<Box, std::unique_ptr<Box>, Region> &cls) {
     cls.def("getHeight", &Box::getHeight);
     cls.def("contains", (bool (Box::*)(LonLat const &) const) & Box::contains);
     cls.def("contains", (bool (Box::*)(Box const &) const) & Box::contains);
-    // Rewrap this base class method since there are overloads in this subclass
+    // Rewrap these base class methods since there are overloads in this subclass
     cls.def("contains",
             (bool (Box::*)(UnitVector3d const &) const) & Box::contains);
+    cls.def("contains", py::vectorize((bool (Box::*)(double, double, double) const)&Box::contains),
+            "x"_a, "y"_a, "z"_a);
     cls.def("isDisjointFrom",
             (bool (Box::*)(LonLat const &) const) & Box::isDisjointFrom);
     cls.def("isDisjointFrom",

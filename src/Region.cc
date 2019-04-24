@@ -31,10 +31,14 @@
 #include "lsst/sphgeom/Circle.h"
 #include "lsst/sphgeom/ConvexPolygon.h"
 #include "lsst/sphgeom/Ellipse.h"
-
+#include "lsst/sphgeom/UnitVector3d.h"
 
 namespace lsst {
 namespace sphgeom {
+
+bool Region::contains(double x, double y, double z) const {
+    return contains(UnitVector3d(x, y, z));
+}
 
 std::unique_ptr<Region> Region::decode(uint8_t const * buffer, size_t n) {
     if (buffer == nullptr || n == 0) {

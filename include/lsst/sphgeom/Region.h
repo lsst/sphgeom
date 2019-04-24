@@ -95,6 +95,10 @@ public:
     /// `contains` tests whether the given unit vector is inside this region.
     virtual bool contains(UnitVector3d const &) const = 0;
 
+    /// `contains` tests whether the unit vector defined by the given (not
+    /// necessarily normalized) coordinates is inside this region.
+    bool contains(double x, double y, double z) const;
+
     ///@{
     /// `relate` computes the spatial relationships between this region A and
     /// another region B. The return value S is a bitset with the following

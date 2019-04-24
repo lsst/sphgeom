@@ -283,6 +283,8 @@ public:
 
     bool contains(UnitVector3d const &v) const override;
 
+    using Region::contains;
+
     Relationship relate(Region const & r) const override {
         // Dispatch on the type of r.
         return invert(r.relate(*this));

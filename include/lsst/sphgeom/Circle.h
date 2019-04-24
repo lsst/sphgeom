@@ -232,6 +232,8 @@ public:
                (v - _center).getSquaredNorm() <= _squaredChordLength;
     }
 
+    using Region::contains;
+
     Relationship relate(Region const & r) const override {
         // Dispatch on the type of r.
         return invert(r.relate(*this));
