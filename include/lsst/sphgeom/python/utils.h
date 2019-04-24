@@ -34,11 +34,10 @@
 namespace lsst {
 namespace sphgeom {
 namespace python {
-namespace {
 
 /// Convert a Python index `i` over a sequence with length `len` to a
 /// non-negative (C++ style) index, and perform a bounds-check.
-ptrdiff_t convertIndex(ptrdiff_t len, pybind11::int_ i) {
+inline ptrdiff_t convertIndex(ptrdiff_t len, pybind11::int_ i) {
     auto j = static_cast<ptrdiff_t>(i);
     if ((j == -1 && PyErr_Occurred()) || j < -len || j >= len) {
         PyErr_Clear();
@@ -51,13 +50,12 @@ ptrdiff_t convertIndex(ptrdiff_t len, pybind11::int_ i) {
 
 
 /// Encode a Region as a pybind11 bytes object
-pybind11::bytes encode(Region const &self) {
+inline pybind11::bytes encode(Region const &self) {
     std::vector<uint8_t> bytes = self.encode();
     return pybind11::bytes(reinterpret_cast<char const *>(bytes.data()),
                      bytes.size());
 }
 
-}  // <anonymous>
 }  // python
 }  // sphgeom
 }  // lsst
