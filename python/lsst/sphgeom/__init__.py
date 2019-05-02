@@ -49,4 +49,8 @@ from .relationship import *
 from .unitVector3d import *
 from .utils import *
 from .vector3d import *
-from .version import *
+try:
+  from .version import *
+except ImportError:
+  pass
+
