@@ -13,7 +13,7 @@
 #      names of its contributors may be used to endorse or promote products
 #      derived from this software without specific prior written permission.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" &
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 # DISCLAIMED. IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE FOR ANY
@@ -142,13 +142,13 @@ def TR_algo2(p, M):
     for i in range(M-1, -1, -1):
         # the cell label is constructed in two steps
         # 1. extract the relevant bits from p
-        l = [bit_component(px, i) for px in p]
+        ll = [bit_component(px, i) for px in p]
         # 2. construct a integer whose bits are given by l
-        l = sum([lx*2**j for j, lx in enumerate(l)])
+        ll = sum([lx*2**j for j, lx in enumerate(ll)])
         # transform l into the current subcube
-        l = T(ve, vd, l)
+        ll = T(ve, vd, ll)
         # obtain the gray code ordering from the label l
-        w = inverse_gc(l)
+        w = inverse_gc(ll)
         # compose (see [TR] lemma 2.13) the transform of ve and vd
         # with the data of the subcube
         ve = ve ^ (rotate_left(e(w), vd+1))
@@ -166,10 +166,10 @@ def TR_algo3(h, M):
     for i in range(M-1, -1, -1):
         w = [bit_component(h, i*N + ii) for ii in range(N)]
         w = sum([wx*2**j for j, wx in enumerate(w)])
-        l = gc(w)
-        l = T_inv(ve, vd, l)
+        ll = gc(w)
+        ll = T_inv(ve, vd, ll)
         for j in range(N):
-            p[j] += bit_component(l, j) << i
+            p[j] += bit_component(ll, j) << i
         ve = ve ^ rotate_left(e(w), vd+1)
         vd = (vd + d(w) + 1) % N
     return p
@@ -198,13 +198,13 @@ def make_TR_algo2_lut(M):
                 for i in range(M-1, -1, -1):
                     # the cell label is constructed in two steps
                     # 1. extract the relevant bits from p
-                    l = [bit_component(px, i) for px in p]
+                    ll = [bit_component(px, i) for px in p]
                     # 2. construct a integer whose bits are given by l
-                    l = sum([lx*2**j for j, lx in enumerate(l)])
+                    ll = sum([lx*2**j for j, lx in enumerate(ll)])
                     # transform l into the current subcube
-                    l = T(ve, vd, l)
+                    ll = T(ve, vd, ll)
                     # obtain the gray code ordering from the label l
-                    w = inverse_gc(l)
+                    w = inverse_gc(ll)
                     # compose (see [TR] lemma 2.13) the transform of ve and vd
                     # with the data of the subcube
                     ve = ve ^ (rotate_left(e(w), vd+1))
@@ -229,11 +229,11 @@ def make_TR_algo3_lut(M):
                 for i in range(M-1, -1, -1):
                     w = [bit_component(h, i*N+ii) for ii in range(N)]
                     w = sum([wx*2**j for j, wx in enumerate(w)])
-                    l = gc(w)
-                    l = T_inv(ve, vd, l)
+                    ll = gc(w)
+                    ll = T_inv(ve, vd, ll)
                     ve = ve ^ rotate_left(e(w), vd+1)
                     vd = (vd + d(w) + 1) % N
-                    z = (z << N) | l
+                    z = (z << N) | ll
                 lut.append(z | (vd << 2*M) | ((ve % 2) << (2*M + 1)))
     return lut
 
