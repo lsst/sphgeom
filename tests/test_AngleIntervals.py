@@ -19,18 +19,16 @@
 # the GNU General Public License along with this program.  If not,
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
-from __future__ import absolute_import, division, print_function
 
 import pickle
 import unittest
-from builtins import object
 
 from lsst.sphgeom import (Angle, AngleInterval,
                           CONTAINS, DISJOINT,
                           NormalizedAngle, NormalizedAngleInterval)
 
 
-class IntervalTests(object):
+class IntervalTests:
 
     def testConstruction(self):
         i = self.Interval(self.Scalar(1))

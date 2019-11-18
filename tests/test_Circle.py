@@ -19,12 +19,8 @@
 # the GNU General Public License along with this program.  If not,
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
-from __future__ import absolute_import, division, print_function
 
-try:
-    import cPickle as pickle   # Use cPickle on Python 2.7
-except ImportError:
-    import pickle
+import pickle
 
 import math
 import unittest
