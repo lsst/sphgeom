@@ -22,7 +22,6 @@
 
 """lsst.sphgeom
 """
-from __future__ import absolute_import
 
 from .region import *
 from .pixelization import *
