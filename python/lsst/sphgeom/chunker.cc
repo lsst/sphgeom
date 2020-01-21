@@ -66,6 +66,11 @@ PYBIND11_MODULE(chunker, mod) {
     cls.def("getAllChunks", &Chunker::getAllChunks);
     cls.def("getAllSubChunks", &Chunker::getAllSubChunks, "chunkId"_a);
 
+    cls.def("getChunkBoundingBox", &Chunker::getChunkBoundingBox, "stripe"_a, "chunk"_a);
+    cls.def("getSubChunkBoundingBox", &Chunker::getSubChunkBoundingBox, "subStripe"_a, "subChunk"_a);
+
+    cls.def("_getStripe", &Chunker::_getStripe, "chunkId"_a);
+
     cls.def("__str__", &toString);
     cls.def("__repr__", &toString);
 
