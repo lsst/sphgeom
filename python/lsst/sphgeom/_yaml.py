@@ -29,9 +29,14 @@ from .convexPolygon import ConvexPolygon
 from .ellipse import Ellipse
 from .circle import Circle
 from .box import Box
+from .htmPixelization import HtmPixelization
+from .q3cPixelization import Q3cPixelization
+from .mq3cPixelization import Mq3cPixelization
 
 YamlLoaders = (yaml.Loader, yaml.CLoader, yaml.FullLoader, yaml.SafeLoader, yaml.UnsafeLoader)
 
+
+# Regions
 
 def region_representer(dumper, data):
     """Represent a sphgeom region object in a form suitable for YAML.
@@ -59,3 +64,40 @@ for region_class in (ConvexPolygon, Ellipse, Circle, Box):
 
     for loader in YamlLoaders:
         yaml.add_constructor(f"lsst.sphgeom.{region_class.__name__}", region_constructor, Loader=loader)
+
+
+# Pixelization schemes
+
+def pixel_representer(dumper, data):
+    """Represent a pixelization in YAML
+
+    Stored as the pixelization level in a mapping with a single key
+    ``level``.
+    """
+    return dumper.represent_mapping(f"lsst.sphgeom.{type(data).__name__}",
+                                    {"level": data.getLevel()})
+
+
+def pixel_constructor(loader, node):
+    """Construct a pixelization object from YAML.
+    """
+    mapping = loader.construct_mapping(node)
+
+    className = node.tag
+    pixelMap = {"lsst.sphgeom.Q3cPixelization": Q3cPixelization,
+                "lsst.sphgeom.Mq3cPixelization": Mq3cPixelization,
+                "lsst.sphgeom.HtmPixelization": HtmPixelization,
+                }
+
+    if className not in pixelMap:
+        raise RuntimeError(f"Encountered unexpected class {className} associated with"
+                           " sphgeom pixelization YAML constructor")
+
+    return pixelMap[className](mapping["level"])
+
+
+# All the pixelization schemes use the same approach with getLevel
+for pixelSchemeCls in (HtmPixelization, Q3cPixelization, Mq3cPixelization):
+    yaml.add_representer(pixelSchemeCls, pixel_representer)
+    for loader in YamlLoaders:
+        yaml.add_constructor(f"lsst.sphgeom.{pixelSchemeCls.__name__}", pixel_constructor, Loader=loader)

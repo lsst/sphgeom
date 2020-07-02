@@ -21,6 +21,7 @@
 #
 
 import pickle
+import yaml
 import unittest
 
 from lsst.sphgeom import (Angle, Circle, Mq3cPixelization, RangeSet,
@@ -91,6 +92,11 @@ class Mq3cPixelizationTestCase(unittest.TestCase):
     def test_pickle(self):
         a = Mq3cPixelization(20)
         b = pickle.loads(pickle.dumps(a))
+        self.assertEqual(a, b)
+
+    def test_yaml(self):
+        a = Mq3cPixelization(20)
+        b = yaml.safe_load(yaml.dump(a))
         self.assertEqual(a, b)
 
 
