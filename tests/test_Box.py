@@ -21,6 +21,7 @@
 #
 
 import pickle
+import yaml
 
 import math
 import unittest
@@ -136,6 +137,11 @@ class BoxTestCase(unittest.TestCase):
     def test_pickle(self):
         a = Box.fromDegrees(0, 0, 10, 10)
         b = pickle.loads(pickle.dumps(a, pickle.HIGHEST_PROTOCOL))
+        self.assertEqual(a, b)
+
+    def test_yaml(self):
+        a = Box.fromDegrees(0, 0, 10, 10)
+        b = yaml.safe_load(yaml.dump(a))
         self.assertEqual(a, b)
 
 

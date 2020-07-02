@@ -21,6 +21,7 @@
 #
 
 import pickle
+import yaml
 
 import unittest
 
@@ -88,6 +89,13 @@ class ConvexPolygonTestCase(unittest.TestCase):
                            UnitVector3d.X(),
                            UnitVector3d.Y()])
         b = pickle.loads(pickle.dumps(a, pickle.HIGHEST_PROTOCOL))
+        self.assertEqual(a, b)
+
+    def testYaml(self):
+        a = ConvexPolygon([UnitVector3d.Z(),
+                           UnitVector3d.X(),
+                           UnitVector3d.Y()])
+        b = yaml.safe_load(yaml.dump(a))
         self.assertEqual(a, b)
 
 
