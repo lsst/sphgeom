@@ -21,6 +21,7 @@
 #
 
 import pickle
+import yaml
 import unittest
 
 from lsst.sphgeom import Angle, Circle, HtmPixelization, RangeSet, UnitVector3d, ConvexPolygon
@@ -87,6 +88,11 @@ class HtmPixelizationTestCase(unittest.TestCase):
     def test_pickle(self):
         a = HtmPixelization(20)
         b = pickle.loads(pickle.dumps(a))
+        self.assertEqual(a, b)
+
+    def test_yaml(self):
+        a = HtmPixelization(20)
+        b = yaml.safe_load(yaml.dump(a))
         self.assertEqual(a, b)
 
 

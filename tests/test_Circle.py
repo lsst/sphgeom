@@ -20,6 +20,7 @@
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
 
+import yaml
 import pickle
 
 import math
@@ -127,6 +128,11 @@ class CircleTestCase(unittest.TestCase):
     def test_pickle(self):
         a = Circle(UnitVector3d(1, -1, 1), 1.0)
         b = pickle.loads(pickle.dumps(a, pickle.HIGHEST_PROTOCOL))
+        self.assertEqual(a, b)
+
+    def test_yaml(self):
+        a = Circle(UnitVector3d(1, -1, 1), 1.0)
+        b = yaml.safe_load(yaml.dump(a))
         self.assertEqual(a, b)
 
 

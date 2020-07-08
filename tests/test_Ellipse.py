@@ -21,6 +21,7 @@
 #
 
 import pickle
+import yaml
 
 import math
 import unittest
@@ -98,6 +99,11 @@ class EllipseTestCase(unittest.TestCase):
     def test_pickle(self):
         a = Ellipse(UnitVector3d.X(), UnitVector3d.Y(), Angle(2 * math.pi / 3))
         b = pickle.loads(pickle.dumps(a, pickle.HIGHEST_PROTOCOL))
+        self.assertEqual(a, b)
+
+    def test_yaml(self):
+        a = Ellipse(UnitVector3d.X(), UnitVector3d.Y(), Angle(2 * math.pi / 3))
+        b = yaml.safe_load(yaml.dump(a))
         self.assertEqual(a, b)
 
 
