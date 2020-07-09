@@ -3,6 +3,9 @@ from setuptools_cpp import ExtensionBuilder, Pybind11Extension
 import os
 import glob
 
+# Importing this automatically enables parallelized builds
+import numpy.distutils.ccompiler  # noqa: F401
+
 # Currently a fake version for testing
 version = '0.0.1'
 
