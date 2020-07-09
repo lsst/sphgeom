@@ -21,24 +21,39 @@
  */
 #include "pybind11/pybind11.h"
 
-#include "lsst/sphgeom/python/relationship.h"
+#include "lsst/sphgeom/python.h"
+
+#include "lsst/sphgeom/Interval1d.h"
+#include "lsst/sphgeom/python/interval.h"
 
 namespace py = pybind11;
 using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
-PYBIND11_MODULE(relationship, mod) {
-    mod.attr("DISJOINT") = py::cast(DISJOINT.to_ulong());
-    mod.attr("INTERSECTS") = py::cast(INTERSECTS.to_ulong());
-    mod.attr("CONTAINS") = py::cast(CONTAINS.to_ulong());
-    mod.attr("WITHIN") = py::cast(WITHIN.to_ulong());
+template <>
+void defineClass(py::class_<Interval1d, std::shared_ptr<Interval1d>> &cls) {
+    python::defineInterval<decltype(cls), Interval1d, double>(cls);
 
-    mod.def("invert", &invert, "relationship"_a);
+    cls.def_static("empty", &Interval1d::empty);
+    cls.def_static("full", &Interval1d::full);
+
+    cls.def(py::init<>());
+    cls.def(py::init<double>(), "x"_a);
+    cls.def(py::init<double, double>(), "x"_a, "y"_a);
+    cls.def(py::init<Interval1d const &>(), "interval"_a);
+
+    cls.def("isFull", &Interval1d::isFull);
+
+    cls.def("__str__", [](Interval1d const &self) {
+        return py::str("[{!s}, {!s}]").format(self.getA(), self.getB());
+    });
+    cls.def("__repr__", [](Interval1d const &self) {
+        return py::str("Interval1d({!r}, {!r})")
+                .format(self.getA(), self.getB());
+    });
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

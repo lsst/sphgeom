@@ -21,29 +21,31 @@
  */
 #include "pybind11/pybind11.h"
 
-#include "lsst/sphgeom/Angle.h"
-#include "lsst/sphgeom/UnitVector3d.h"
-#include "lsst/sphgeom/utils.h"
-#include "lsst/sphgeom/Vector3d.h"
+#include "lsst/sphgeom/curve.h"
 
 namespace py = pybind11;
 using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
-PYBIND11_MODULE(utils, mod) {
-    mod.def("getMinSquaredChordLength", &getMinSquaredChordLength, "v"_a, "a"_a,
-            "b"_a, "n"_a);
-    mod.def("getMaxSquaredChordLength", &getMaxSquaredChordLength, "v"_a, "a"_a,
-            "b"_a, "n"_a);
-    mod.def("getMinAngleToCircle", &getMinAngleToCircle, "x"_a, "c"_a);
-    mod.def("getMaxAngleToCircle", &getMaxAngleToCircle, "x"_a, "c"_a);
-    mod.def("getWeightedCentroid", &getWeightedCentroid, "vector0"_a,
-            "vector1"_a, "vector2"_a);
+void defineCurve(py::module &mod) {
+    mod.def("log2", (uint8_t(*)(uint64_t)) & log2);
+    mod.def("mortonIndex", (uint64_t(*)(uint32_t, uint32_t)) & mortonIndex,
+            "x"_a, "y"_a);
+    mod.def("mortonIndexInverse",
+            (std::tuple<uint32_t, uint32_t>(*)(uint64_t)) & mortonIndexInverse,
+            "z"_a);
+    mod.def("mortonToHilbert", &mortonToHilbert, "z"_a, "m"_a);
+    mod.def("hilbertToMorton", &hilbertToMorton, "h"_a, "m"_a);
+    mod.def("hilbertIndex",
+            (uint64_t(*)(uint32_t, uint32_t, int)) & hilbertIndex, "x"_a, "y"_a,
+            "m"_a);
+    mod.def("hilbertIndexInverse",
+            (std::tuple<uint32_t, uint32_t>(*)(uint64_t, int)) &
+                    hilbertIndexInverse,
+            "h"_a, "m"_a);
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

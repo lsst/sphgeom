@@ -24,7 +24,7 @@ import pickle
 import yaml
 import unittest
 
-from lsst.sphgeom import Angle, Circle, Q3cPixelization, RangeSet, UnitVector3d
+from lsst.sphgeom import Angle, Circle, Q3cPixelization, RangeSet, UnitVector3d, ConvexPolygon
 
 
 class Q3cPixelizationTestCase(unittest.TestCase):
@@ -44,6 +44,10 @@ class Q3cPixelizationTestCase(unittest.TestCase):
     def test_indexing(self):
         pixelization = Q3cPixelization(1)
         self.assertEqual(pixelization.index(UnitVector3d(0.5, -0.5, 1.0)), 0)
+
+    def test_pixel(self):
+        h = Q3cPixelization(1)
+        self.assertIsInstance(h.pixel(10), ConvexPolygon)
 
     def test_envelope_and_interior(self):
         pixelization = Q3cPixelization(1)

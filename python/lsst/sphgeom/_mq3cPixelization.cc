@@ -21,48 +21,45 @@
  */
 #include "pybind11/pybind11.h"
 
-#include "lsst/sphgeom/HtmPixelization.h"
+#include "lsst/sphgeom/python.h"
+
+#include "lsst/sphgeom/Mq3cPixelization.h"
 
 namespace py = pybind11;
 using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
-PYBIND11_MODULE(htmPixelization, mod) {
-    py::module::import("lsst.sphgeom.pixelization");
-    py::module::import("lsst.sphgeom.region");
+template <>
+void defineClass(py::class_<Mq3cPixelization, Pixelization> &cls) {
+    cls.attr("MAX_LEVEL") = py::int_(Mq3cPixelization::MAX_LEVEL);
 
-    py::class_<HtmPixelization, Pixelization> cls(mod, "HtmPixelization");
-
-    cls.attr("MAX_LEVEL") = py::int_(HtmPixelization::MAX_LEVEL);
-
-    cls.def_static("level", &HtmPixelization::level, "i"_a);
-    cls.def_static("triangle", &HtmPixelization::triangle, "i"_a);
-    cls.def_static("asString", &HtmPixelization::asString, "i"_a);
+    cls.def_static("level", &Mq3cPixelization::level);
+    cls.def_static("quad", &Mq3cPixelization::quad);
+    cls.def_static("neighborhood", &Mq3cPixelization::neighborhood);
+    cls.def_static("asString", &Mq3cPixelization::asString);
 
     cls.def(py::init<int>(), "level"_a);
-    cls.def(py::init<HtmPixelization const &>(), "htmPixelization"_a);
+    cls.def(py::init<Mq3cPixelization const &>(), "mq3cPixelization"_a);
 
-    cls.def("getLevel", &HtmPixelization::getLevel);
+    cls.def("getLevel", &Mq3cPixelization::getLevel);
 
     cls.def("__eq__",
-            [](HtmPixelization const &self, HtmPixelization const &other) {
+            [](Mq3cPixelization const &self, Mq3cPixelization const &other) {
                 return self.getLevel() == other.getLevel();
             });
     cls.def("__ne__",
-            [](HtmPixelization const &self, HtmPixelization const &other) {
+            [](Mq3cPixelization const &self, Mq3cPixelization const &other) {
                 return self.getLevel() != other.getLevel();
             });
-    cls.def("__repr__", [](HtmPixelization const &self) {
-        return py::str("HtmPixelization({!s})").format(self.getLevel());
+    cls.def("__repr__", [](Mq3cPixelization const &self) {
+        return py::str("Mq3cPixelization({!s})").format(self.getLevel());
     });
-    cls.def("__reduce__", [cls](HtmPixelization const &self) {
+    cls.def("__reduce__", [cls](Mq3cPixelization const &self) {
         return py::make_tuple(cls, py::make_tuple(self.getLevel()));
     });
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

@@ -21,26 +21,29 @@
  */
 #include "pybind11/pybind11.h"
 
-#include "lsst/sphgeom/orientation.h"
+#include "lsst/sphgeom/python.h"
+
+#include "lsst/sphgeom/Angle.h"
+#include "lsst/sphgeom/UnitVector3d.h"
+#include "lsst/sphgeom/utils.h"
+#include "lsst/sphgeom/Vector3d.h"
 
 namespace py = pybind11;
 using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
-PYBIND11_MODULE(orientation, mod) {
-    py::module::import("lsst.sphgeom.vector3d");
-    py::module::import("lsst.sphgeom.unitVector3d");
-
-    mod.def("orientationExact", &orientationExact, "a"_a, "b"_a, "c"_a);
-    mod.def("orientation", &orientation, "a"_a, "b"_a, "c"_a);
-    mod.def("orientationX", &orientationX, "b"_a, "c"_a);
-    mod.def("orientationY", &orientationY, "b"_a, "c"_a);
-    mod.def("orientationZ", &orientationZ, "b"_a, "c"_a);
+void defineUtils(py::module &mod) {
+    mod.def("getMinSquaredChordLength", &getMinSquaredChordLength, "v"_a, "a"_a,
+            "b"_a, "n"_a);
+    mod.def("getMaxSquaredChordLength", &getMaxSquaredChordLength, "v"_a, "a"_a,
+            "b"_a, "n"_a);
+    mod.def("getMinAngleToCircle", &getMinAngleToCircle, "x"_a, "c"_a);
+    mod.def("getMaxAngleToCircle", &getMaxAngleToCircle, "x"_a, "c"_a);
+    mod.def("getWeightedCentroid", &getWeightedCentroid, "vector0"_a,
+            "vector1"_a, "vector2"_a);
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

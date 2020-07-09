@@ -21,7 +21,7 @@
  */
 #include "pybind11/pybind11.h"
 
-#include <stdexcept>
+#include "lsst/sphgeom/python.h"
 
 #include "lsst/sphgeom/RangeSet.h"
 #include "lsst/sphgeom/python/utils.h"
@@ -31,10 +31,11 @@ using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
+
 namespace {
 
 /// Convert a Python integer to a uint64_t.
-uint64_t _uint64(py::handle const & obj) {
+uint64_t _uint64(py::handle const &obj) {
     try {
         return obj.cast<uint64_t>();
     } catch (py::cast_error const &) {
@@ -80,19 +81,22 @@ py::list ranges(RangeSet const &self) {
 // range end-point values of 0 and the Python integer 2**64. Since this is
 // somewhat involved, it is left as future work.
 
-PYBIND11_MODULE(rangeSet, mod) {
-    py::class_<RangeSet, std::shared_ptr<RangeSet>> cls(mod, "RangeSet");
+}  // <anonymous>
 
+template <>
+void defineClass(py::class_<RangeSet, std::shared_ptr<RangeSet>> &cls) {
     cls.def(py::init<>());
     cls.def(py::init<uint64_t>(), "integer"_a);
-    cls.def(py::init<uint64_t, uint64_t>(), "first"_a, "last"_a);
+    cls.def(py::init([](uint64_t a, uint64_t b) {
+                return new RangeSet(a, b);
+            }),
+            "first"_a, "last"_a);
     cls.def(py::init<RangeSet const &>(), "rangeSet"_a);
     cls.def(py::init(
             [](py::iterable iterable) {
                 return new RangeSet(makeRangeSet(iterable));
             }),
             "iterable"_a);
-
     cls.def("__eq__", &RangeSet::operator==, py::is_operator());
     cls.def("__ne__", &RangeSet::operator!=, py::is_operator());
 
@@ -209,6 +213,5 @@ PYBIND11_MODULE(rangeSet, mod) {
     });
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst

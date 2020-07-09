@@ -21,7 +21,7 @@
  */
 #include "pybind11/pybind11.h"
 
-#include <memory>
+#include "lsst/sphgeom/python.h"
 
 #include "lsst/sphgeom/AngleInterval.h"
 #include "lsst/sphgeom/Box.h"
@@ -42,20 +42,18 @@ using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
-namespace {
 
+namespace {
 std::unique_ptr<Box> decode(py::bytes bytes) {
     uint8_t const *buffer = reinterpret_cast<uint8_t const *>(
             PYBIND11_BYTES_AS_STRING(bytes.ptr()));
     size_t n = static_cast<size_t>(PYBIND11_BYTES_SIZE(bytes.ptr()));
     return Box::decode(buffer, n);
 }
+}
 
-PYBIND11_MODULE(box, mod) {
-    py::module::import("lsst.sphgeom.region");
-
-    py::class_<Box, std::unique_ptr<Box>, Region> cls(mod, "Box");
-
+template <>
+void defineClass(py::class_<Box, std::unique_ptr<Box>, Region> &cls) {
     cls.attr("TYPE_CODE") = py::int_(Box::TYPE_CODE);
 
     cls.def_static("fromDegrees", &Box::fromDegrees, "lon1"_a, "lat1"_a,
@@ -167,6 +165,5 @@ PYBIND11_MODULE(box, mod) {
             [](py::bytes bytes) { return decode(bytes).release(); }));
 }
 
-}  // <anonymous>
 }  // sphgeom
 }  // lsst
