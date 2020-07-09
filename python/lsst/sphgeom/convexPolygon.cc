@@ -22,7 +22,7 @@
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
 
-#include "sphgeom.h"
+#include "lsst/sphgeom/python.h"
 
 #include "lsst/sphgeom/Box.h"
 #include "lsst/sphgeom/Box3d.h"

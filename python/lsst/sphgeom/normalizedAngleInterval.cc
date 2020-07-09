@@ -21,7 +21,7 @@
  */
 #include "pybind11/pybind11.h"
 
-#include "sphgeom.h"
+#include "lsst/sphgeom/python.h"
 
 #include "lsst/sphgeom/NormalizedAngleInterval.h"
 #include "lsst/sphgeom/python/interval.h"

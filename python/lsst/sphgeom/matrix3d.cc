@@ -21,7 +21,7 @@
  */
 #include "pybind11/pybind11.h"
 
-#include "sphgeom.h"
+#include "lsst/sphgeom/python.h"
 
 #include "lsst/sphgeom/Matrix3d.h"
 #include "lsst/sphgeom/python/utils.h"
