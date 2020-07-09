@@ -57,7 +57,7 @@ void defineUtils(py::module&);
 
 namespace {
 
-PYBIND11_MODULE(sphgeom, mod) {
+PYBIND11_MODULE(_sphgeom, mod) {
     // Create all Python class instances up front, then define them.
     //
     // This results in docstrings containing only Python type names, even

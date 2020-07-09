@@ -24,7 +24,7 @@
 __all__ = ()
 
 import yaml
-from .sphgeom import (
+from ._sphgeom import (
     Box,
     Circle,
     ConvexPolygon,
