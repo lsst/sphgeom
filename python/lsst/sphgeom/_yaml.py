@@ -24,14 +24,16 @@
 __all__ = ()
 
 import yaml
-from .region import Region
-from .convexPolygon import ConvexPolygon
-from .ellipse import Ellipse
-from .circle import Circle
-from .box import Box
-from .htmPixelization import HtmPixelization
-from .q3cPixelization import Q3cPixelization
-from .mq3cPixelization import Mq3cPixelization
+from .sphgeom import (
+    Box,
+    Circle,
+    ConvexPolygon,
+    Ellipse,
+    HtmPixelization,
+    Mq3cPixelization,
+    Region,
+    Q3cPixelization,
+)
 
 YamlLoaders = (yaml.Loader, yaml.CLoader, yaml.FullLoader, yaml.SafeLoader, yaml.UnsafeLoader)
 
