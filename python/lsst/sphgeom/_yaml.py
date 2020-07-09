@@ -35,7 +35,15 @@ from ._sphgeom import (
     Q3cPixelization,
 )
 
-YamlLoaders = (yaml.Loader, yaml.CLoader, yaml.FullLoader, yaml.SafeLoader, yaml.UnsafeLoader)
+try:
+    # CLoader is not always available
+    from yaml import CLoader
+except ImportError:
+    CLoader = None
+
+YamlLoaders = (yaml.Loader, yaml.FullLoader, yaml.SafeLoader, yaml.UnsafeLoader)
+if CLoader is not None:
+    YamlLoaders += (CLoader,)
 
 
 # Regions
