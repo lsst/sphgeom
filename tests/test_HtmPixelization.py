@@ -21,7 +21,11 @@
 #
 
 import pickle
-import yaml
+try:
+    import yaml
+except ImportError:
+    yaml = None
+
 import unittest
 
 from lsst.sphgeom import Angle, Circle, HtmPixelization, RangeSet, UnitVector3d, ConvexPolygon
@@ -90,6 +94,7 @@ class HtmPixelizationTestCase(unittest.TestCase):
         b = pickle.loads(pickle.dumps(a))
         self.assertEqual(a, b)
 
+    @unittest.skipIf(not yaml, "YAML module can not be imported")
     def test_yaml(self):
         a = HtmPixelization(20)
         b = yaml.safe_load(yaml.dump(a))

@@ -23,7 +23,14 @@
 
 __all__ = ()
 
-import yaml
+# YAML representers and constructors are only useful if yaml itself can
+# be imported.  If yaml can not be imported then there is no reason to
+# break the entire module import of sphgeom.
+try:
+    import yaml
+except ImportError:
+    yaml = None
+
 from ._sphgeom import (
     Box,
     Circle,
@@ -35,15 +42,17 @@ from ._sphgeom import (
     Q3cPixelization,
 )
 
-try:
-    # CLoader is not always available
-    from yaml import CLoader
-except ImportError:
-    CLoader = None
 
-YamlLoaders = (yaml.Loader, yaml.FullLoader, yaml.SafeLoader, yaml.UnsafeLoader)
-if CLoader is not None:
-    YamlLoaders += (CLoader,)
+if yaml:
+    try:
+        # CLoader is not always available
+        from yaml import CLoader
+    except ImportError:
+        CLoader = None
+
+    YamlLoaders = (yaml.Loader, yaml.FullLoader, yaml.SafeLoader, yaml.UnsafeLoader)
+    if CLoader is not None:
+        YamlLoaders += (CLoader,)
 
 
 # Regions
@@ -69,11 +78,12 @@ def region_constructor(loader, node):
 
 
 # Register all the region classes with the same constructor and representer
-for region_class in (ConvexPolygon, Ellipse, Circle, Box):
-    yaml.add_representer(region_class, region_representer)
+if yaml:
+    for region_class in (ConvexPolygon, Ellipse, Circle, Box):
+        yaml.add_representer(region_class, region_representer)
 
-    for loader in YamlLoaders:
-        yaml.add_constructor(f"lsst.sphgeom.{region_class.__name__}", region_constructor, Loader=loader)
+        for loader in YamlLoaders:
+            yaml.add_constructor(f"lsst.sphgeom.{region_class.__name__}", region_constructor, Loader=loader)
 
 
 # Pixelization schemes
@@ -107,7 +117,8 @@ def pixel_constructor(loader, node):
 
 
 # All the pixelization schemes use the same approach with getLevel
-for pixelSchemeCls in (HtmPixelization, Q3cPixelization, Mq3cPixelization):
-    yaml.add_representer(pixelSchemeCls, pixel_representer)
-    for loader in YamlLoaders:
-        yaml.add_constructor(f"lsst.sphgeom.{pixelSchemeCls.__name__}", pixel_constructor, Loader=loader)
+if yaml:
+    for pixelSchemeCls in (HtmPixelization, Q3cPixelization, Mq3cPixelization):
+        yaml.add_representer(pixelSchemeCls, pixel_representer)
+        for loader in YamlLoaders:
+            yaml.add_constructor(f"lsst.sphgeom.{pixelSchemeCls.__name__}", pixel_constructor, Loader=loader)

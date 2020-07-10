@@ -21,7 +21,10 @@
 #
 
 import pickle
-import yaml
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 import math
 import unittest
@@ -101,6 +104,7 @@ class EllipseTestCase(unittest.TestCase):
         b = pickle.loads(pickle.dumps(a, pickle.HIGHEST_PROTOCOL))
         self.assertEqual(a, b)
 
+    @unittest.skipIf(not yaml, "YAML module can not be imported")
     def test_yaml(self):
         a = Ellipse(UnitVector3d.X(), UnitVector3d.Y(), Angle(2 * math.pi / 3))
         b = yaml.safe_load(yaml.dump(a))

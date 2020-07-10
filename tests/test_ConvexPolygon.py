@@ -21,7 +21,10 @@
 #
 
 import pickle
-import yaml
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 import unittest
 
@@ -91,6 +94,7 @@ class ConvexPolygonTestCase(unittest.TestCase):
         b = pickle.loads(pickle.dumps(a, pickle.HIGHEST_PROTOCOL))
         self.assertEqual(a, b)
 
+    @unittest.skipIf(not yaml, "YAML module can not be imported")
     def testYaml(self):
         a = ConvexPolygon([UnitVector3d.Z(),
                            UnitVector3d.X(),
