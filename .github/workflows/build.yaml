@@ -19,7 +19,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Build and install
-        run: pip install .
+        run: pip install -v .
 
       - name: Run tests
         run: pytest -r a -v
