@@ -21,7 +21,10 @@
 #
 
 import pickle
-import yaml
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 import math
 import unittest
@@ -139,6 +142,7 @@ class BoxTestCase(unittest.TestCase):
         b = pickle.loads(pickle.dumps(a, pickle.HIGHEST_PROTOCOL))
         self.assertEqual(a, b)
 
+    @unittest.skipIf(not yaml, "YAML module can not be imported")
     def test_yaml(self):
         a = Box.fromDegrees(0, 0, 10, 10)
         b = yaml.safe_load(yaml.dump(a))

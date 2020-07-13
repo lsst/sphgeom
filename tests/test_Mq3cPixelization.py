@@ -21,7 +21,11 @@
 #
 
 import pickle
-import yaml
+try:
+    import yaml
+except ImportError:
+    yaml = None
+
 import unittest
 
 from lsst.sphgeom import (Angle, Circle, Mq3cPixelization, RangeSet,
@@ -94,6 +98,7 @@ class Mq3cPixelizationTestCase(unittest.TestCase):
         b = pickle.loads(pickle.dumps(a))
         self.assertEqual(a, b)
 
+    @unittest.skipIf(not yaml, "YAML module can not be imported")
     def test_yaml(self):
         a = Mq3cPixelization(20)
         b = yaml.safe_load(yaml.dump(a))

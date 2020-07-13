@@ -20,8 +20,11 @@
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
 
-import yaml
 import pickle
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 import math
 import unittest
@@ -130,6 +133,7 @@ class CircleTestCase(unittest.TestCase):
         b = pickle.loads(pickle.dumps(a, pickle.HIGHEST_PROTOCOL))
         self.assertEqual(a, b)
 
+    @unittest.skipIf(not yaml, "YAML module can not be imported")
     def test_yaml(self):
         a = Circle(UnitVector3d(1, -1, 1), 1.0)
         b = yaml.safe_load(yaml.dump(a))

@@ -74,6 +74,16 @@ the HTM (Hierarchical Triangular Mesh) pixelization. The
 the original Quad Tree Cube indexing scheme and a modified version with
 reduced pixel area variation.
 
+Installing with pip
+-------------------
+
+A simple pip-compatible installer is available.  This only installs the
+Python bindings and the resulting installation is not usable for linking
+from C++.  Some metadata (in particular the version number) are not set
+properly for the distribution.  The main purpose for now is to allow
+other packages to pip install from the GitHub URL in their CI systems
+where sphgeom is a dependency.
+
 See Also
 --------
 
