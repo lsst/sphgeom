@@ -1,3 +1,14 @@
+"""
+Basic setuptools description.
+
+This is not a complete definition.
+
+* Version number is not correct.
+* The shared library and include files are not installed.  This makes it
+  unusable with other python packages that directly reference the C++
+  interface.
+"""
+
 from setuptools import setup
 from setuptools_cpp import ExtensionBuilder, Pybind11Extension
 import os
