@@ -268,7 +268,7 @@ std::vector<int32_t> Chunker::getAllChunks() const {
 
 std::vector<int32_t> Chunker::getAllSubChunks(int32_t chunkId) const {
     std::vector<int32_t> subChunkIds;
-    int32_t s = _getStripe(chunkId);
+    int32_t s = getStripe(chunkId);
     subChunkIds.reserve(_stripes.at(s).numSubChunksPerChunk);
     int32_t const ssBeg = s * _numSubStripesPerStripe;
     int32_t const ssEnd = ssBeg + _numSubStripesPerStripe;
@@ -283,9 +283,9 @@ std::vector<int32_t> Chunker::getAllSubChunks(int32_t chunkId) const {
 }
 
 bool Chunker::valid(int32_t chunkId) const {
-    int32_t const s = _getStripe(chunkId);
+    int32_t const s = getStripe(chunkId);
     return s >= 0 and s < _numStripes and
-           _getChunk(chunkId, s) < _stripes.at(s).numChunksPerStripe;
+           getChunk(chunkId, s) < _stripes.at(s).numChunksPerStripe;
 }
 
 Box Chunker::getChunkBoundingBox(int32_t stripe, int32_t chunk) const {
