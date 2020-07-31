@@ -112,8 +112,14 @@ public:
     Box getChunkBoundingBox(int32_t stripe, int32_t chunk) const;
     Box getSubChunkBoundingBox(int32_t subStripe, int32_t subChunk) const;
 
-    int32_t _getStripe(int32_t chunkId) const {
+    /// Return the stripe for the specified chunkId
+    int32_t getStripe(int32_t chunkId) const {
         return chunkId / (2 * _numStripes);
+    }
+
+    /// Return the chunk for the given chunkId and stripe
+    int32_t getChunk(int32_t chunkId, int32_t stripe) const {
+        return chunkId - stripe*2*_numStripes;
     }
 
 private:
@@ -135,11 +141,6 @@ private:
 
         SubStripe() : subChunkWidth(), numSubChunksPerChunk(0) {}
     };
-
-
-    int32_t _getChunk(int32_t chunkId, int32_t stripe) const {
-        return chunkId - stripe*2*_numStripes;
-    }
 
     int32_t _getChunkId(int32_t stripe, int32_t chunk) const {
         return stripe * 2 * _numStripes + chunk;
