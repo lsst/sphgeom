@@ -57,6 +57,18 @@ class ChunkerTestCase(unittest.TestCase):
         b = pickle.loads(pickle.dumps(a))
         self.assertEqual(a, b)
 
+    def testChunkBoundingBox(self):
+        chunker = Chunker(200, 5)
+        chunk_id = 3645
+        stripe = chunker.getStripe(chunk_id)
+        chunk_in_stripe = chunker.getChunk(chunk_id, stripe)
+        bbox = chunker.getChunkBoundingBox(stripe, chunk_in_stripe)
+        self.assertEqual(stripe, 9)
+        self.assertEqual(chunk_in_stripe, 45)
+        b = Box.fromRadians(5.048988193233824, -1.4294246573883558,
+                            5.1611879309330035, -1.413716694110407)
+        self.assertAlmostEqual(bbox, b)
+
 
 if __name__ == '__main__':
     unittest.main()
