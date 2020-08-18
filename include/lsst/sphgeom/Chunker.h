@@ -109,6 +109,19 @@ public:
     /// Return 'true' if the specified chunk number is valid
     bool valid(int32_t chunkId) const;
 
+    Box getChunkBoundingBox(int32_t stripe, int32_t chunk) const;
+    Box getSubChunkBoundingBox(int32_t subStripe, int32_t subChunk) const;
+
+    /// Return the stripe for the specified chunkId
+    int32_t getStripe(int32_t chunkId) const {
+        return chunkId / (2 * _numStripes);
+    }
+
+    /// Return the chunk for the given chunkId and stripe
+    int32_t getChunk(int32_t chunkId, int32_t stripe) const {
+        return chunkId - stripe*2*_numStripes;
+    }
+
 private:
     struct Stripe {
         Angle chunkWidth;
@@ -129,14 +142,6 @@ private:
         SubStripe() : subChunkWidth(), numSubChunksPerChunk(0) {}
     };
 
-    int32_t _getStripe(int32_t chunkId) const {
-        return chunkId / (2 * _numStripes);
-    }
-
-    int32_t _getChunk(int32_t chunkId, int32_t stripe) const {
-        return chunkId - stripe*2*_numStripes;
-    }
-
     int32_t _getChunkId(int32_t stripe, int32_t chunk) const {
         return stripe * 2 * _numStripes + chunk;
     }
@@ -156,8 +161,6 @@ private:
                        int32_t chunk,
                        int32_t minSS,
                        int32_t maxSS) const;
-    Box _getChunkBoundingBox(int32_t stripe, int32_t chunk) const;
-    Box _getSubChunkBoundingBox(int32_t subStripe, int32_t subChunk) const;
 
     int32_t _numStripes;
     int32_t _numSubStripesPerStripe;

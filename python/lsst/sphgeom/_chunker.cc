@@ -65,6 +65,13 @@ void defineClass(py::class_<Chunker, std::shared_ptr<Chunker>> &cls) {
     cls.def("getAllChunks", &Chunker::getAllChunks);
     cls.def("getAllSubChunks", &Chunker::getAllSubChunks, "chunkId"_a);
 
+    cls.def("getChunkBoundingBox", &Chunker::getChunkBoundingBox, "stripe"_a, "chunk"_a);
+    cls.def("getSubChunkBoundingBox", &Chunker::getSubChunkBoundingBox, "subStripe"_a, "subChunk"_a);
+
+    cls.def("getStripe", &Chunker::getStripe, "chunkId"_a);
+    cls.def("getChunk", &Chunker::getChunk, "chunkId"_a, "stripe"_a);
+
+
     cls.def("__str__", &toString);
     cls.def("__repr__", &toString);
 
