@@ -63,7 +63,7 @@ setup(
     ext_modules=ext_modules,
     long_description_content_type="text/markdown",
     zip_safe=False,
-    packages=find_packages(include=['python/lsst']),
+    packages=find_packages(),
     install_requires=[
         "numpy >=1.18"
     ],
