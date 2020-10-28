@@ -9,10 +9,11 @@ This is not a complete definition.
   interface.
 """
 
-from setuptools import setup, find_packages
-from setuptools_cpp import ExtensionBuilder, Pybind11Extension
 import os
 import glob
+
+from setuptools import setup, find_packages
+from pybind11.setup_helpers import Pybind11Extension, build_ext
 
 # Importing this automatically enables parallelized builds
 import numpy.distutils.ccompiler  # noqa: F401
@@ -75,5 +76,5 @@ setup(
         ],
         "yaml": ["pyyaml >= 5.1"],
     },
-    cmdclass={'build_ext': ExtensionBuilder},
+    cmdclass={"build_ext": build_ext},
 )
