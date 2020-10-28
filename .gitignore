@@ -45,3 +45,4 @@ tests/.cache/*
 ups/*.cfgc
 build/
 .eggs/
+*.egg-info

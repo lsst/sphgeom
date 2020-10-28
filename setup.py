@@ -9,7 +9,7 @@ This is not a complete definition.
   interface.
 """
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from setuptools_cpp import ExtensionBuilder, Pybind11Extension
 import os
 import glob
@@ -44,9 +44,36 @@ ext_modules = [Pybind11Extension("lsst.sphgeom._sphgeom",
                                  include_dirs=["include"])]
 
 setup(
+    name="lsst_sphgeom",
+    description="A spherical geometry library.",
+    author="LSST Data Management",
+    author_email="support@lsst.org",
+    url="https://github.com/lsst/sphgeom",
+    classifiers=[
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: GNU General Public License v3 or later "
+        "(GPLv3+)",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Topic :: Scientific/Engineering :: Astronomy",
+    ],
     version=version,
     long_description=long_description,
     ext_modules=ext_modules,
     long_description_content_type="text/markdown",
+    zip_safe=False,
+    packages=find_packages(include=['python/lsst']),
+    install_requires=[
+        "numpy >=1.18"
+    ],
+    extras_require={
+        "test": [
+            "pytest >= 3.2",
+            "flake8 >= 3.7.5",
+            "pytest-flake8 >= 1.0.4",
+        ],
+        "yaml": ["pyyaml >= 5.1"],
+    },
     cmdclass={'build_ext': ExtensionBuilder},
 )
