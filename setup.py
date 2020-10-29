@@ -12,7 +12,7 @@ This is not a complete definition.
 import os
 import glob
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 from pybind11.setup_helpers import Pybind11Extension, build_ext
 
 # Importing this automatically enables parallelized builds
@@ -64,7 +64,8 @@ setup(
     ext_modules=ext_modules,
     long_description_content_type="text/markdown",
     zip_safe=False,
-    packages=find_packages(),
+    package_dir={"": "python"},
+    packages=find_namespace_packages(where="python"),
     install_requires=[
         "numpy >=1.18"
     ],
