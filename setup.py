@@ -9,12 +9,12 @@ This is not a complete definition.
   interface.
 """
 
-from setuptools import setup
-from setuptools_cpp import ExtensionBuilder, Pybind11Extension
 import glob
 
 # Importing this automatically enables parallelized builds
 import numpy.distutils.ccompiler  # noqa: F401
+from setuptools import setup
+from pybind11.setup_helpers import Pybind11Extension, build_ext
 
 # Currently a fake version for testing
 version = '0.0.1'
@@ -40,5 +40,5 @@ ext_modules = [Pybind11Extension("lsst.sphgeom._sphgeom",
 setup(
     version=version,
     ext_modules=ext_modules,
-    cmdclass={'build_ext': ExtensionBuilder},
+    cmdclass={'build_ext': build_ext},
 )
