@@ -11,7 +11,6 @@ This is not a complete definition.
 
 from setuptools import setup
 from setuptools_cpp import ExtensionBuilder, Pybind11Extension
-import os
 import glob
 
 # Importing this automatically enables parallelized builds
@@ -28,11 +27,6 @@ __all__ = ("__version__", )
 __version__ = '{version}'""", file=f)
 
 
-# read the contents of the README file
-this_directory = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(this_directory, "README.md"), encoding='utf-8') as f:
-    long_description = f.read()
-
 # Find the source code -- we can combine it into a single module
 pybind_src = sorted(glob.glob("python/lsst/sphgeom/*.cc"))
 cpp_src = sorted(glob.glob("src/*.cc"))
@@ -45,8 +39,6 @@ ext_modules = [Pybind11Extension("lsst.sphgeom._sphgeom",
 
 setup(
     version=version,
-    long_description=long_description,
     ext_modules=ext_modules,
-    long_description_content_type="text/markdown",
     cmdclass={'build_ext': ExtensionBuilder},
 )
