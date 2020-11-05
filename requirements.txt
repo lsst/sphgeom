@@ -1,8 +1,0 @@
-pybind11 >=2.5.0
-setuptools >=46.0
-setuptools_cpp >=0.0.1
-pyyaml >=5.1
-pytest >= 3.2
-flake8 >= 3.7.5
-pytest-flake8 >= 1.0.4
-numpy >=1.18
