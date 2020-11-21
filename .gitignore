@@ -46,3 +46,4 @@ ups/*.cfgc
 build/
 .eggs/
 *.egg-info/
+compile_commands.json
