@@ -33,6 +33,7 @@
 #include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/Circle.h"
 #include "lsst/sphgeom/ConvexPolygon.h"
+#include "lsst/sphgeom/HEALPixel.h"
 #include "lsst/sphgeom/codec.h"
 
 
@@ -334,6 +335,11 @@ Relationship Ellipse::relate(ConvexPolygon const & p) const {
 
 Relationship Ellipse::relate(Ellipse const & e) const {
     return getBoundingCircle().relate(e.getBoundingCircle()) & DISJOINT;
+}
+
+Relationship Ellipse::relate(HEALPixel const & p) const {
+    // HEALPixel-Ellipse relations are implemented by HEALPixel.
+    return invert(p.relate(*this));
 }
 
 std::vector<uint8_t> Ellipse::encode() const {

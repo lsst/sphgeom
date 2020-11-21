@@ -41,6 +41,7 @@ class Box3d;
 class Circle;
 class ConvexPolygon;
 class Ellipse;
+class HEALPixel;
 class UnitVector3d;
 
 /// `Region` is a minimal interface for 2-dimensional regions on the unit
@@ -118,6 +119,7 @@ public:
     virtual Relationship relate(Circle const &) const = 0;
     virtual Relationship relate(ConvexPolygon const &) const = 0;
     virtual Relationship relate(Ellipse const &) const = 0;
+    virtual Relationship relate(HEALPixel const &) const = 0;
     ///@}
 
     /// `encode` serializes this region into an opaque byte string. Byte strings

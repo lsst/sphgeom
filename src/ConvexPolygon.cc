@@ -30,6 +30,7 @@
 
 #include "lsst/sphgeom/codec.h"
 #include "lsst/sphgeom/orientation.h"
+#include "lsst/sphgeom/HEALPixel.h"
 
 #include "ConvexPolygonImpl.h"
 
@@ -343,6 +344,11 @@ Relationship ConvexPolygon::relate(ConvexPolygon const & p) const {
 
 Relationship ConvexPolygon::relate(Ellipse const & e) const {
     return detail::relate(_vertices.begin(), _vertices.end(), e);
+}
+
+Relationship ConvexPolygon::relate(HEALPixel const & p) const {
+    // HEALPixel-ConvexPolygon relations are implemented by HEALPixel.
+    return invert(p.relate(*this));
 }
 
 std::vector<uint8_t> ConvexPolygon::encode() const {

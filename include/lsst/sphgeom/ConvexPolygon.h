@@ -147,6 +147,7 @@ public:
     Relationship relate(Circle const &) const override;
     Relationship relate(ConvexPolygon const &) const override;
     Relationship relate(Ellipse const &) const override;
+    Relationship relate(HEALPixel const &) const override;
 
     std::vector<uint8_t> encode() const override;
 
