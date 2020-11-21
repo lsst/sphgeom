@@ -27,6 +27,7 @@
 /// \brief This file defines an interface for pixelizations of the sphere.
 
 #include <string>
+#include <memory>
 
 #include "RangeSet.h"
 
