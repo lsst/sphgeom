@@ -68,10 +68,10 @@ public:
                                   NormalizedAngle const & b);
 
     /// This constructor creates a NormalizedAngle with a value of zero.
-    NormalizedAngle() {}
+    NormalizedAngle() = default;
 
     /// This constructor creates a copy of a.
-    NormalizedAngle(NormalizedAngle const & a) : _a(a._a) {}
+    NormalizedAngle(NormalizedAngle const & a) = default;
 
     /// This constructor creates a normalized copy of a.
     explicit NormalizedAngle(Angle const & a) {

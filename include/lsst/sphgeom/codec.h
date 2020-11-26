@@ -41,34 +41,35 @@
 namespace lsst {
 namespace sphgeom {
 
-/// `encode` appends an IEEE double in little-endian byte order
+/// `encode` appends a uint64 in little-endian byte order
 /// to the end of buffer.
-inline void encodeDouble(double item, std::vector<uint8_t> & buffer) {
-#ifdef OPTIMIZED_LITTLE_ENDIAN
+inline void encodeU64(uint64_t item, std::vector<uint8_t> & buffer) {
+#if OPTIMIZED_LITTLE_ENDIAN
+    // x86-64 is little endian.
     auto ptr = reinterpret_cast<uint8_t const *>(&item);
     buffer.insert(buffer.end(), ptr, ptr + 8);
 #else
     union { uint64_t u; double d; };
     d = item;
-    buffer.push_back(static_cast<uint8_t>(u));
-    buffer.push_back(static_cast<uint8_t>(u >> 8));
-    buffer.push_back(static_cast<uint8_t>(u >> 16));
-    buffer.push_back(static_cast<uint8_t>(u >> 24));
-    buffer.push_back(static_cast<uint8_t>(u >> 32));
-    buffer.push_back(static_cast<uint8_t>(u >> 40));
-    buffer.push_back(static_cast<uint8_t>(u >> 48));
-    buffer.push_back(static_cast<uint8_t>(u >> 56));
+    buffer.push_back(static_cast<uint8_t>(item));
+    buffer.push_back(static_cast<uint8_t>(item >> 8));
+    buffer.push_back(static_cast<uint8_t>(item >> 16));
+    buffer.push_back(static_cast<uint8_t>(item >> 24));
+    buffer.push_back(static_cast<uint8_t>(item >> 32));
+    buffer.push_back(static_cast<uint8_t>(item >> 40));
+    buffer.push_back(static_cast<uint8_t>(item >> 48));
+    buffer.push_back(static_cast<uint8_t>(item >> 56));
 #endif
 }
 
-/// `decode` extracts an IEEE double from the 8 byte little-endian byte
+/// `decode` extracts a uint64 from the 8 byte little-endian byte
 /// sequence in buffer.
-inline double decodeDouble(uint8_t const * buffer) {
+inline uint64_t decodeU64(uint8_t const * buffer) {
 #ifdef OPTIMIZED_LITTLE_ENDIAN
-    return *reinterpret_cast<double const *>(buffer);
+    // x86-64 is little endian and supports unaligned loads.
+    return *reinterpret_cast<uint64_t const *>(buffer);
 #else
-    union { uint64_t u; double d; };
-    u = static_cast<uint64_t>(buffer[0]) +
+    uint64_t u = static_cast<uint64_t>(buffer[0]) +
         (static_cast<uint64_t>(buffer[1]) << 8) +
         (static_cast<uint64_t>(buffer[2]) << 16) +
         (static_cast<uint64_t>(buffer[3]) << 24) +
@@ -76,8 +77,21 @@ inline double decodeDouble(uint8_t const * buffer) {
         (static_cast<uint64_t>(buffer[5]) << 40) +
         (static_cast<uint64_t>(buffer[6]) << 48) +
         (static_cast<uint64_t>(buffer[7]) << 56);
-    return d;
+    return u;
 #endif
+}
+
+/// `encode` appends an IEEE double in little-endian byte order
+/// to the end of buffer.
+inline void encodeDouble(double item, std::vector<uint8_t> & buffer) {
+    encodeU64(*reinterpret_cast<uint64_t*>(&item), buffer);
+}
+
+/// `decode` extracts an IEEE double from the 8 byte little-endian byte
+/// sequence in buffer.
+inline double decodeDouble(uint8_t const * buffer) {
+    uint64_t u64 = decodeU64(buffer);
+    return *reinterpret_cast<double*>(&u64);
 }
 
 }} // namespace lsst::sphgeom
