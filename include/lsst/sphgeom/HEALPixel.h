@@ -24,9 +24,8 @@
 #define LSST_SPHGEOM_HEALPIXEL_H_
 
 /// \file
-/// \brief This file declares an abstract base class for implementing
-///        HEALPix Pixelizations, including a concrete Region class for its
-///        pixels.
+/// \brief This file declares classes for implementing HEALPix Pixelizations,
+///        including a still-abstract Region base class for its pixels.
 
 #include <iosfwd>
 
@@ -36,6 +35,16 @@
 
 namespace lsst {
 namespace sphgeom {
+
+/// Implementation-agnostic state for all `HEALPixel` implementations.
+///
+/// Code that uses `HEALPixel` but does not provide an implementation of it
+/// can ignore this class.
+struct HEALPixelState {
+    uint8_t level;
+    uint64_t nested;
+    UnitVector3d vertices[4];
+};
 
 /// A `HEALPixel` is a cell in the Hierarchical Equal Area Pixelization
 /// (HEALPix) scheme.   HEALPix is not implemented in the sphgeom package
@@ -48,10 +57,10 @@ public:
     static constexpr uint8_t TYPE_CODE = 'h';
 
     /// Return the NESTED-system ID for this pixel.
-    uint64_t nested() const { return _nested; }
+    uint64_t nested() const { return _state.nested; }
 
     /// Return the level (i.e. depth) of this pixel.
-    int level() const { return _level; }
+    int level() const { return _state.level; }
 
     bool operator==(HEALPixel const & p) const {
         return nested() == p.nested() && level() == p.level();
@@ -88,23 +97,49 @@ public:
     /// `getArea` returns the area of this HEALPix in steradians.
     virtual double getArea() const = 0;
 
-    virtual Relationship relate(UnitVector3d const & v) const = 0;
-
     // Region interface is left to subclasses, except for HEALPixel-HEALPixel
-    // relations.
+    // relations and the dispatch method for generic Region.
     using Region::relate;
+    Relationship relate(Region const &) const override;
     Relationship relate(HEALPixel const &) const override;
 
+    // Encode is implemented to save level and NESTED ID.
+    std::vector<uint8_t> encode() const;
+
+    /// Function pointer type for registerDecodeFunction.
+    typedef std::unique_ptr<HEALPixel>(*DecodeFunction)(HEALPixelState const & state);
+
+    /// Register a function pointer to call when a encoded HEALPixel is
+    /// encountered by `decode`.
+    ///
+    /// New registrations override previous ones.
+    static void registerDecodeFunction(DecodeFunction func);
+
+    /// Deserialize a byte string produced by `encode` into the
+    /// implementation-agnostic state struct.
+    static HEALPixelState decodeState(uint8_t const * buffer, size_t n);
+
+    ///@{
+    /// `decode` deserializes a HEALPixel from a byte string produced by
+    /// encode.
+    ///
+    /// This first calls `decodeState`, then delegates the rest to the callback
+    /// registered with `registerDecodeFunction`.
+    static std::unique_ptr<HEALPixel> decode(std::vector<uint8_t> const & s) {
+        return decode(s.data(), s.size());
+    }
+    static std::unique_ptr<HEALPixel> decode(uint8_t const * buffer, size_t n);
+    ///@}
+
 protected:
+    static constexpr size_t ENCODED_SIZE = 106;
 
     /// Construct a HEALPixel for the given level and NESTED ID.
-    explicit HEALPixel(int level, uint64_t nested)
-        : _level(level), _nested(nested)
+    explicit HEALPixel(HEALPixelState const & state)
+        : _state(state)
     {}
 
-private:
-    int _level;
-    std::uint64_t _nested;
+    HEALPixelState const _state;
 };
 
 std::ostream & operator<<(std::ostream &, HEALPixel const &);
