@@ -29,6 +29,7 @@
 
 #include <vector>
 
+#define IS_LITTLE_ENDIAN (*(unsigned char *)&(uint16_t){1})
 
 namespace lsst {
 namespace sphgeom {
@@ -36,12 +37,13 @@ namespace sphgeom {
 /// `encode` appends an IEEE double in little-endian byte order
 /// to the end of buffer.
 inline void encodeDouble(double item, std::vector<uint8_t> & buffer) {
-#if defined(__x86_64__)
+  //#if defined(__x86_64__)
+#ifdef IS_LITTLE_ENDIAN
     // x86-64 is little endian.
     auto ptr = reinterpret_cast<uint8_t const *>(&item);
     buffer.insert(buffer.end(), ptr, ptr + 8);
 #else
-    union { uint64_t u; double d };
+    union { uint64_t u; double d; };
     d = item;
     buffer.push_back(static_cast<uint8_t>(value));
     buffer.push_back(static_cast<uint8_t>(value >> 8));
@@ -57,11 +59,11 @@ inline void encodeDouble(double item, std::vector<uint8_t> & buffer) {
 /// `decode` extracts an IEEE double from the 8 byte little-endian byte
 /// sequence in buffer.
 inline double decodeDouble(uint8_t const * buffer) {
-#if defined(__x86_64__)
+#ifdef IS_LITTLE_ENDIAN
     // x86-64 is little endian and supports unaligned loads.
     return *reinterpret_cast<double const *>(buffer);
 #else
-    union { uint64_t u; double d };
+    union { uint64_t u; double d; };
     u = static_cast<uint64_t>(buffer[0]) +
         (static_cast<uint64_t>(buffer[1]) << 8) +
         (static_cast<uint64_t>(buffer[2]) << 16) +
