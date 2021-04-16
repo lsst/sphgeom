@@ -23,12 +23,20 @@
 #ifndef LSST_SPHGEOM_CODEC_H_
 #define LSST_SPHGEOM_CODEC_H_
 
+// Optimized path requires little endian arch and support for unaligned loads.
+#if defined(__x86_64__) or (defined(__aarch64__) and defined(__LITTLE_ENDIAN__))
+#define OPTIMIZED_LITTLE_ENDIAN
+#endif
+
+#ifdef NO_OPTIMIZED_PATHS
+#undef OPTIMIZED_LITTLE_ENDIAN
+#endif
+
 /// \file
 /// \brief This file contains simple helper functions for encoding and
 ///        decoding primitive types to/from byte strings.
 
 #include <vector>
-
 
 namespace lsst {
 namespace sphgeom {
@@ -36,32 +44,30 @@ namespace sphgeom {
 /// `encode` appends an IEEE double in little-endian byte order
 /// to the end of buffer.
 inline void encodeDouble(double item, std::vector<uint8_t> & buffer) {
-#if defined(__x86_64__)
-    // x86-64 is little endian.
+#ifdef OPTIMIZED_LITTLE_ENDIAN
     auto ptr = reinterpret_cast<uint8_t const *>(&item);
     buffer.insert(buffer.end(), ptr, ptr + 8);
 #else
-    union { uint64_t u; double d };
+    union { uint64_t u; double d; };
     d = item;
-    buffer.push_back(static_cast<uint8_t>(value));
-    buffer.push_back(static_cast<uint8_t>(value >> 8));
-    buffer.push_back(static_cast<uint8_t>(value >> 16));
-    buffer.push_back(static_cast<uint8_t>(value >> 24));
-    buffer.push_back(static_cast<uint8_t>(value >> 32));
-    buffer.push_back(static_cast<uint8_t>(value >> 40));
-    buffer.push_back(static_cast<uint8_t>(value >> 48));
-    buffer.push_back(static_cast<uint8_t>(value >> 56));
+    buffer.push_back(static_cast<uint8_t>(u));
+    buffer.push_back(static_cast<uint8_t>(u >> 8));
+    buffer.push_back(static_cast<uint8_t>(u >> 16));
+    buffer.push_back(static_cast<uint8_t>(u >> 24));
+    buffer.push_back(static_cast<uint8_t>(u >> 32));
+    buffer.push_back(static_cast<uint8_t>(u >> 40));
+    buffer.push_back(static_cast<uint8_t>(u >> 48));
+    buffer.push_back(static_cast<uint8_t>(u >> 56));
 #endif
 }
 
 /// `decode` extracts an IEEE double from the 8 byte little-endian byte
 /// sequence in buffer.
 inline double decodeDouble(uint8_t const * buffer) {
-#if defined(__x86_64__)
-    // x86-64 is little endian and supports unaligned loads.
+#ifdef OPTIMIZED_LITTLE_ENDIAN
     return *reinterpret_cast<double const *>(buffer);
 #else
-    union { uint64_t u; double d };
+    union { uint64_t u; double d; };
     u = static_cast<uint64_t>(buffer[0]) +
         (static_cast<uint64_t>(buffer[1]) << 8) +
         (static_cast<uint64_t>(buffer[2]) << 16) +
