@@ -13,6 +13,7 @@ scripts.BasicSConscript.pybind11(
             "_convexPolygon.cc",
             "_curve.cc",
             "_ellipse.cc",
+            "_healPixel.cc",
             "_htmPixelization.cc",
             "_interval1d.cc",
             "_lonLat.cc",

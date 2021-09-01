@@ -125,7 +125,11 @@ std::unique_ptr<HEALPixel> HEALPixel::decode(uint8_t const * buffer, size_t n) {
     return registeredDecoder(state);
 }
 
-std::ostream & operator<<(std::ostream & os, HEALPixel const & p) {
+    bool HEALPixel::contains(const UnitVector3d &v) const {
+        return false;
+    }
+
+    std::ostream & operator<<(std::ostream & os, HEALPixel const & p) {
     return os << "{\"HEALPixel\": [level=" << p.level()
               << ", nested=" << p.nested() << "]";
 }

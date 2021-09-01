@@ -31,6 +31,7 @@
 #include "lsst/sphgeom/Circle.h"
 #include "lsst/sphgeom/ConvexPolygon.h"
 #include "lsst/sphgeom/Ellipse.h"
+#include "lsst/sphgeom/HEALPixel.h"
 #include "lsst/sphgeom/HtmPixelization.h"
 #include "lsst/sphgeom/Interval1d.h"
 #include "lsst/sphgeom/LonLat.h"
@@ -88,6 +89,8 @@ PYBIND11_MODULE(_sphgeom, mod) {
             convexPolygon(mod, "ConvexPolygon");
     py::class_<Ellipse, std::unique_ptr<Ellipse>, Region> ellipse(mod,
                                                                   "Ellipse");
+    py::class_<HEALPixel, std::unique_ptr<HEALPixel>> healPixel(mod,
+                                                                  "HEALPixel");
 
     py::class_<RangeSet, std::shared_ptr<RangeSet>> rangeSet(mod, "RangeSet");
 
@@ -115,6 +118,7 @@ PYBIND11_MODULE(_sphgeom, mod) {
     defineClass(box3d);
 
     defineClass(region);
+    defineClass(healPixel);
     defineClass(box);
     defineClass(circle);
     defineClass(convexPolygon);

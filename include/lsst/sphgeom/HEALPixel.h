@@ -67,7 +67,7 @@ public:
     }
     bool operator!=(HEALPixel const & p) const { return !(*this == p); }
 
-    using Region::contains;
+    bool contains(UnitVector3d const & x) const override;
 
     /// `contains` returns true if the intersection of this HEALPixel and x
     /// is equal to x.
