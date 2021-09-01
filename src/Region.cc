@@ -50,6 +50,8 @@ std::unique_ptr<Region> Region::decode(uint8_t const * buffer, size_t n) {
         return ConvexPolygon::decode(buffer, n);
     } else if (type == Ellipse::TYPE_CODE) {
         return Ellipse::decode(buffer, n);
+    } else if (type == HEALPixel::TYPE_CODE) {
+        return HEALPixel::decode(buffer, n);
     }
     throw std::runtime_error(
         "Byte-string either represents an extension Region that must be "
