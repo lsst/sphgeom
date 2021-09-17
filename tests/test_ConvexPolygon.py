@@ -90,6 +90,14 @@ class ConvexPolygonTestCase(unittest.TestCase):
                 u = UnitVector3d(x[i, j], y[i, j], z[i, j])
                 self.assertEqual(c[i, j], b.contains(u))
                 self.assertEqual(c2[i, j], b.contains(u))
+        # test with non-contiguous memory
+        c3 = b.contains(x[::2], y[::2], z[::2])
+        c4 = b.contains(lon[::2], lat[::2])
+        for i in range(x.shape[0], 2):
+            for j in range(x.shape[1]):
+                u = UnitVector3d(x[i, j], y[i, j], z[i, j])
+                self.assertEqual(c3[i//2, j], b.contains(u))
+                self.assertEqual(c4[i//2, j], b.contains(u))
 
     def testString(self):
         p = ConvexPolygon([UnitVector3d.Z(),

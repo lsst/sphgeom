@@ -94,6 +94,14 @@ class EllipseTestCase(unittest.TestCase):
                 u = UnitVector3d(x[i, j], y[i, j], z[i, j])
                 self.assertEqual(c[i, j], e.contains(u))
                 self.assertEqual(c2[i, j], e.contains(u))
+        # test with non-contiguous memory
+        c3 = e.contains(x[::2], y[::2], z[::2])
+        c4 = e.contains(lon[::2], lat[::2])
+        for i in range(x.shape[0], 2):
+            for j in range(x.shape[1]):
+                u = UnitVector3d(x[i, j], y[i, j], z[i, j])
+                self.assertEqual(c3[i//2, j], e.contains(u))
+                self.assertEqual(c4[i//2, j], e.contains(u))
 
     def test_complement(self):
         e = Ellipse(UnitVector3d.X(),

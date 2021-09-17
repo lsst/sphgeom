@@ -109,6 +109,12 @@ class Box3dTestCase(unittest.TestCase):
             for j in range(x.shape[1]):
                 u = Vector3d(x[i, j], y[i, j], z[i, j])
                 self.assertEqual(c[i, j], b.contains(u))
+        # test with non-contiguous memory
+        c2 = b.contains(x[::2], y[::2], z[::2])
+        for i in range(x.shape[0], 2):
+            for j in range(x.shape[1]):
+                u = Vector3d(x[i, j], y[i, j], z[i, j])
+                self.assertEqual(c2[i//2, j], b.contains(u))
 
     def test_expanding_and_clipping(self):
         a = Box3d(Vector3d(1, 1, 1), Vector3d(2, 2, 2))
