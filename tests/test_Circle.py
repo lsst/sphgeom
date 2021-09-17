@@ -90,10 +90,14 @@ class CircleTestCase(unittest.TestCase):
         y = np.random.rand(5, 3)
         z = np.random.rand(5, 3)
         c = b.contains(x, y, z)
+        lon = np.arctan2(y, x)
+        lat = np.arctan2(z, np.hypot(x, y))
+        c2 = b.contains(lon, lat)
         for i in range(x.shape[0]):
             for j in range(x.shape[1]):
                 u = UnitVector3d(x[i, j], y[i, j], z[i, j])
                 self.assertEqual(c[i, j], b.contains(u))
+                self.assertEqual(c2[i, j], b.contains(u))
 
     def test_expanding_and_clipping(self):
         a = Circle.empty()

@@ -40,6 +40,10 @@ bool Region::contains(double x, double y, double z) const {
     return contains(UnitVector3d(x, y, z));
 }
 
+bool Region::contains(double lon, double lat) const {
+    return contains(UnitVector3d(LonLat::fromRadians(lon, lat)));
+}
+
 std::unique_ptr<Region> Region::decode(uint8_t const * buffer, size_t n) {
     if (buffer == nullptr || n == 0) {
         throw std::runtime_error("Byte-string is not an encoded Region");

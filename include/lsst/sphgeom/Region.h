@@ -99,6 +99,10 @@ public:
     /// necessarily normalized) coordinates is inside this region.
     bool contains(double x, double y, double z) const;
 
+    /// `contains` tests whether the unit vector defined by the given longitude
+    /// and latitude coordinates (in radians) is inside this region.
+    bool contains(double lon, double lat) const;
+
     ///@{
     /// `relate` computes the spatial relationships between this region A and
     /// another region B. The return value S is a bitset with the following

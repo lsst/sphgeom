@@ -59,6 +59,8 @@ void defineClass(py::class_<Region, std::unique_ptr<Region>> &cls) {
             "unitVector"_a);
     cls.def("contains", py::vectorize((bool (Region::*)(double, double, double) const)&Region::contains),
             "x"_a, "y"_a, "z"_a);
+    cls.def("contains", py::vectorize((bool (Region::*)(double, double) const)&Region::contains),
+            "lon"_a, "lat"_a);
     cls.def("__contains__", py::overload_cast<UnitVector3d const &>(&Region::contains, py::const_),
             py::is_operator());
     // The per-subclass relate() overloads are used to implement

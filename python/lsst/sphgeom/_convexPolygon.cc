@@ -74,6 +74,9 @@ void defineClass(py::class_<ConvexPolygon, std::unique_ptr<ConvexPolygon>,
     cls.def("contains",
             py::vectorize((bool (ConvexPolygon::*)(double, double, double) const)&ConvexPolygon::contains),
             "x"_a, "y"_a, "z"_a);
+    cls.def("contains",
+            py::vectorize((bool (ConvexPolygon::*)(double, double) const)&ConvexPolygon::contains),
+            "lon"_a, "lat"_a);
     cls.def("isDisjointFrom", &ConvexPolygon::isDisjointFrom);
     cls.def("intersects", &ConvexPolygon::intersects);
     cls.def("isWithin", &ConvexPolygon::isWithin);

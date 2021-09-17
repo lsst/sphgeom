@@ -89,6 +89,8 @@ void defineClass(py::class_<Circle, std::unique_ptr<Circle>, Region> &cls) {
             (bool (Circle::*)(UnitVector3d const &) const) & Circle::contains);
     cls.def("contains", py::vectorize((bool (Circle::*)(double, double, double) const)&Circle::contains),
             "x"_a, "y"_a, "z"_a);
+    cls.def("contains", py::vectorize((bool (Circle::*)(double, double) const)&Circle::contains),
+            "lon"_a, "lat"_a);
 
     cls.def("isDisjointFrom",
             (bool (Circle::*)(UnitVector3d const &) const) &

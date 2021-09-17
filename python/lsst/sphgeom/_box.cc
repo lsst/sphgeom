@@ -109,6 +109,8 @@ void defineClass(py::class_<Box, std::unique_ptr<Box>, Region> &cls) {
             (bool (Box::*)(UnitVector3d const &) const) & Box::contains);
     cls.def("contains", py::vectorize((bool (Box::*)(double, double, double) const)&Box::contains),
             "x"_a, "y"_a, "z"_a);
+    cls.def("contains", py::vectorize((bool (Box::*)(double, double) const)&Box::contains),
+            "lon"_a, "lat"_a);
     cls.def("isDisjointFrom",
             (bool (Box::*)(LonLat const &) const) & Box::isDisjointFrom);
     cls.def("isDisjointFrom",
