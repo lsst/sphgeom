@@ -28,6 +28,8 @@ except ImportError:
 
 import unittest
 
+import numpy as np
+
 from lsst.sphgeom import CONTAINS, ConvexPolygon, Circle, Region, UnitVector3d
 
 
@@ -73,6 +75,29 @@ class ConvexPolygonTestCase(unittest.TestCase):
         self.assertTrue(p.intersects(tinyCircle))
         self.assertFalse(p.isDisjointFrom(tinyCircle))
         self.assertTrue(p.contains(tinyCircle))
+
+    def test_vectorized_contains(self):
+        b = ConvexPolygon([UnitVector3d.Z(), UnitVector3d.X(), UnitVector3d.Y()])
+        x = np.random.rand(5, 3)
+        y = np.random.rand(5, 3)
+        z = np.random.rand(5, 3)
+        c = b.contains(x, y, z)
+        lon = np.arctan2(y, x)
+        lat = np.arctan2(z, np.hypot(x, y))
+        c2 = b.contains(lon, lat)
+        for i in range(x.shape[0]):
+            for j in range(x.shape[1]):
+                u = UnitVector3d(x[i, j], y[i, j], z[i, j])
+                self.assertEqual(c[i, j], b.contains(u))
+                self.assertEqual(c2[i, j], b.contains(u))
+        # test with non-contiguous memory
+        c3 = b.contains(x[::2], y[::2], z[::2])
+        c4 = b.contains(lon[::2], lat[::2])
+        for i in range(x.shape[0], 2):
+            for j in range(x.shape[1]):
+                u = UnitVector3d(x[i, j], y[i, j], z[i, j])
+                self.assertEqual(c3[i//2, j], b.contains(u))
+                self.assertEqual(c4[i//2, j], b.contains(u))
 
     def testString(self):
         p = ConvexPolygon([UnitVector3d.Z(),

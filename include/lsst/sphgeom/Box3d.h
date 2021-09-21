@@ -166,6 +166,10 @@ public:
                y().contains(b.y()) &&
                z().contains(b.z());
     }
+
+    bool contains(double x_, double y_, double z_) const {
+        return x().contains(x_) && y().contains(y_) && z().contains(z_);
+    }
     ///@}
 
     ///@{

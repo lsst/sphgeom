@@ -20,6 +20,7 @@
  * see <https://www.lsstcorp.org/LegalNotices/>.
  */
 #include "pybind11/pybind11.h"
+#include "pybind11/numpy.h"
 
 #include "lsst/sphgeom/python.h"
 
@@ -54,8 +55,13 @@ void defineClass(py::class_<Region, std::unique_ptr<Region>> &cls) {
     cls.def("getBoundingBox", &Region::getBoundingBox);
     cls.def("getBoundingBox3d", &Region::getBoundingBox3d);
     cls.def("getBoundingCircle", &Region::getBoundingCircle);
-    cls.def("contains", &Region::contains, "unitVector"_a);
-    cls.def("__contains__", &Region::contains, "unitVector"_a,
+    cls.def("contains", py::overload_cast<UnitVector3d const &>(&Region::contains, py::const_),
+            "unitVector"_a);
+    cls.def("contains", py::vectorize((bool (Region::*)(double, double, double) const)&Region::contains),
+            "x"_a, "y"_a, "z"_a);
+    cls.def("contains", py::vectorize((bool (Region::*)(double, double) const)&Region::contains),
+            "lon"_a, "lat"_a);
+    cls.def("__contains__", py::overload_cast<UnitVector3d const &>(&Region::contains, py::const_),
             py::is_operator());
     // The per-subclass relate() overloads are used to implement
     // double-dispatch in C++, and are not needed in Python.

@@ -29,6 +29,8 @@ except ImportError:
 import math
 import unittest
 
+import numpy as np
+
 from lsst.sphgeom import (Angle, CONTAINS, Circle, Ellipse, Region,
                           UnitVector3d, WITHIN)
 
@@ -76,6 +78,30 @@ class EllipseTestCase(unittest.TestCase):
         c = Circle(UnitVector3d.X(), Angle(math.pi / 2))
         self.assertEqual(c.relate(e), CONTAINS)
         self.assertEqual(e.relate(c), WITHIN)
+
+    def test_vectorized_contains(self):
+        e = Ellipse(UnitVector3d.X(),
+                    Angle(math.pi / 3), Angle(math.pi / 6), Angle(0))
+        x = np.random.rand(5, 3)
+        y = np.random.rand(5, 3)
+        z = np.random.rand(5, 3)
+        c = e.contains(x, y, z)
+        lon = np.arctan2(y, x)
+        lat = np.arctan2(z, np.hypot(x, y))
+        c2 = e.contains(lon, lat)
+        for i in range(x.shape[0]):
+            for j in range(x.shape[1]):
+                u = UnitVector3d(x[i, j], y[i, j], z[i, j])
+                self.assertEqual(c[i, j], e.contains(u))
+                self.assertEqual(c2[i, j], e.contains(u))
+        # test with non-contiguous memory
+        c3 = e.contains(x[::2], y[::2], z[::2])
+        c4 = e.contains(lon[::2], lat[::2])
+        for i in range(x.shape[0], 2):
+            for j in range(x.shape[1]):
+                u = UnitVector3d(x[i, j], y[i, j], z[i, j])
+                self.assertEqual(c3[i//2, j], e.contains(u))
+                self.assertEqual(c4[i//2, j], e.contains(u))
 
     def test_complement(self):
         e = Ellipse(UnitVector3d.X(),
