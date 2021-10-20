@@ -35,34 +35,34 @@ class PixelizationABC(abc.ABC):
 
         Returns
         -------
-        `lsst.sphgeom.RangeSet`
+        rangeSet : `lsst.sphgeom.RangeSet`
         """
         pass
 
     @abc.abstractmethod
     def pixel(self, i) -> Region:
-        """Return the spherical region corresponding to the pixel with index i.
+        """Return the spherical region corresponding to the pixel index ``i``.
 
-        This region will contain all unit vectors v with `index(v) == i`. But
-        it may also contain points with index not equal to i. To see why,
-        consider a point that lies on the edge of a polygonal pixel - it is
-        inside the polygons for both pixels sharing the edge, but must be
-        assigned to exactly one pixel by the pixelization.
+        This region will contain all unit vectors v with ``index(v) == i``.
+        But it may also contain points with index not equal to ``i``.
+        To see why, consider a point that lies on the edge of a polygonal
+        pixel - it is inside the polygons for both pixels sharing the edge,
+        but must be assigned to exactly one pixel by the pixelization.
 
         Parameters
         ----------
-        i: `int`
+        i : `int`
             Pixel index.
 
         Returns
         -------
-        `lsst.sphgeom.Region`
-            The spherical region corresponding to the pixel with index i
+        region : `lsst.sphgeom.Region`
+            The spherical region corresponding to the pixel with index ``i``
 
         Raises
         ------
-        `InvalidArgumentExceptiont`
-            If i is not a valid pixel index.
+        `InvalidArgumentException`
+            Raised if ``i`` is not a valid pixel index.
         """
         pass
 
@@ -72,11 +72,11 @@ class PixelizationABC(abc.ABC):
 
         Parameters
         ----------
-        v: `lsst.sphgeom.UnitVector3d)`
+        v : `lsst.sphgeom.UnitVector3d`
 
         Returns
         -------
-        `int`
+        i : `int`
             The index of the pixel.
         """
         pass
@@ -87,11 +87,11 @@ class PixelizationABC(abc.ABC):
 
         Parameters
         ----------
-        i: `int`
+        i : `int`
 
         Returns
         -------
-        `str`
+        s : `str`
         """
         pass
 
@@ -99,23 +99,24 @@ class PixelizationABC(abc.ABC):
     def envelope(self, region: Region, maxRanges: int = 0):
         """Return the indexes of the pixels intersecting the spherical region.
 
-        The `maxRanges` parameter can be used to limit both these costs -
+        The ``maxRanges`` parameter can be used to limit both these costs -
         setting it to a non-zero value sets a cap on the number of ranges
         returned by this method. To meet this constraint, implementations are
-        allowed to return pixels that do not intersect r along with those that
-        do. This allows two ranges [a, b) and [c, d), a < b < c < d, to be
+        allowed to return pixels that do not intersect the region along with
+        those, that do.
+        This allows two ranges [a, b) and [c, d), a < b < c < d, to be
         merged into one range [a, d) (by adding in the pixels [b, c)). Since
         simplification proceeds by adding pixels, the return value will always
         be a superset of the intersecting pixels.
 
         Parameters
         ----------
-        region: `lsst.sphgeom.Region`
-        maxRanges: `int`
+        region : `lsst.sphgeom.Region`
+        maxRanges : `int`
 
         Returns
         -------
-        `lsst.sphgeom.RangeSet`
+        rangeSet : `lsst.sphgeom.RangeSet`
         """
         pass
 
@@ -123,7 +124,7 @@ class PixelizationABC(abc.ABC):
     def interior(self, region: Region, maxRanges: int = 0):
         """Return the indexes of the pixels within the spherical region.
 
-        The `maxRanges` argument is analogous to the identically named
+        The ``maxRanges`` argument is analogous to the identically named
         envelope() argument. The only difference is that implementations must
         remove interior pixels to keep the number of ranges at or below the
         maximum. The return value is therefore always a subset of the interior
@@ -131,11 +132,11 @@ class PixelizationABC(abc.ABC):
 
         Parameters
         ----------
-        region: `lsst.sphgeom.Region`
-        maxRanges: `int`
+        region : `lsst.sphgeom.Region`
+        maxRanges : `int`
 
         Returns
         -------
-        `lsst.sphgeom.RangeSet`
+        rangeSet : `lsst.sphgeom.RangeSet`
         """
         pass
