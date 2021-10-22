@@ -27,6 +27,7 @@
 /// \brief This file defines a class for representing angle intervals.
 
 #include <iosfwd>
+#include <limits>
 
 #include "Angle.h"
 #include "Interval.h"

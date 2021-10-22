@@ -26,6 +26,8 @@
 /// \file
 /// \brief This file declares a class for representing normalized angles.
 
+#include <limits>
+
 #include "Angle.h"
 
 
