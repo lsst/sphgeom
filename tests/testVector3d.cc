@@ -22,6 +22,9 @@
 
 /// \file
 /// \brief This file contains tests for the Vector3d class.
+
+#include <limits>
+
 #include "lsst/sphgeom/Angle.h"
 #include "lsst/sphgeom/Vector3d.h"
 

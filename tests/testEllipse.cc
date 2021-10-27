@@ -23,6 +23,7 @@
 /// \file
 /// \brief This file contains tests for the Ellipse class.
 
+#include <limits>
 #include <memory>
 #include <vector>
 

@@ -28,6 +28,7 @@
 ///        regions on the unit sphere.
 
 #include <iosfwd>
+#include <limits>
 
 #include "Circle.h"
 #include "Matrix3d.h"

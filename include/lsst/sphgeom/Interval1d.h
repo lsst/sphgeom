@@ -27,6 +27,7 @@
 /// \brief This file defines a class for representing intervals of ℝ.
 
 #include <iosfwd>
+#include <limits>
 
 #include "Interval.h"
 

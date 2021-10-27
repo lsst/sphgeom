@@ -23,6 +23,7 @@
 /// \file
 /// \brief This file contains tests for the Angle class.
 
+#include <limits>
 #include <sstream>
 #include <string>
 
