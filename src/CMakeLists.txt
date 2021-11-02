@@ -1,7 +1,7 @@
 add_library(sphgeom SHARED)
 
 target_compile_features(sphgeom PRIVATE 
-    cxx_std_14
+    cxx_std_17
 )
 
 set_target_properties(sphgeom PROPERTIES 
