@@ -1,0 +1,31 @@
+name: cmake
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  cmake:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install Python prereqs
+        run: pip install pybind11[global]
+
+      - name: CMake configure
+        run: cmake -B ${{github.workspace}}/build
+
+      - name: CMake build
+        run: cmake --build ${{github.workspace}}/build --parallel `nproc`
+
+      - name: CMake test
+        working-directory: ${{github.workspace}}/build
+        run: ctest  --parallel `nproc`
