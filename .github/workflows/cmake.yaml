@@ -18,14 +18,32 @@ jobs:
           python-version: 3.8
 
       - name: Install Python prereqs
-        run: pip install pybind11[global]
+        run: |
+          pip install \
+            numpy \
+            pybind11[global] \
+            pytest \
+            pytest-flake8 \
+            pyyaml
 
       - name: CMake configure
-        run: cmake -B ${{github.workspace}}/build
+        run: |
+          cmake \
+            -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install \
+            -B ${{github.workspace}}/build
 
       - name: CMake build
         run: cmake --build ${{github.workspace}}/build --parallel `nproc`
 
       - name: CMake test
         working-directory: ${{github.workspace}}/build
-        run: ctest  --parallel `nproc`
+        run: ctest
+
+      - name: CMake install
+        run: cmake --build ${{github.workspace}}/build --target install
+
+      - name: Python tests
+        env:
+          PYTHONPATH: ${{github.workspace}}/build/install/python
+          LD_LIBRARY_PATH: ${{github.workspace}}/build/install/lib
+        run: pytest -r a -v
