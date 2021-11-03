@@ -105,7 +105,7 @@ public:
     /// The default constructor creates a unit vector equal to (1, 0, 0).
     UnitVector3d() : _v(1.0, 0.0, 0.0) {}
 
-    UnitVector3d(UnitVector3d const & v) : _v(v._v) {}
+    UnitVector3d(UnitVector3d const &v) = default;
 
     ///@{
     /// This constructor creates a unit vector with the given direction.
