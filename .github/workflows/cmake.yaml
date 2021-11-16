@@ -24,7 +24,8 @@ jobs:
             pybind11[global] \
             pytest \
             pytest-flake8 \
-            pyyaml
+            pyyaml \
+            healpy
 
       - name: CMake configure
         run: |
