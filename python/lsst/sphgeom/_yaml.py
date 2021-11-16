@@ -42,6 +42,8 @@ from ._sphgeom import (
     Q3cPixelization,
 )
 
+from ._healpixPixelization import HealpixPixelization
+
 
 if yaml:
     try:
@@ -107,6 +109,7 @@ def pixel_constructor(loader, node):
     pixelMap = {"lsst.sphgeom.Q3cPixelization": Q3cPixelization,
                 "lsst.sphgeom.Mq3cPixelization": Mq3cPixelization,
                 "lsst.sphgeom.HtmPixelization": HtmPixelization,
+                "lsst.sphgeom.HealpixPixelization": HealpixPixelization,
                 }
 
     if className not in pixelMap:
@@ -118,7 +121,7 @@ def pixel_constructor(loader, node):
 
 # All the pixelization schemes use the same approach with getLevel
 if yaml:
-    for pixelSchemeCls in (HtmPixelization, Q3cPixelization, Mq3cPixelization):
+    for pixelSchemeCls in (HtmPixelization, Q3cPixelization, Mq3cPixelization, HealpixPixelization):
         yaml.add_representer(pixelSchemeCls, pixel_representer)
         for loader in YamlLoaders:
             yaml.add_constructor(f"lsst.sphgeom.{pixelSchemeCls.__name__}", pixel_constructor, Loader=loader)
