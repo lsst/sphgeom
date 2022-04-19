@@ -1,19 +1,26 @@
 name: build_and_test
 
 on:
-  - push
-  - pull_request
+  push:
+    branches:
+      - main
+  pull_request:
 
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          # Need to clone everything to determine version from git.
+          fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: 3.8
+          cache: "pip"
+          cache-dependency-path: "setup.cfg"
 
       - name: Build and install
         run: |
