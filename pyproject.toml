@@ -5,4 +5,8 @@ requires = [
     "wheel",
     "pybind11 >= 2.5.0",
     "numpy >= 1.18",
+    "lsst-versions",
 ]
+
+[tool.lsst_versions]
+write_to = "python/lsst/sphgeom/version.py"
