@@ -41,7 +41,7 @@
 namespace lsst {
 namespace sphgeom {
 
-/// `encode` appends an IEEE double in little-endian byte order
+/// `encodeDouble` appends an IEEE double in little-endian byte order
 /// to the end of buffer.
 inline void encodeDouble(double item, std::vector<uint8_t> & buffer) {
 #ifdef OPTIMIZED_LITTLE_ENDIAN
@@ -61,7 +61,7 @@ inline void encodeDouble(double item, std::vector<uint8_t> & buffer) {
 #endif
 }
 
-/// `decode` extracts an IEEE double from the 8 byte little-endian byte
+/// `decodeDouble` extracts an IEEE double from the 8 byte little-endian byte
 /// sequence in buffer.
 inline double decodeDouble(uint8_t const * buffer) {
 #ifdef OPTIMIZED_LITTLE_ENDIAN
