@@ -56,6 +56,15 @@ inline pybind11::bytes encode(Region const &self) {
                      bytes.size());
 }
 
+/// Decode a Region from a pybind11 bytes object.
+template <typename R>
+std::unique_ptr<R> decode(pybind11::bytes bytes) {
+    uint8_t const *buffer = reinterpret_cast<uint8_t const *>(
+            PYBIND11_BYTES_AS_STRING(bytes.ptr()));
+    size_t n = static_cast<size_t>(PYBIND11_BYTES_SIZE(bytes.ptr()));
+    return R::decode(buffer, n);
+}
+
 }  // python
 }  // sphgeom
 }  // lsst

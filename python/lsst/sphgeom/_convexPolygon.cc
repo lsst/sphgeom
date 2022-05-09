@@ -41,15 +41,6 @@ using namespace pybind11::literals;
 namespace lsst {
 namespace sphgeom {
 
-namespace {
-std::unique_ptr<ConvexPolygon> decode(py::bytes bytes) {
-    uint8_t const *buffer = reinterpret_cast<uint8_t const *>(
-            PYBIND11_BYTES_AS_STRING(bytes.ptr()));
-    size_t n = static_cast<size_t>(PYBIND11_BYTES_SIZE(bytes.ptr()));
-    return ConvexPolygon::decode(buffer, n);
-}
-}
-
 template <>
 void defineClass(py::class_<ConvexPolygon, std::unique_ptr<ConvexPolygon>,
                             Region> &cls) {
@@ -81,18 +72,12 @@ void defineClass(py::class_<ConvexPolygon, std::unique_ptr<ConvexPolygon>,
     cls.def("intersects", &ConvexPolygon::intersects);
     cls.def("isWithin", &ConvexPolygon::isWithin);
 
-    // The lambda is necessary for now; returning the unique pointer
-    // directly leads to incorrect results and crashes.
-    cls.def_static("decode",
-                   [](py::bytes bytes) { return decode(bytes).release(); },
-                   "bytes"_a);
-
     cls.def("__repr__", [](ConvexPolygon const &self) {
         return py::str("ConvexPolygon({!r})").format(self.getVertices());
     });
     cls.def(py::pickle(
             [](const ConvexPolygon &self) { return python::encode(self); },
-            [](py::bytes bytes) { return decode(bytes).release(); }));
+            [](py::bytes bytes) { return python::decode<ConvexPolygon>(bytes).release(); }));
 }
 
 }  // sphgeom
