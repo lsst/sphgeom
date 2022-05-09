@@ -150,9 +150,7 @@ void defineClass(py::class_<Box, std::unique_ptr<Box>, Region> &cls) {
     cls.def("__repr__", [](Box const &self) {
         return py::str("Box({!r}, {!r})").format(self.getLon(), self.getLat());
     });
-    cls.def(py::pickle(
-            [](const Box &self) { return python::encode(self); },
-            [](py::bytes bytes) { return python::decode<Box>(bytes).release(); }));
+    cls.def(py::pickle(&python::encode, &python::decode<Box>));
 }
 
 }  // sphgeom

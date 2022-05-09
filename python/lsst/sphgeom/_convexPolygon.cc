@@ -75,9 +75,7 @@ void defineClass(py::class_<ConvexPolygon, std::unique_ptr<ConvexPolygon>,
     cls.def("__repr__", [](ConvexPolygon const &self) {
         return py::str("ConvexPolygon({!r})").format(self.getVertices());
     });
-    cls.def(py::pickle(
-            [](const ConvexPolygon &self) { return python::encode(self); },
-            [](py::bytes bytes) { return python::decode<ConvexPolygon>(bytes).release(); }));
+    cls.def(py::pickle(&python::encode, &python::decode<ConvexPolygon>));
 }
 
 }  // sphgeom

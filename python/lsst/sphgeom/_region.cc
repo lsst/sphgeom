@@ -43,7 +43,7 @@ namespace sphgeom {
 
 template <>
 void defineClass(py::class_<Region, std::unique_ptr<Region>> &cls) {
-    cls.def("clone", [](Region const &self) { return self.clone().release(); });
+    cls.def("clone", &Region::clone);
     cls.def("getBoundingBox", &Region::getBoundingBox);
     cls.def("getBoundingBox3d", &Region::getBoundingBox3d);
     cls.def("getBoundingCircle", &Region::getBoundingCircle);

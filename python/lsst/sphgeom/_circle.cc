@@ -132,9 +132,7 @@ void defineClass(py::class_<Circle, std::unique_ptr<Circle>, Region> &cls) {
         return py::str("Circle({!r}, {!r})")
                 .format(self.getCenter(), self.getOpeningAngle());
     });
-    cls.def(py::pickle(
-            [](const Circle &self) { return python::encode(self); },
-            [](py::bytes bytes) { return python::decode<Circle>(bytes).release(); }));
+    cls.def(py::pickle(&python::encode, &python::decode<Circle>));
 }
 
 }  // sphgeom

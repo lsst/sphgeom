@@ -84,9 +84,7 @@ void defineClass(py::class_<Ellipse, std::unique_ptr<Ellipse>, Region> &cls) {
         return py::str("Ellipse({!r}, {!r}, {!r})")
                 .format(self.getF1(), self.getF2(), self.getAlpha());
     });
-    cls.def(py::pickle(
-            [](const Ellipse &self) { return python::encode(self); },
-            [](py::bytes bytes) { return python::decode<Ellipse>(bytes).release(); }));
+    cls.def(py::pickle(&python::encode, &python::decode<Ellipse>));
 }
 
 }  // sphgeom
