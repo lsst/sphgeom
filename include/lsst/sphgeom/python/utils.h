@@ -65,6 +65,22 @@ std::unique_ptr<R> decode(pybind11::bytes bytes) {
     return R::decode(buffer, n);
 }
 
+/// Create a vector of Region (or Region-subclass) pointers by copying the
+/// regions from a sized Python iterable (e.g. S == py::tuple).
+///
+/// Note that the pybind11 built-in STL conversions don't work, because they
+/// use unique_ptr - we can't transfer ownership out of Python, and those
+/// converters don't know about our clone methods.
+template <typename S>
+inline std::vector<std::unique_ptr<Region>> convert_region_sequence(S const & seq) {
+    std::vector<std::unique_ptr<Region>> result;
+    result.reserve(seq.size());
+    for (pybind11::handle py_region : seq) {
+        result.push_back(py_region.cast<Region const &>().clone());
+    }
+    return result;
+}
+
 }  // python
 }  // sphgeom
 }  // lsst
