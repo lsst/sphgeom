@@ -31,6 +31,7 @@
 #include "lsst/sphgeom/Circle.h"
 #include "lsst/sphgeom/ConvexPolygon.h"
 #include "lsst/sphgeom/Ellipse.h"
+#include "lsst/sphgeom/CompoundRegion.h"
 #include "lsst/sphgeom/UnitVector3d.h"
 
 namespace lsst {
@@ -57,6 +58,10 @@ std::unique_ptr<Region> Region::decode(uint8_t const * buffer, size_t n) {
         return ConvexPolygon::decode(buffer, n);
     } else if (type == Ellipse::TYPE_CODE) {
         return Ellipse::decode(buffer, n);
+    } else if (type == UnionRegion::TYPE_CODE) {
+        return UnionRegion::decode(buffer, n);
+    } else if (type == IntersectionRegion::TYPE_CODE) {
+        return IntersectionRegion::decode(buffer, n);
     }
     throw std::runtime_error("Byte-string is not an encoded Region");
 }

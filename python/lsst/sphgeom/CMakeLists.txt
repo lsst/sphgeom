@@ -7,6 +7,7 @@ pybind11_add_module(_sphgeom
     _box.cc
     _chunker.cc
     _circle.cc
+    _compoundRegion.cc
     _convexPolygon.cc
     _curve.cc
     _ellipse.cc

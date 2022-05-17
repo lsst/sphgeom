@@ -41,17 +41,9 @@ using namespace pybind11::literals;
 namespace lsst {
 namespace sphgeom {
 
-namespace {
-py::bytes encode(Region const &self) {
-    std::vector<uint8_t> bytes = self.encode();
-    return py::bytes(reinterpret_cast<char const *>(bytes.data()),
-                     bytes.size());
-}
-}
-
 template <>
 void defineClass(py::class_<Region, std::unique_ptr<Region>> &cls) {
-    cls.def("clone", [](Region const &self) { return self.clone().release(); });
+    cls.def("clone", &Region::clone);
     cls.def("getBoundingBox", &Region::getBoundingBox);
     cls.def("getBoundingBox3d", &Region::getBoundingBox3d);
     cls.def("getBoundingCircle", &Region::getBoundingCircle);
@@ -69,17 +61,7 @@ void defineClass(py::class_<Region, std::unique_ptr<Region>> &cls) {
             (Relationship(Region::*)(Region const &) const) & Region::relate,
             "region"_a);
     cls.def("encode", &python::encode);
-
-    cls.def_static(
-            "decode",
-            [](py::bytes bytes) {
-                uint8_t const *buffer = reinterpret_cast<uint8_t const *>(
-                        PYBIND11_BYTES_AS_STRING(bytes.ptr()));
-                size_t n =
-                        static_cast<size_t>(PYBIND11_BYTES_SIZE(bytes.ptr()));
-                return Region::decode(buffer, n).release();
-            },
-            "bytes"_a);
+    cls.def_static("decode", &python::decode<Region>, "bytes"_a);
 }
 
 }  // sphgeom

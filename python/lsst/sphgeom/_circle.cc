@@ -40,15 +40,6 @@ using namespace pybind11::literals;
 namespace lsst {
 namespace sphgeom {
 
-namespace {
-std::unique_ptr<Circle> decode(py::bytes bytes) {
-    uint8_t const *buffer = reinterpret_cast<uint8_t const *>(
-            PYBIND11_BYTES_AS_STRING(bytes.ptr()));
-    size_t n = static_cast<size_t>(PYBIND11_BYTES_SIZE(bytes.ptr()));
-    return Circle::decode(buffer, n);
-}
-}
-
 template <>
 void defineClass(py::class_<Circle, std::unique_ptr<Circle>, Region> &cls) {
     cls.attr("TYPE_CODE") = py::int_(Circle::TYPE_CODE);
@@ -133,12 +124,6 @@ void defineClass(py::class_<Circle, std::unique_ptr<Circle>, Region> &cls) {
 
     // Note that the Region interface has already been wrapped.
 
-    // The lambda is necessary for now; returning the unique pointer
-    // directly leads to incorrect results and crashes.
-    cls.def_static("decode",
-                   [](py::bytes bytes) { return decode(bytes).release(); },
-                   "bytes"_a);
-
     cls.def("__str__", [](Circle const &self) {
         return py::str("Circle({!s}, {!s})")
                 .format(self.getCenter(), self.getOpeningAngle());
@@ -147,9 +132,7 @@ void defineClass(py::class_<Circle, std::unique_ptr<Circle>, Region> &cls) {
         return py::str("Circle({!r}, {!r})")
                 .format(self.getCenter(), self.getOpeningAngle());
     });
-    cls.def(py::pickle(
-            [](const Circle &self) { return python::encode(self); },
-            [](py::bytes bytes) { return decode(bytes).release(); }));
+    cls.def(py::pickle(&python::encode, &python::decode<Circle>));
 }
 
 }  // sphgeom

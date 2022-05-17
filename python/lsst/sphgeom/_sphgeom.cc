@@ -29,6 +29,7 @@
 #include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/Chunker.h"
 #include "lsst/sphgeom/Circle.h"
+#include "lsst/sphgeom/CompoundRegion.h"
 #include "lsst/sphgeom/ConvexPolygon.h"
 #include "lsst/sphgeom/Ellipse.h"
 #include "lsst/sphgeom/HtmPixelization.h"
@@ -88,6 +89,10 @@ PYBIND11_MODULE(_sphgeom, mod) {
             convexPolygon(mod, "ConvexPolygon");
     py::class_<Ellipse, std::unique_ptr<Ellipse>, Region> ellipse(mod,
                                                                   "Ellipse");
+    py::class_<CompoundRegion, std::unique_ptr<CompoundRegion>, Region> compoundRegion(mod, "CompoundRegion");
+    py::class_<UnionRegion, std::unique_ptr<UnionRegion>, CompoundRegion> unionRegion(mod, "UnionRegion");
+    py::class_<IntersectionRegion, std::unique_ptr<IntersectionRegion>, CompoundRegion>
+            intersectionRegion(mod, "IntersectionRegion");
 
     py::class_<RangeSet, std::shared_ptr<RangeSet>> rangeSet(mod, "RangeSet");
 
@@ -119,6 +124,9 @@ PYBIND11_MODULE(_sphgeom, mod) {
     defineClass(circle);
     defineClass(convexPolygon);
     defineClass(ellipse);
+    defineClass(compoundRegion);
+    defineClass(unionRegion);
+    defineClass(intersectionRegion);
 
     defineClass(rangeSet);
 

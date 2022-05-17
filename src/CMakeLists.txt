@@ -1,10 +1,10 @@
 add_library(sphgeom SHARED)
 
-target_compile_features(sphgeom PRIVATE 
+target_compile_features(sphgeom PRIVATE
     cxx_std_17
 )
 
-set_target_properties(sphgeom PROPERTIES 
+set_target_properties(sphgeom PROPERTIES
     CXX_EXTENSIONS OFF
     POSITION_INDEPENDENT_CODE ON
 )
@@ -21,6 +21,7 @@ target_sources(sphgeom PRIVATE
     Box.cc
     Chunker.cc
     Circle.cc
+    CompoundRegion.cc
     ConvexPolygon.cc
     ConvexPolygonImpl.h
     Ellipse.cc

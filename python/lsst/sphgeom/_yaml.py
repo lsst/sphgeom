@@ -36,6 +36,8 @@ from ._sphgeom import (
     Circle,
     ConvexPolygon,
     Ellipse,
+    UnionRegion,
+    IntersectionRegion,
     HtmPixelization,
     Mq3cPixelization,
     Region,
@@ -81,7 +83,7 @@ def region_constructor(loader, node):
 
 # Register all the region classes with the same constructor and representer
 if yaml:
-    for region_class in (ConvexPolygon, Ellipse, Circle, Box):
+    for region_class in (ConvexPolygon, Ellipse, Circle, Box, UnionRegion, IntersectionRegion):
         yaml.add_representer(region_class, region_representer)
 
         for loader in YamlLoaders:

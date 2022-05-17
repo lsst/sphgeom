@@ -10,6 +10,7 @@ scripts.BasicSConscript.pybind11(
             "_box3d.cc",
             "_chunker.cc",
             "_circle.cc",
+            "_compoundRegion.cc",
             "_convexPolygon.cc",
             "_curve.cc",
             "_ellipse.cc",

@@ -44,15 +44,6 @@ using namespace pybind11::literals;
 namespace lsst {
 namespace sphgeom {
 
-namespace {
-std::unique_ptr<Box> decode(py::bytes bytes) {
-    uint8_t const *buffer = reinterpret_cast<uint8_t const *>(
-            PYBIND11_BYTES_AS_STRING(bytes.ptr()));
-    size_t n = static_cast<size_t>(PYBIND11_BYTES_SIZE(bytes.ptr()));
-    return Box::decode(buffer, n);
-}
-}
-
 template <>
 void defineClass(py::class_<Box, std::unique_ptr<Box>, Region> &cls) {
     cls.attr("TYPE_CODE") = py::int_(Box::TYPE_CODE);
@@ -153,21 +144,13 @@ void defineClass(py::class_<Box, std::unique_ptr<Box>, Region> &cls) {
 
     // Note that the Region interface has already been wrapped.
 
-    // The lambda is necessary for now; returning the unique pointer
-    // directly leads to incorrect results and crashes.
-    cls.def_static("decode",
-                   [](py::bytes bytes) { return decode(bytes).release(); },
-                   "bytes"_a);
-
     cls.def("__str__", [](Box const &self) {
         return py::str("Box({!s}, {!s})").format(self.getLon(), self.getLat());
     });
     cls.def("__repr__", [](Box const &self) {
         return py::str("Box({!r}, {!r})").format(self.getLon(), self.getLat());
     });
-    cls.def(py::pickle(
-            [](const Box &self) { return python::encode(self); },
-            [](py::bytes bytes) { return decode(bytes).release(); }));
+    cls.def(py::pickle(&python::encode, &python::decode<Box>));
 }
 
 }  // sphgeom

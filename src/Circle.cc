@@ -68,6 +68,9 @@ bool Circle::contains(Circle const & x) const {
     if (isEmpty() || x.isFull()) {
         return false;
     }
+    if (*this == x) {
+        return true;
+    }
     NormalizedAngle cc(_center, x._center);
     return _openingAngle >
            cc + x._openingAngle + 4.0 * Angle(MAX_ASIN_ERROR);
@@ -296,6 +299,11 @@ Relationship Circle::relate(Circle const & c) const {
         return CONTAINS;
     } else if (c.isFull()) {
         return WITHIN;
+    }
+    // Special case equality, which can be missed by logic below due to
+    // round-off error.
+    if (*this == c) {
+        return CONTAINS | WITHIN;
     }
     // Neither circle is full.
     NormalizedAngle cc(_center, c._center);
