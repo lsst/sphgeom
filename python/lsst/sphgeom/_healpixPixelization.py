@@ -21,7 +21,6 @@
 __all__ = ["HealpixPixelization"]
 
 import numpy as np
-import healpy as hp
 
 from ._sphgeom import RangeSet, Region, UnitVector3d
 from ._sphgeom import Box, Circle, ConvexPolygon, Ellipse
@@ -39,6 +38,7 @@ class HealpixPixelization(PixelizationABC):
     MAX_LEVEL = 17
 
     def __init__(self, level: int):
+        import healpy as hp
 
         if level < 0:
             raise ValueError("HealPix level must be >= 0.")
@@ -65,18 +65,23 @@ class HealpixPixelization(PixelizationABC):
         return RangeSet(0, self._npix)
 
     def pixel(self, i) -> Region:
+        import healpy as hp
+
         # This is arbitrarily returning 4 points on a side
         # to approximate the pixel shape.
         varr = hp.boundaries(self._nside, i, step=4, nest=True).T
         return ConvexPolygon([UnitVector3d(*c) for c in varr])
 
     def index(self, v: UnitVector3d) -> int:
+        import healpy as hp
         return hp.vec2pix(self._nside, v.x(), v.y(), v.z(), nest=True)
 
     def toString(self, i: int) -> str:
         return str(i)
 
     def envelope(self, region: Region, maxRanges: int = 0):
+        import healpy as hp
+
         if maxRanges > 0:
             # If this is important, the rangeset can be consolidated.
             raise NotImplementedError("HealpixPixelization: maxRanges not implemented")
@@ -93,6 +98,8 @@ class HealpixPixelization(PixelizationABC):
         return RangeSet(pixels)
 
     def interior(self, region: Region, maxRanges: int = 0):
+        import healpy as hp
+
         if maxRanges > 0:
             # If this is important, the rangeset can be consolidated.
             raise NotImplementedError("HealpixPixelization: maxRanges not implemented")
@@ -128,6 +135,8 @@ class HealpixPixelization(PixelizationABC):
         pixels : `np.ndarray`
             Array of pixels at resolution nside, nest ordering.
         """
+        import healpy as hp
+
         _circle = None
         _poly = None
         if isinstance(region, (Box, Ellipse)):
