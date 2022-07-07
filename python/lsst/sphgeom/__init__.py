@@ -24,5 +24,10 @@
 """
 
 from ._sphgeom import *
+from ._sphgeom import Pixelization
 from .version import *
 from ._yaml import *
+from .pixelization_abc import *
+from ._healpixPixelization import *
+
+PixelizationABC.register(Pixelization)
