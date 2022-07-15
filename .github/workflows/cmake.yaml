@@ -28,7 +28,7 @@ jobs:
             pytest \
             pytest-flake8 \
             pyyaml \
-            healpy
+            hpgeom
 
       - name: CMake configure
         run: |

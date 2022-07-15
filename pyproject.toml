@@ -30,7 +30,7 @@ classifiers = [
 keywords = ["lsst"]
 dependencies = [
    "numpy >=1.18",
-   "healpy"
+   "hpgeom >=0.8.0"
 ]
 dynamic = ["version"]
 
