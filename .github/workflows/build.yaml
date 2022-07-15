@@ -11,6 +11,10 @@ on:
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10"]
+
     steps:
       - uses: actions/checkout@v3
         with:
@@ -20,7 +24,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python-version: 3.8
+          python-version: ${{ matrix.python-version }}
           cache: "pip"
           cache-dependency-path: "setup.cfg"
 
@@ -47,8 +51,6 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: 3.8
-          cache: "pip"
-          cache-dependency-path: "setup.cfg"
 
       - name: Install dependencies
         run: |
@@ -78,25 +80,21 @@ jobs:
 
     steps:
       # uncomment when building aarch64
-      #- name: Set up QEMU
-      #  uses: docker/setup-qemu-action@v2
-      #  if: runner.os == 'Linux'
-      #  with:
-      #    platforms: arm64
+      # - name: Set up QEMU
+      #   uses: docker/setup-qemu-action@v2
+      #   if: runner.os == 'Linux'
+      #   with:
+      #     platforms: arm64
 
       - uses: actions/checkout@v3
         with:
           # Need to clone everything to embed the versiona
           fetch-depth: 0
-          cache: "pip"
-          cache-dependency-path: "setup.cfg"
 
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
           python-version: 3.8
-          cache: "pip"
-          cache-dependency-path: "setup.cfg"
 
       - name: Install dependencies
         run: |

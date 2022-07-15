@@ -1,0 +1,13 @@
+name: Run docstyle
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  call-workflow:
+    uses: lsst/rubin_workflows/.github/workflows/docstyle.yaml@main
+    with:
+      args: "python/lsst/sphgeom/"
