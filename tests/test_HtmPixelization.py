@@ -21,6 +21,7 @@
 #
 
 import pickle
+
 try:
     import yaml
 except ImportError:
@@ -28,11 +29,10 @@ except ImportError:
 
 import unittest
 
-from lsst.sphgeom import Angle, Circle, HtmPixelization, RangeSet, UnitVector3d, ConvexPolygon
+from lsst.sphgeom import Angle, Circle, ConvexPolygon, HtmPixelization, RangeSet, UnitVector3d
 
 
 class HtmPixelizationTestCase(unittest.TestCase):
-
     def test_construction(self):
         with self.assertRaises(ValueError):
             HtmPixelization(-1)
@@ -64,30 +64,29 @@ class HtmPixelizationTestCase(unittest.TestCase):
         pixelization = HtmPixelization(3)
         c = Circle(UnitVector3d(1, 1, 1), Angle.fromDegrees(0.1))
         rs = pixelization.envelope(c)
-        self.assertTrue(rs == RangeSet(0x3ff))
+        self.assertTrue(rs == RangeSet(0x3FF))
         rs = pixelization.envelope(c, 1)
-        self.assertTrue(rs == RangeSet(0x3ff))
+        self.assertTrue(rs == RangeSet(0x3FF))
         self.assertTrue(rs.isWithin(pixelization.universe()))
         rs = pixelization.interior(c)
         self.assertTrue(rs.empty())
 
     def test_index_to_string(self):
-        strings = ['S0', 'S1', 'S2', 'S3', 'N0', 'N1', 'N2', 'N3']
+        strings = ["S0", "S1", "S2", "S3", "N0", "N1", "N2", "N3"]
         for i in range(8, 16):
             s0 = strings[i - 8]
             self.assertEqual(HtmPixelization.asString(i), s0)
             self.assertEqual(HtmPixelization(0).toString(i), s0)
             for j in range(4):
                 s1 = s0 + str(j)
-                self.assertEqual(HtmPixelization.asString(i*4 + j), s1)
-                self.assertEqual(HtmPixelization(1).asString(i*4 + j), s1)
+                self.assertEqual(HtmPixelization.asString(i * 4 + j), s1)
+                self.assertEqual(HtmPixelization(1).asString(i * 4 + j), s1)
 
     def test_string(self):
         p = HtmPixelization(3)
-        self.assertEqual(str(p), 'HtmPixelization(3)')
+        self.assertEqual(str(p), "HtmPixelization(3)")
         self.assertEqual(str(p), repr(p))
-        self.assertEqual(
-            p, eval(repr(p), dict(HtmPixelization=HtmPixelization)))
+        self.assertEqual(p, eval(repr(p), dict(HtmPixelization=HtmPixelization)))
 
     def test_pickle(self):
         a = HtmPixelization(20)
@@ -101,5 +100,5 @@ class HtmPixelizationTestCase(unittest.TestCase):
         self.assertEqual(a, b)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

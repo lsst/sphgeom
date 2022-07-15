@@ -19,18 +19,18 @@
 # the GNU General Public License along with this program.  If not,
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
-import unittest
-import numpy as np
-import healpy as hp
-
 import pickle
+import unittest
+
+import healpy as hp
+import numpy as np
+
 try:
     import yaml
 except ImportError:
     yaml = None
 
-from lsst.sphgeom import (Angle, Circle, HealpixPixelization,
-                          UnitVector3d, ConvexPolygon, LonLat, Box)
+from lsst.sphgeom import Angle, Box, Circle, ConvexPolygon, HealpixPixelization, LonLat, UnitVector3d
 
 
 class HealpixPixelizationTestCase(unittest.TestCase):
@@ -52,11 +52,9 @@ class HealpixPixelizationTestCase(unittest.TestCase):
         h = HealpixPixelization(5)
         vec = UnitVector3d(1, 1, 1)
         lonlat = LonLat(vec)
-        pix = hp.ang2pix(h.nside,
-                         lonlat.getLon().asDegrees(),
-                         lonlat.getLat().asDegrees(),
-                         lonlat=True,
-                         nest=True)
+        pix = hp.ang2pix(
+            h.nside, lonlat.getLon().asDegrees(), lonlat.getLat().asDegrees(), lonlat=True, nest=True
+        )
         self.assertEqual(h.index(UnitVector3d(1, 1, 1)), pix)
 
     def test_pixel(self):
@@ -79,29 +77,36 @@ class HealpixPixelizationTestCase(unittest.TestCase):
         smost = np.argmin(corners_dec)
 
         # Choose challenging comparison box corners:
-        ra_range = np.array([corners_ra[smost] - 0.5,
-                             corners_ra[smost] + 0.5])
-        dec_range = np.array([corners_dec[smost] - 0.5,
-                              corners_dec[smost] + 1e-8])
+        ra_range = np.array([corners_ra[smost] - 0.5, corners_ra[smost] + 0.5])
+        dec_range = np.array([corners_dec[smost] - 0.5, corners_dec[smost] + 1e-8])
 
         # Test the box region
-        box = Box(point1=LonLat.fromDegrees(ra_range[0], dec_range[0]),
-                  point2=LonLat.fromDegrees(ra_range[1], dec_range[1]))
+        box = Box(
+            point1=LonLat.fromDegrees(ra_range[0], dec_range[0]),
+            point2=LonLat.fromDegrees(ra_range[1], dec_range[1]),
+        )
         # These pixels have been checked to completely overlap the region
         self._check_envelope(h, box, [98, 99, 104, 105])
 
         # Try a polygon region:
-        poly = ConvexPolygon([UnitVector3d(LonLat.fromDegrees(ra_range[0], dec_range[0])),
-                              UnitVector3d(LonLat.fromDegrees(ra_range[1], dec_range[0])),
-                              UnitVector3d(LonLat.fromDegrees(ra_range[1], dec_range[1])),
-                              UnitVector3d(LonLat.fromDegrees(ra_range[0], dec_range[1])),
-                              UnitVector3d(LonLat.fromDegrees(ra_range[0], dec_range[0]))])
+        poly = ConvexPolygon(
+            [
+                UnitVector3d(LonLat.fromDegrees(ra_range[0], dec_range[0])),
+                UnitVector3d(LonLat.fromDegrees(ra_range[1], dec_range[0])),
+                UnitVector3d(LonLat.fromDegrees(ra_range[1], dec_range[1])),
+                UnitVector3d(LonLat.fromDegrees(ra_range[0], dec_range[1])),
+                UnitVector3d(LonLat.fromDegrees(ra_range[0], dec_range[0])),
+            ]
+        )
         self._check_envelope(h, poly, [98, 99, 104, 105])
 
         # Try a circle region
-        circle = Circle(center=UnitVector3d(LonLat.fromDegrees((ra_range[0] + ra_range[1])/2.,
-                                                               (dec_range[0] + dec_range[1])/2.)),
-                        angle=Angle.fromDegrees((dec_range[1] - dec_range[0])/2.))
+        circle = Circle(
+            center=UnitVector3d(
+                LonLat.fromDegrees((ra_range[0] + ra_range[1]) / 2.0, (dec_range[0] + dec_range[1]) / 2.0)
+            ),
+            angle=Angle.fromDegrees((dec_range[1] - dec_range[0]) / 2.0),
+        )
         self._check_envelope(h, circle, [98, 99, 104, 105])
 
     def _check_envelope(self, pixelization, region, check_pixels):
@@ -134,23 +139,32 @@ class HealpixPixelizationTestCase(unittest.TestCase):
         dec_range = np.array([corners_dec.min() - 1.0, corners_dec.max() + 1.0])
 
         # Test the box region
-        box = Box(point1=LonLat.fromDegrees(ra_range[0], dec_range[0]),
-                  point2=LonLat.fromDegrees(ra_range[1], dec_range[1]))
+        box = Box(
+            point1=LonLat.fromDegrees(ra_range[0], dec_range[0]),
+            point2=LonLat.fromDegrees(ra_range[1], dec_range[1]),
+        )
         # These pixels have been checked to completely overlap the region
         self._check_interior(h, box, [pix])
 
         # Try a polygon region:
-        poly = ConvexPolygon([UnitVector3d(LonLat.fromDegrees(ra_range[0], dec_range[0])),
-                              UnitVector3d(LonLat.fromDegrees(ra_range[1], dec_range[0])),
-                              UnitVector3d(LonLat.fromDegrees(ra_range[1], dec_range[1])),
-                              UnitVector3d(LonLat.fromDegrees(ra_range[0], dec_range[1])),
-                              UnitVector3d(LonLat.fromDegrees(ra_range[0], dec_range[0]))])
+        poly = ConvexPolygon(
+            [
+                UnitVector3d(LonLat.fromDegrees(ra_range[0], dec_range[0])),
+                UnitVector3d(LonLat.fromDegrees(ra_range[1], dec_range[0])),
+                UnitVector3d(LonLat.fromDegrees(ra_range[1], dec_range[1])),
+                UnitVector3d(LonLat.fromDegrees(ra_range[0], dec_range[1])),
+                UnitVector3d(LonLat.fromDegrees(ra_range[0], dec_range[0])),
+            ]
+        )
         self._check_interior(h, poly, [pix])
 
         # Try a circle region
-        circle = Circle(center=UnitVector3d(LonLat.fromDegrees((ra_range[0] + ra_range[1])/2.,
-                                                               (dec_range[0] + dec_range[1])/2.)),
-                        angle=Angle.fromDegrees(2.5))
+        circle = Circle(
+            center=UnitVector3d(
+                LonLat.fromDegrees((ra_range[0] + ra_range[1]) / 2.0, (dec_range[0] + dec_range[1]) / 2.0)
+            ),
+            angle=Angle.fromDegrees(2.5),
+        )
         self._check_interior(h, circle, [pix])
 
     def _check_interior(self, pixelization, region, check_pixels):
@@ -179,10 +193,9 @@ class HealpixPixelizationTestCase(unittest.TestCase):
     def test_string(self):
         """Test string representation of HealpixPixelization."""
         h = HealpixPixelization(5)
-        self.assertEqual(str(h), 'HealpixPixelization(5)')
+        self.assertEqual(str(h), "HealpixPixelization(5)")
         self.assertEqual(str(h), repr(h))
-        self.assertEqual(
-            h, eval(repr(h), dict(HealpixPixelization=HealpixPixelization)))
+        self.assertEqual(h, eval(repr(h), dict(HealpixPixelization=HealpixPixelization)))
 
     def test_pickle(self):
         """Test pickling of HealpixPixelization."""

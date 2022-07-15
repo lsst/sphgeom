@@ -67,9 +67,7 @@ class CompoundRegionTestMixin:
             self.point_in_box.getLon().asDegrees() + 1.5,
             self.point_in_box.getLat().asDegrees() + 1.5,
         )
-        self.faraway = Circle(
-            UnitVector3d(self.point_in_neither), Angle.fromDegrees(0.1)
-        )
+        self.faraway = Circle(UnitVector3d(self.point_in_neither), Angle.fromDegrees(0.1))
         self.operands = (self.circle, self.box)
 
     def assertOperandsEqual(self, region, operands):

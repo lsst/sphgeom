@@ -21,6 +21,7 @@
 #
 
 import pickle
+
 try:
     import yaml
 except ImportError:
@@ -30,14 +31,21 @@ import math
 import unittest
 
 import numpy as np
-
-from lsst.sphgeom import (Angle, AngleInterval, Box, CONTAINS, DISJOINT,
-                          LonLat, NormalizedAngle, NormalizedAngleInterval,
-                          Region, UnitVector3d)
+from lsst.sphgeom import (
+    CONTAINS,
+    DISJOINT,
+    Angle,
+    AngleInterval,
+    Box,
+    LonLat,
+    NormalizedAngle,
+    NormalizedAngleInterval,
+    Region,
+    UnitVector3d,
+)
 
 
 class BoxTestCase(unittest.TestCase):
-
     def setUp(self):
         np.random.seed(1)
 
@@ -46,12 +54,12 @@ class BoxTestCase(unittest.TestCase):
         self.assertTrue(b.isFull())
         b = Box.fromDegrees(-90, -45, 90, 45)
         self.assertEqual(b, Box(b.getLon(), b.getLat()))
-        a = Box.fromRadians(-0.5 * math.pi, -0.25 * math.pi,
-                            0.5 * math.pi, 0.25 * math.pi)
-        b = Box(LonLat.fromRadians(-0.5 * math.pi, -0.25 * math.pi),
-                LonLat.fromRadians(0.5 * math.pi, 0.25 * math.pi))
-        c = Box(LonLat.fromRadians(0, 0),
-                Angle(0.5 * math.pi), Angle(0.25 * math.pi))
+        a = Box.fromRadians(-0.5 * math.pi, -0.25 * math.pi, 0.5 * math.pi, 0.25 * math.pi)
+        b = Box(
+            LonLat.fromRadians(-0.5 * math.pi, -0.25 * math.pi),
+            LonLat.fromRadians(0.5 * math.pi, 0.25 * math.pi),
+        )
+        c = Box(LonLat.fromRadians(0, 0), Angle(0.5 * math.pi), Angle(0.25 * math.pi))
         d = c.clone()
         self.assertEqual(a, b)
         self.assertEqual(b, c)
@@ -63,15 +71,13 @@ class BoxTestCase(unittest.TestCase):
         self.assertTrue(Box.full().isFull())
 
     def test_comparison_operators(self):
-        self.assertEqual(Box(LonLat.fromDegrees(45, 45)),
-                         LonLat.fromDegrees(45, 45))
-        self.assertEqual(Box.fromDegrees(90, -45, 180, 45),
-                         Box(NormalizedAngleInterval.fromDegrees(90, 180),
-                             AngleInterval.fromDegrees(-45, 45)))
-        self.assertNotEqual(Box(LonLat.fromDegrees(45, 45)),
-                            LonLat.fromDegrees(45, 90))
-        self.assertNotEqual(Box.fromDegrees(90, -45, 180, 45),
-                            Box.fromDegrees(90, -45, 180, 90))
+        self.assertEqual(Box(LonLat.fromDegrees(45, 45)), LonLat.fromDegrees(45, 45))
+        self.assertEqual(
+            Box.fromDegrees(90, -45, 180, 45),
+            Box(NormalizedAngleInterval.fromDegrees(90, 180), AngleInterval.fromDegrees(-45, 45)),
+        )
+        self.assertNotEqual(Box(LonLat.fromDegrees(45, 45)), LonLat.fromDegrees(45, 90))
+        self.assertNotEqual(Box.fromDegrees(90, -45, 180, 45), Box.fromDegrees(90, -45, 180, 90))
 
     def test_center_and_dimensions(self):
         b = Box.fromDegrees(-90, -45, 90, 45)
@@ -121,15 +127,17 @@ class BoxTestCase(unittest.TestCase):
         for i in range(x.shape[0], 2):
             for j in range(x.shape[1]):
                 u = UnitVector3d(x[i, j], y[i, j], z[i, j])
-                self.assertEqual(c3[i//2, j], b.contains(u))
-                self.assertEqual(c4[i//2, j], b.contains(u))
+                self.assertEqual(c3[i // 2, j], b.contains(u))
+                self.assertEqual(c4[i // 2, j], b.contains(u))
 
     def test_expanding_and_clipping(self):
         a = Box.fromDegrees(0, 0, 10, 10)
-        b = (a.expandedTo(LonLat.fromDegrees(20, 20))
-              .expandedTo(Box.fromDegrees(0, 0, 30, 10))
-              .clippedTo(Box.fromDegrees(10, 10, 15, 15))
-              .clippedTo(LonLat.fromDegrees(11, 11)))
+        b = (
+            a.expandedTo(LonLat.fromDegrees(20, 20))
+            .expandedTo(Box.fromDegrees(0, 0, 30, 10))
+            .clippedTo(Box.fromDegrees(10, 10, 15, 15))
+            .clippedTo(LonLat.fromDegrees(11, 11))
+        )
         a.expandTo(LonLat.fromDegrees(20, 20))
         a.expandTo(Box.fromDegrees(0, 0, 30, 10))
         a.clipTo(Box.fromDegrees(10, 10, 15, 15))
@@ -154,16 +162,18 @@ class BoxTestCase(unittest.TestCase):
 
     def test_string(self):
         b = Box.fromRadians(0, 0, 1, 1)
-        self.assertEqual(str(b), 'Box([0.0, 1.0], [0.0, 1.0])')
+        self.assertEqual(str(b), "Box([0.0, 1.0], [0.0, 1.0])")
         self.assertEqual(
             repr(b),
-            'Box(NormalizedAngleInterval.fromRadians(0.0, 1.0), '
-            'AngleInterval.fromRadians(0.0, 1.0))'
+            "Box(NormalizedAngleInterval.fromRadians(0.0, 1.0), " "AngleInterval.fromRadians(0.0, 1.0))",
         )
-        self.assertEqual(b, eval(repr(b), dict(
-            AngleInterval=AngleInterval, Box=Box,
-            NormalizedAngleInterval=NormalizedAngleInterval
-        )))
+        self.assertEqual(
+            b,
+            eval(
+                repr(b),
+                dict(AngleInterval=AngleInterval, Box=Box, NormalizedAngleInterval=NormalizedAngleInterval),
+            ),
+        )
 
     def test_pickle(self):
         a = Box.fromDegrees(0, 0, 10, 10)
@@ -177,5 +187,5 @@ class BoxTestCase(unittest.TestCase):
         self.assertEqual(a, b)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -27,7 +27,6 @@ from lsst.sphgeom import Angle, LonLat, NormalizedAngle, UnitVector3d
 
 
 class NormalizedAngleTestCase(unittest.TestCase):
-
     def testConstruction(self):
         a1 = NormalizedAngle(1.0)
         a2 = NormalizedAngle.fromRadians(1.0)
@@ -36,14 +35,10 @@ class NormalizedAngleTestCase(unittest.TestCase):
         self.assertEqual(a1.asRadians(), 1.0)
         self.assertEqual(a1, a3)
         self.assertEqual(a1.asDegrees(), 57.29577951308232)
-        self.assertEqual(
-            NormalizedAngle.between(NormalizedAngle(0), NormalizedAngle(1)),
-            NormalizedAngle(1)
-        )
+        self.assertEqual(NormalizedAngle.between(NormalizedAngle(0), NormalizedAngle(1)), NormalizedAngle(1))
         a = NormalizedAngle.center(NormalizedAngle(0), NormalizedAngle(1))
         self.assertAlmostEqual(a.asRadians(), 0.5, places=15)
-        a = NormalizedAngle(LonLat.fromDegrees(45, 0),
-                            LonLat.fromDegrees(90, 0))
+        a = NormalizedAngle(LonLat.fromDegrees(45, 0), LonLat.fromDegrees(90, 0))
         self.assertAlmostEqual(a.asDegrees(), 45.0, places=13)
         a = NormalizedAngle(UnitVector3d.Y(), UnitVector3d.Z())
         self.assertAlmostEqual(a.asDegrees(), 90.0, places=13)
@@ -67,15 +62,13 @@ class NormalizedAngleTestCase(unittest.TestCase):
         self.assertEqual(a / a, 1.0)
 
     def testAngleTo(self):
-        self.assertEqual(NormalizedAngle(1).getAngleTo(NormalizedAngle(2)),
-                         NormalizedAngle(1))
+        self.assertEqual(NormalizedAngle(1).getAngleTo(NormalizedAngle(2)), NormalizedAngle(1))
 
     def testString(self):
-        self.assertEqual(str(NormalizedAngle(1)), '1.0')
-        self.assertEqual(repr(NormalizedAngle(1)), 'NormalizedAngle(1.0)')
+        self.assertEqual(str(NormalizedAngle(1)), "1.0")
+        self.assertEqual(repr(NormalizedAngle(1)), "NormalizedAngle(1.0)")
         a = NormalizedAngle(0.5)
-        self.assertEqual(
-            a, eval(repr(a), dict(NormalizedAngle=NormalizedAngle)))
+        self.assertEqual(a, eval(repr(a), dict(NormalizedAngle=NormalizedAngle)))
 
     def testPickle(self):
         a = NormalizedAngle(1.5)
@@ -83,5 +76,5 @@ class NormalizedAngleTestCase(unittest.TestCase):
         self.assertEqual(a, b)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

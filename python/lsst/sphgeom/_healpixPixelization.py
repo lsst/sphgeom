@@ -22,8 +22,7 @@ __all__ = ["HealpixPixelization"]
 
 import numpy as np
 
-from ._sphgeom import RangeSet, Region, UnitVector3d
-from ._sphgeom import Box, Circle, ConvexPolygon, Ellipse
+from ._sphgeom import Box, Circle, ConvexPolygon, Ellipse, RangeSet, Region, UnitVector3d
 from .pixelization_abc import PixelizationABC
 
 
@@ -35,6 +34,7 @@ class HealpixPixelization(PixelizationABC):
     level : `int`
         Pixelization level.  HEALPix nside = 2**level
     """
+
     MAX_LEVEL = 17
 
     def __init__(self, level: int):
@@ -50,7 +50,7 @@ class HealpixPixelization(PixelizationABC):
 
         # Values used to do pixel/region intersections
         self._bit_shift = 8
-        self._nside_highres = self._nside*(2**(self._bit_shift//2))
+        self._nside_highres = self._nside * (2 ** (self._bit_shift // 2))
 
     @property
     def nside(self):
@@ -74,6 +74,7 @@ class HealpixPixelization(PixelizationABC):
 
     def index(self, v: UnitVector3d) -> int:
         import healpy as hp
+
         return hp.vec2pix(self._nside, v.x(), v.y(), v.z(), nest=True)
 
     def toString(self, i: int) -> str:
@@ -89,9 +90,7 @@ class HealpixPixelization(PixelizationABC):
 
         # Dilate the high resolution pixels by one to ensure that the full
         # region is completely covered at high resolution.
-        neighbors = hp.get_all_neighbours(self._nside_highres,
-                                          pixels_highres,
-                                          nest=True)
+        neighbors = hp.get_all_neighbours(self._nside_highres, pixels_highres, nest=True)
         # Shift back to the original resolution and uniquify
         pixels = np.unique(np.right_shift(neighbors, self._bit_shift))
 
@@ -112,10 +111,10 @@ class HealpixPixelization(PixelizationABC):
         # the center index points to x, y, z.
         corners = hp.boundaries(self._nside, pixels, step=1, nest=True)
 
-        corners_int = region.contains(corners[:, 0, :].ravel(),
-                                      corners[:, 1, :].ravel(),
-                                      corners[:, 2, :].ravel()).reshape((len(pixels), 4))
-        interior = (np.sum(corners_int, axis=1) == 4)
+        corners_int = region.contains(
+            corners[:, 0, :].ravel(), corners[:, 1, :].ravel(), corners[:, 2, :].ravel()
+        ).reshape((len(pixels), 4))
+        interior = np.sum(corners_int, axis=1) == 4
         pixels = pixels[interior]
 
         return RangeSet(pixels)
@@ -152,26 +151,21 @@ class HealpixPixelization(PixelizationABC):
         if _circle is not None:
             center = _circle.getCenter()
             vec = np.array([center.x(), center.y(), center.z()]).T
-            pixels = hp.query_disc(nside,
-                                   vec,
-                                   _circle.getOpeningAngle().asRadians(),
-                                   inclusive=False,
-                                   nest=True)
+            pixels = hp.query_disc(
+                nside, vec, _circle.getOpeningAngle().asRadians(), inclusive=False, nest=True
+            )
         else:
             vertices = np.array([[v.x(), v.y(), v.z()] for v in _poly.getVertices()])
-            pixels = hp.query_polygon(nside,
-                                      vertices,
-                                      inclusive=False,
-                                      nest=True)
+            pixels = hp.query_polygon(nside, vertices, inclusive=False, nest=True)
 
         return pixels
 
     def __eq__(self, other):
         if isinstance(other, HealpixPixelization):
-            return (self._level == other._level)
+            return self._level == other._level
 
     def __repr__(self):
         return f"HealpixPixelization({self._level})"
 
     def __reduce__(self):
-        return (self.__class__, (self._level, ))
+        return (self.__class__, (self._level,))

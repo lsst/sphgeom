@@ -31,21 +31,19 @@ try:
 except ImportError:
     yaml = None
 
+from ._healpixPixelization import HealpixPixelization
 from ._sphgeom import (
     Box,
     Circle,
     ConvexPolygon,
     Ellipse,
-    UnionRegion,
-    IntersectionRegion,
     HtmPixelization,
+    IntersectionRegion,
     Mq3cPixelization,
-    Region,
     Q3cPixelization,
+    Region,
+    UnionRegion,
 )
-
-from ._healpixPixelization import HealpixPixelization
-
 
 if yaml:
     try:
@@ -61,6 +59,7 @@ if yaml:
 
 # Regions
 
+
 def region_representer(dumper, data):
     """Represent a sphgeom region object in a form suitable for YAML.
 
@@ -68,8 +67,7 @@ def region_representer(dumper, data):
     storing the hex encoded byte string.
     """
     encoded = data.encode()
-    return dumper.represent_mapping(f"lsst.sphgeom.{type(data).__name__}",
-                                    {"encoded": encoded.hex()})
+    return dumper.represent_mapping(f"lsst.sphgeom.{type(data).__name__}", {"encoded": encoded.hex()})
 
 
 def region_constructor(loader, node):
@@ -92,31 +90,33 @@ if yaml:
 
 # Pixelization schemes
 
+
 def pixel_representer(dumper, data):
     """Represent a pixelization in YAML
 
     Stored as the pixelization level in a mapping with a single key
     ``level``.
     """
-    return dumper.represent_mapping(f"lsst.sphgeom.{type(data).__name__}",
-                                    {"level": data.getLevel()})
+    return dumper.represent_mapping(f"lsst.sphgeom.{type(data).__name__}", {"level": data.getLevel()})
 
 
 def pixel_constructor(loader, node):
-    """Construct a pixelization object from YAML.
-    """
+    """Construct a pixelization object from YAML."""
     mapping = loader.construct_mapping(node)
 
     className = node.tag
-    pixelMap = {"lsst.sphgeom.Q3cPixelization": Q3cPixelization,
-                "lsst.sphgeom.Mq3cPixelization": Mq3cPixelization,
-                "lsst.sphgeom.HtmPixelization": HtmPixelization,
-                "lsst.sphgeom.HealpixPixelization": HealpixPixelization,
-                }
+    pixelMap = {
+        "lsst.sphgeom.Q3cPixelization": Q3cPixelization,
+        "lsst.sphgeom.Mq3cPixelization": Mq3cPixelization,
+        "lsst.sphgeom.HtmPixelization": HtmPixelization,
+        "lsst.sphgeom.HealpixPixelization": HealpixPixelization,
+    }
 
     if className not in pixelMap:
-        raise RuntimeError(f"Encountered unexpected class {className} associated with"
-                           " sphgeom pixelization YAML constructor")
+        raise RuntimeError(
+            f"Encountered unexpected class {className} associated with"
+            " sphgeom pixelization YAML constructor"
+        )
 
     return pixelMap[className](mapping["level"])
 
