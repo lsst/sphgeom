@@ -27,7 +27,6 @@ from lsst.sphgeom import Angle
 
 
 class AngleTestCase(unittest.TestCase):
-
     def testConstruction(self):
         a1 = Angle(1.0)
         a2 = Angle.fromRadians(1.0)
@@ -61,8 +60,8 @@ class AngleTestCase(unittest.TestCase):
         self.assertEqual(a.asRadians(), 1)
 
     def testString(self):
-        self.assertEqual(str(Angle(1)), '1.0')
-        self.assertEqual(repr(Angle(1)), 'Angle(1.0)')
+        self.assertEqual(str(Angle(1)), "1.0")
+        self.assertEqual(repr(Angle(1)), "Angle(1.0)")
         a = Angle(2.5)
         self.assertEqual(a, eval(repr(a), dict(Angle=Angle)))
 
@@ -72,5 +71,5 @@ class AngleTestCase(unittest.TestCase):
         self.assertEqual(a, b)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

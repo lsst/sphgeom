@@ -24,12 +24,10 @@ import pickle
 import unittest
 
 import numpy as np
-
-from lsst.sphgeom import Box3d, CONTAINS, DISJOINT, Interval1d, Vector3d
+from lsst.sphgeom import CONTAINS, DISJOINT, Box3d, Interval1d, Vector3d
 
 
 class Box3dTestCase(unittest.TestCase):
-
     def setUp(self):
         np.random.seed(1)
 
@@ -48,16 +46,11 @@ class Box3dTestCase(unittest.TestCase):
         self.assertTrue(Interval1d.empty().isEmpty())
 
     def test_comparison_operators(self):
-        self.assertEqual(Box3d(Vector3d(1, 1, 1)),
-                         Vector3d(1, 1, 1))
-        self.assertEqual(Box3d(Vector3d(1, 1, 1)),
-                         Box3d(Vector3d(1, 1, 1), Vector3d(1, 1, 1)))
-        self.assertEqual(Box3d(Vector3d(0, 0, 0), 1, 1, 1),
-                         Box3d(Vector3d(-1, -1, -1), Vector3d(1, 1, 1)))
-        self.assertNotEqual(Box3d(Vector3d(0, 0, 0), 1, 1, 1),
-                            Box3d(Vector3d(-1, -1, -1), Vector3d(1, 1, 2)))
-        self.assertNotEqual(Box3d(Vector3d(0, 0, 0), 1, 1, 1),
-                            Vector3d(1, 1, 1))
+        self.assertEqual(Box3d(Vector3d(1, 1, 1)), Vector3d(1, 1, 1))
+        self.assertEqual(Box3d(Vector3d(1, 1, 1)), Box3d(Vector3d(1, 1, 1), Vector3d(1, 1, 1)))
+        self.assertEqual(Box3d(Vector3d(0, 0, 0), 1, 1, 1), Box3d(Vector3d(-1, -1, -1), Vector3d(1, 1, 1)))
+        self.assertNotEqual(Box3d(Vector3d(0, 0, 0), 1, 1, 1), Box3d(Vector3d(-1, -1, -1), Vector3d(1, 1, 2)))
+        self.assertNotEqual(Box3d(Vector3d(0, 0, 0), 1, 1, 1), Vector3d(1, 1, 1))
 
     def test_center_and_dimensions(self):
         b = Box3d(Vector3d(1.5, 1.5, 1.5), 0.5, 1.0, 1.5)
@@ -114,7 +107,7 @@ class Box3dTestCase(unittest.TestCase):
         for i in range(x.shape[0], 2):
             for j in range(x.shape[1]):
                 u = Vector3d(x[i, j], y[i, j], z[i, j])
-                self.assertEqual(c2[i//2, j], b.contains(u))
+                self.assertEqual(c2[i // 2, j], b.contains(u))
 
     def test_expanding_and_clipping(self):
         a = Box3d(Vector3d(1, 1, 1), Vector3d(2, 2, 2))
@@ -142,14 +135,12 @@ class Box3dTestCase(unittest.TestCase):
 
     def test_string(self):
         b = Box3d(Vector3d(0, 0, 0), 1, 1, 1)
-        self.assertEqual(str(b), '[[-1.0, 1.0],\n'
-                                 ' [-1.0, 1.0],\n'
-                                 ' [-1.0, 1.0]]')
-        self.assertEqual(repr(b), 'Box3d(Interval1d(-1.0, 1.0),\n'
-                                  '      Interval1d(-1.0, 1.0),\n'
-                                  '      Interval1d(-1.0, 1.0))')
+        self.assertEqual(str(b), "[[-1.0, 1.0],\n" " [-1.0, 1.0],\n" " [-1.0, 1.0]]")
         self.assertEqual(
-            b, eval(repr(b), dict(Box3d=Box3d, Interval1d=Interval1d)))
+            repr(b),
+            "Box3d(Interval1d(-1.0, 1.0),\n" "      Interval1d(-1.0, 1.0),\n" "      Interval1d(-1.0, 1.0))",
+        )
+        self.assertEqual(b, eval(repr(b), dict(Box3d=Box3d, Interval1d=Interval1d)))
 
     def test_pickle(self):
         a = Box3d(Vector3d(0, 0, 0), 1, 1, 1)
@@ -157,5 +148,5 @@ class Box3dTestCase(unittest.TestCase):
         self.assertEqual(a, b)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

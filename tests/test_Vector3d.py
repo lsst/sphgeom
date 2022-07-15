@@ -28,7 +28,6 @@ from lsst.sphgeom import Angle, UnitVector3d, Vector3d
 
 
 class Vector3dTestCase(unittest.TestCase):
-
     def testConstruction(self):
         v = Vector3d(1, 2, 3)
         self.assertEqual(v.x(), 1)
@@ -80,8 +79,7 @@ class Vector3dTestCase(unittest.TestCase):
         self.assertEqual(-Vector3d(1, 1, 1), Vector3d(-1, -1, -1))
         self.assertEqual(Vector3d(1, 1, 1) * 2, Vector3d(2, 2, 2))
         self.assertEqual(Vector3d(2, 2, 2) / 2, Vector3d(1, 1, 1))
-        self.assertEqual(Vector3d(1, 1, 1) + Vector3d(1, 1, 1),
-                         Vector3d(2, 2, 2))
+        self.assertEqual(Vector3d(1, 1, 1) + Vector3d(1, 1, 1), Vector3d(2, 2, 2))
         self.assertEqual(Vector3d(1, 1, 1) - Vector3d(1, 1, 1), Vector3d())
         v = Vector3d(1, 1, 1)
         v += Vector3d(3, 3, 3)
@@ -92,16 +90,15 @@ class Vector3dTestCase(unittest.TestCase):
         self.assertEqual(v.cwiseProduct(Vector3d(2, 3, 4)), Vector3d(2, 3, 4))
 
     def testRotation(self):
-        v = Vector3d(0, 1, 0).rotatedAround(UnitVector3d.X(),
-                                            Angle(0.5 * math.pi))
+        v = Vector3d(0, 1, 0).rotatedAround(UnitVector3d.X(), Angle(0.5 * math.pi))
         self.assertAlmostEqual(v.x(), 0.0, places=15)
         self.assertAlmostEqual(v.y(), 0.0, places=15)
         self.assertAlmostEqual(v.z(), 1.0, places=15)
 
     def testString(self):
         v = Vector3d(1, 0, 0)
-        self.assertEqual(str(v), '[1.0, 0.0, 0.0]')
-        self.assertEqual(repr(v), 'Vector3d(1.0, 0.0, 0.0)')
+        self.assertEqual(str(v), "[1.0, 0.0, 0.0]")
+        self.assertEqual(repr(v), "Vector3d(1.0, 0.0, 0.0)")
         self.assertEqual(v, eval(repr(v), dict(Vector3d=Vector3d)))
 
     def testPickle(self):
@@ -110,5 +107,5 @@ class Vector3dTestCase(unittest.TestCase):
         self.assertEqual(v, w)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

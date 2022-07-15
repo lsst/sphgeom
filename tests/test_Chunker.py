@@ -27,7 +27,6 @@ from lsst.sphgeom import Box, Chunker
 
 
 class ChunkerTestCase(unittest.TestCase):
-
     def testConstruction(self):
         chunker = Chunker(85, 12)
         self.assertEqual(chunker.numStripes, 85)
@@ -43,13 +42,12 @@ class ChunkerTestCase(unittest.TestCase):
         b = Box.fromDegrees(273.6, 30.7, 273.7180105379097, 30.722546655347717)
         c = Chunker(85, 12)
         self.assertEqual(c.getChunksIntersecting(b), [9630, 9631, 9797])
-        self.assertEqual(c.getSubChunksIntersecting(b),
-                         [(9630, [770]), (9631, [759]), (9797, [11])])
+        self.assertEqual(c.getSubChunksIntersecting(b), [(9630, [770]), (9631, [759]), (9797, [11])])
 
     def testString(self):
         chunker = Chunker(85, 12)
-        self.assertEqual(str(chunker), 'Chunker(85, 12)')
-        self.assertEqual(repr(chunker), 'Chunker(85, 12)')
+        self.assertEqual(str(chunker), "Chunker(85, 12)")
+        self.assertEqual(repr(chunker), "Chunker(85, 12)")
         self.assertEqual(chunker, eval(repr(chunker), dict(Chunker=Chunker)))
 
     def testPickle(self):
@@ -66,13 +64,11 @@ class ChunkerTestCase(unittest.TestCase):
         sbbox = chunker.getSubChunkBoundingBox(0, 0)
         self.assertEqual(stripe, 9)
         self.assertEqual(chunk_in_stripe, 45)
-        b = Box.fromRadians(5.048988193233824, -1.4294246573883558,
-                            5.1611879309330035, -1.413716694110407)
+        b = Box.fromRadians(5.048988193233824, -1.4294246573883558, 5.1611879309330035, -1.413716694110407)
         self.assertAlmostEqual(bbox, b)
-        sb = Box.fromRadians(0.0, -1.5707963267948966,
-                             6.283185307179586, -1.5676547341363067)
+        sb = Box.fromRadians(0.0, -1.5707963267948966, 6.283185307179586, -1.5676547341363067)
         self.assertAlmostEqual(sbbox, sb)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

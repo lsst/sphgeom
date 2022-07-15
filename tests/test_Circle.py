@@ -21,6 +21,7 @@
 #
 
 import pickle
+
 try:
     import yaml
 except ImportError:
@@ -30,13 +31,10 @@ import math
 import unittest
 
 import numpy as np
-
-from lsst.sphgeom import (Angle, CONTAINS, Circle, DISJOINT, Region,
-                          UnitVector3d)
+from lsst.sphgeom import CONTAINS, DISJOINT, Angle, Circle, Region, UnitVector3d
 
 
 class CircleTestCase(unittest.TestCase):
-
     def setUp(self):
         np.random.seed(1)
 
@@ -85,7 +83,7 @@ class CircleTestCase(unittest.TestCase):
         self.assertEqual(e.relate(d), DISJOINT)
 
     def test_vectorized_contains(self):
-        b = Circle(UnitVector3d(*np.random.randn(3)), Angle(0.4*math.pi))
+        b = Circle(UnitVector3d(*np.random.randn(3)), Angle(0.4 * math.pi))
         x = np.random.rand(5, 3)
         y = np.random.rand(5, 3)
         z = np.random.rand(5, 3)
@@ -104,15 +102,17 @@ class CircleTestCase(unittest.TestCase):
         for i in range(x.shape[0], 2):
             for j in range(x.shape[1]):
                 u = UnitVector3d(x[i, j], y[i, j], z[i, j])
-                self.assertEqual(c3[i//2, j], b.contains(u))
-                self.assertEqual(c4[i//2, j], b.contains(u))
+                self.assertEqual(c3[i // 2, j], b.contains(u))
+                self.assertEqual(c4[i // 2, j], b.contains(u))
 
     def test_expanding_and_clipping(self):
         a = Circle.empty()
-        b = (a.expandedTo(UnitVector3d.X())
-              .expandedTo(Circle(UnitVector3d.Y(), 1))
-              .clippedTo(Circle(UnitVector3d(1, 1, 0), 1))
-              .clippedTo(UnitVector3d.Y()))
+        b = (
+            a.expandedTo(UnitVector3d.X())
+            .expandedTo(Circle(UnitVector3d.Y(), 1))
+            .clippedTo(Circle(UnitVector3d(1, 1, 0), 1))
+            .clippedTo(UnitVector3d.Y())
+        )
         a.expandTo(UnitVector3d.X())
         a.expandTo(Circle(UnitVector3d.Y(), 1))
         a.clipTo(Circle(UnitVector3d(1, 1, 0), 1))
@@ -150,11 +150,9 @@ class CircleTestCase(unittest.TestCase):
 
     def test_string(self):
         c = Circle(UnitVector3d.Z(), Angle(1.0))
-        self.assertEqual(str(c), 'Circle([0.0, 0.0, 1.0], 1.0)')
-        self.assertEqual(repr(c),
-                         'Circle(UnitVector3d(0.0, 0.0, 1.0), Angle(1.0))')
-        self.assertEqual(c, eval(repr(c), dict(
-            Angle=Angle, Circle=Circle, UnitVector3d=UnitVector3d)))
+        self.assertEqual(str(c), "Circle([0.0, 0.0, 1.0], 1.0)")
+        self.assertEqual(repr(c), "Circle(UnitVector3d(0.0, 0.0, 1.0), Angle(1.0))")
+        self.assertEqual(c, eval(repr(c), dict(Angle=Angle, Circle=Circle, UnitVector3d=UnitVector3d)))
 
     def test_pickle(self):
         a = Circle(UnitVector3d(1, -1, 1), 1.0)
@@ -168,5 +166,5 @@ class CircleTestCase(unittest.TestCase):
         self.assertEqual(a, b)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

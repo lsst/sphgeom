@@ -1,0 +1,11 @@
+name: Lint YAML Files
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  call-workflow:
+    uses: lsst/rubin_workflows/.github/workflows/yamllint.yaml@main

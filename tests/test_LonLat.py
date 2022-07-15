@@ -27,34 +27,24 @@ from lsst.sphgeom import Angle, LonLat, NormalizedAngle, UnitVector3d
 
 
 class LonLatTestCase(unittest.TestCase):
-
     def testConstruction(self):
         p = LonLat.fromDegrees(45, 45)
-        self.assertEqual(p, LonLat(NormalizedAngle.fromDegrees(45),
-                                   Angle.fromDegrees(45)))
+        self.assertEqual(p, LonLat(NormalizedAngle.fromDegrees(45), Angle.fromDegrees(45)))
         u = UnitVector3d(p)
         q = LonLat(u)
-        self.assertAlmostEqual(
-            p.getLon().asRadians(), q.getLon().asRadians(), places=13)
-        self.assertAlmostEqual(
-            p.getLat().asRadians(), q.getLat().asRadians(), places=13)
-        self.assertAlmostEqual(p.getLon().asRadians(),
-                               LonLat.latitudeOf(u).asRadians(),
-                               places=13)
-        self.assertAlmostEqual(p.getLon().asRadians(),
-                               LonLat.longitudeOf(u).asRadians(),
-                               places=13)
+        self.assertAlmostEqual(p.getLon().asRadians(), q.getLon().asRadians(), places=13)
+        self.assertAlmostEqual(p.getLat().asRadians(), q.getLat().asRadians(), places=13)
+        self.assertAlmostEqual(p.getLon().asRadians(), LonLat.latitudeOf(u).asRadians(), places=13)
+        self.assertAlmostEqual(p.getLon().asRadians(), LonLat.longitudeOf(u).asRadians(), places=13)
 
     def testComparisonOperators(self):
-        self.assertEqual(LonLat.fromDegrees(45, 45),
-                         LonLat.fromDegrees(45, 45))
-        self.assertNotEqual(LonLat.fromDegrees(0, 0),
-                            LonLat.fromDegrees(45, 45))
+        self.assertEqual(LonLat.fromDegrees(45, 45), LonLat.fromDegrees(45, 45))
+        self.assertNotEqual(LonLat.fromDegrees(0, 0), LonLat.fromDegrees(45, 45))
 
     def testString(self):
         p = LonLat.fromRadians(1, 1)
-        self.assertEqual(str(p), '[1.0, 1.0]')
-        self.assertEqual(repr(p), 'LonLat.fromRadians(1.0, 1.0)')
+        self.assertEqual(str(p), "[1.0, 1.0]")
+        self.assertEqual(repr(p), "LonLat.fromRadians(1.0, 1.0)")
         self.assertEqual(p, eval(repr(p), dict(LonLat=LonLat)))
 
     def testPickle(self):
@@ -63,5 +53,5 @@ class LonLatTestCase(unittest.TestCase):
         self.assertEqual(p, q)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

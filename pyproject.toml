@@ -1,12 +1,81 @@
 [build-system]
-build-backend = "setuptools.build_meta"
 requires = [
-    "setuptools >= 46.6.0",
+    "setuptools",
+    "lsst-versions >= 1.3.0",
     "wheel",
     "pybind11 >= 2.5.0",
     "numpy >= 1.18",
-    "lsst-versions",
 ]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lsst-sphgeom"
+description = "A spherical geometry library."
+license = {text = "GPLv3+ License"}
+readme = "README.md"
+authors = [
+    {name="Rubin Observatory Data Management", email="dm-admin@lists.lsst.org"},
+]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Scientific/Engineering :: Astronomy",
+]
+keywords = ["lsst"]
+dependencies = [
+   "numpy >=1.18",
+   "healpy"
+]
+dynamic = ["version"]
+
+[project.urls]
+"Homepage" = "https://github.com/lsst/sphgeom"
+
+[project.optional-dependencies]
+test = [
+    "pytest >= 3.2",
+    "flake8 >= 3.7.5",
+    "pytest-flake8 >= 1.0.4",
+]
+yaml = ["pyyaml >= 5.1"]
+
+[tool.setuptools.packages.find]
+where = ["python"]
+
+[tool.setuptools]
+zip-safe = false
+license-files = ["LICENSE"]
+
+[tool.setuptools.dynamic]
+version = { attr = "lsst_versions.get_lsst_version" }
+
+[tool.black]
+line-length = 110
+target-version = ["py38"]
+
+[tool.isort]
+profile = "black"
+line_length = 110
 
 [tool.lsst_versions]
 write_to = "python/lsst/sphgeom/version.py"
+
+[tool.pytest.ini_options]
+addopts = "--flake8"
+flake8-ignore = ["E133", "E226", "E228", "N802", "N803", "N806", "N812", "N815", "N816", "W503"]
+
+[tool.pydocstyle]
+convention = "numpy"
+# Our coding style does not require docstrings for magic methods (D105)
+# Our docstyle documents __init__ at the class level (D107)
+# We allow methods to inherit docstrings and this is not compatible with D102.
+# Docstring at the very first line is not required
+# D200, D205 and D400 all complain if the first sentence of the docstring does
+# not fit on one line.
+add-ignore = ["D107", "D105", "D102", "D100", "D200", "D205", "D400"]

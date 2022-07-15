@@ -1,0 +1,16 @@
+extends: default
+
+rules:
+  document-start: {present: false}
+  line-length:
+    max: 132
+    allow-non-breakable-words: true
+    allow-non-breakable-inline-mappings: true
+    ignore: |
+      /.github/workflows/lint.yaml
+  truthy:
+    # "on" as a key in workflows confuses things
+    ignore: |
+      /.github/workflows/
+  indentation:
+    indent-sequences: consistent

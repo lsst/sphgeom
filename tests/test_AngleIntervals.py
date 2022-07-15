@@ -23,13 +23,10 @@
 import pickle
 import unittest
 
-from lsst.sphgeom import (Angle, AngleInterval,
-                          CONTAINS, DISJOINT,
-                          NormalizedAngle, NormalizedAngleInterval)
+from lsst.sphgeom import CONTAINS, DISJOINT, Angle, AngleInterval, NormalizedAngle, NormalizedAngleInterval
 
 
 class IntervalTests:
-
     def testConstruction(self):
         i = self.Interval(self.Scalar(1))
         self.assertEqual(i.getA(), i.getB())
@@ -39,11 +36,9 @@ class IntervalTests:
         self.assertTrue(self.Interval.empty().isEmpty())
 
     def testComparisonOperators(self):
-        self.assertEqual(self.Interval(self.Scalar(1)),
-                         self.Interval.fromRadians(1, 1))
+        self.assertEqual(self.Interval(self.Scalar(1)), self.Interval.fromRadians(1, 1))
         self.assertEqual(self.Interval(self.Scalar(1)), self.Scalar(1))
-        self.assertNotEqual(self.Interval.fromDegrees(1, 1),
-                            self.Interval.fromRadians(1, 1))
+        self.assertNotEqual(self.Interval.fromDegrees(1, 1), self.Interval.fromRadians(1, 1))
         self.assertNotEqual(self.Interval.fromDegrees(2, 2), self.Scalar(1))
 
     def testCenterAndSize(self):
@@ -91,11 +86,9 @@ class IntervalTests:
 
     def testString(self):
         a = self.Interval.fromRadians(0.5, 1.5)
-        self.assertEqual(str(a), '[0.5, 1.5]')
-        self.assertEqual(repr(a),
-                         self.Interval.__name__ + '.fromRadians(0.5, 1.5)')
-        self.assertEqual(
-            a, eval(repr(a), dict([(self.Interval.__name__, self.Interval)])))
+        self.assertEqual(str(a), "[0.5, 1.5]")
+        self.assertEqual(repr(a), self.Interval.__name__ + ".fromRadians(0.5, 1.5)")
+        self.assertEqual(a, eval(repr(a), dict([(self.Interval.__name__, self.Interval)])))
 
     def testPickle(self):
         a = self.Interval.fromRadians(1, 3)
@@ -104,18 +97,16 @@ class IntervalTests:
 
 
 class AngleIntervalTestCase(unittest.TestCase, IntervalTests):
-
     def setUp(self):
         self.Interval = AngleInterval
         self.Scalar = Angle
 
 
 class NormalizedAngleIntervalTestCase(unittest.TestCase, IntervalTests):
-
     def setUp(self):
         self.Interval = NormalizedAngleInterval
         self.Scalar = NormalizedAngle
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

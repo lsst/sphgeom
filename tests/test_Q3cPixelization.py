@@ -21,6 +21,7 @@
 #
 
 import pickle
+
 try:
     import yaml
 except ImportError:
@@ -28,11 +29,10 @@ except ImportError:
 
 import unittest
 
-from lsst.sphgeom import Angle, Circle, Q3cPixelization, RangeSet, UnitVector3d, ConvexPolygon
+from lsst.sphgeom import Angle, Circle, ConvexPolygon, Q3cPixelization, RangeSet, UnitVector3d
 
 
 class Q3cPixelizationTestCase(unittest.TestCase):
-
     def test_construction(self):
         with self.assertRaises(ValueError):
             Q3cPixelization(-1)
@@ -65,24 +65,22 @@ class Q3cPixelizationTestCase(unittest.TestCase):
         self.assertTrue(rs.empty())
 
     def test_index_to_string(self):
-        strings = ['+X', '+Y', '+Z', '-X', '-Y', '-Z']
+        strings = ["+X", "+Y", "+Z", "-X", "-Y", "-Z"]
         for i in range(6):
             s = strings[i]
-            components = [0.0]*3
+            components = [0.0] * 3
             components[i % 3] = 1.0 if i < 3 else -1.0
             v = UnitVector3d(*components)
             f = Q3cPixelization(0).index(v)
             self.assertEqual(Q3cPixelization(0).toString(f), s)
             for j in range(4):
-                self.assertEqual(Q3cPixelization(1).toString(f*4 + j),
-                                 s + str(j))
+                self.assertEqual(Q3cPixelization(1).toString(f * 4 + j), s + str(j))
 
     def test_string(self):
         p = Q3cPixelization(3)
-        self.assertEqual(str(p), 'Q3cPixelization(3)')
+        self.assertEqual(str(p), "Q3cPixelization(3)")
         self.assertEqual(str(p), repr(p))
-        self.assertEqual(
-            p, eval(repr(p), dict(Q3cPixelization=Q3cPixelization)))
+        self.assertEqual(p, eval(repr(p), dict(Q3cPixelization=Q3cPixelization)))
 
     def test_pickle(self):
         a = Q3cPixelization(20)
@@ -96,5 +94,5 @@ class Q3cPixelizationTestCase(unittest.TestCase):
         self.assertEqual(a, b)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

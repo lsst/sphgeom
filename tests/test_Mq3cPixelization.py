@@ -21,6 +21,7 @@
 #
 
 import pickle
+
 try:
     import yaml
 except ImportError:
@@ -28,12 +29,10 @@ except ImportError:
 
 import unittest
 
-from lsst.sphgeom import (Angle, Circle, Mq3cPixelization, RangeSet,
-                          UnitVector3d)
+from lsst.sphgeom import Angle, Circle, Mq3cPixelization, RangeSet, UnitVector3d
 
 
 class Mq3cPixelizationTestCase(unittest.TestCase):
-
     def test_construction(self):
         with self.assertRaises(ValueError):
             Mq3cPixelization(-1)
@@ -72,10 +71,10 @@ class Mq3cPixelizationTestCase(unittest.TestCase):
         self.assertTrue(rs.empty())
 
     def test_index_to_string(self):
-        strings = ['+X', '+Y', '+Z', '-X', '-Y', '-Z']
+        strings = ["+X", "+Y", "+Z", "-X", "-Y", "-Z"]
         for i in range(6):
             s0 = strings[i]
-            components = [0.0]*3
+            components = [0.0] * 3
             components[i % 3] = 1.0 if i < 3 else -1.0
             v = UnitVector3d(*components)
             f = Mq3cPixelization(0).index(v)
@@ -83,15 +82,14 @@ class Mq3cPixelizationTestCase(unittest.TestCase):
             self.assertEqual(Mq3cPixelization(0).toString(f), s0)
             for j in range(4):
                 s1 = s0 + str(j)
-                self.assertEqual(Mq3cPixelization.asString(f*4 + j), s1)
-                self.assertEqual(Mq3cPixelization(1).toString(f*4 + j), s1)
+                self.assertEqual(Mq3cPixelization.asString(f * 4 + j), s1)
+                self.assertEqual(Mq3cPixelization(1).toString(f * 4 + j), s1)
 
     def test_string(self):
         p = Mq3cPixelization(3)
-        self.assertEqual(str(p), 'Mq3cPixelization(3)')
+        self.assertEqual(str(p), "Mq3cPixelization(3)")
         self.assertEqual(str(p), repr(p))
-        self.assertEqual(
-            p, eval(repr(p), dict(Mq3cPixelization=Mq3cPixelization)))
+        self.assertEqual(p, eval(repr(p), dict(Mq3cPixelization=Mq3cPixelization)))
 
     def test_pickle(self):
         a = Mq3cPixelization(20)
@@ -105,5 +103,5 @@ class Mq3cPixelizationTestCase(unittest.TestCase):
         self.assertEqual(a, b)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

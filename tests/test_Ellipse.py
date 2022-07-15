@@ -21,6 +21,7 @@
 #
 
 import pickle
+
 try:
     import yaml
 except ImportError:
@@ -30,13 +31,10 @@ import math
 import unittest
 
 import numpy as np
-
-from lsst.sphgeom import (Angle, CONTAINS, Circle, Ellipse, Region,
-                          UnitVector3d, WITHIN)
+from lsst.sphgeom import CONTAINS, WITHIN, Angle, Circle, Ellipse, Region, UnitVector3d
 
 
 class EllipseTestCase(unittest.TestCase):
-
     def test_construction(self):
         self.assertTrue(Ellipse.empty().isEmpty())
         self.assertTrue(Ellipse().isEmpty())
@@ -56,8 +54,7 @@ class EllipseTestCase(unittest.TestCase):
 
     def test_comparison_operators(self):
         e = Ellipse(UnitVector3d.X(), UnitVector3d.Y(), Angle(2 * math.pi / 3))
-        f = Ellipse(UnitVector3d.X(),
-                    Angle(math.pi / 3), Angle(math.pi / 6), Angle(0))
+        f = Ellipse(UnitVector3d.X(), Angle(math.pi / 3), Angle(math.pi / 6), Angle(0))
         self.assertEqual(e, e)
         self.assertNotEqual(e, f)
 
@@ -66,13 +63,11 @@ class EllipseTestCase(unittest.TestCase):
         self.assertAlmostEqual(e.getF1().dot(UnitVector3d.X()), 1.0)
         self.assertAlmostEqual(e.getF2().dot(UnitVector3d.Y()), 1.0)
         self.assertAlmostEqual(e.getAlpha(), Angle(2 * math.pi / 3))
-        f = Ellipse(UnitVector3d.X(),
-                    Angle(math.pi / 3), Angle(math.pi / 6), Angle(0))
+        f = Ellipse(UnitVector3d.X(), Angle(math.pi / 3), Angle(math.pi / 6), Angle(0))
         self.assertEqual(f.getCenter(), UnitVector3d.X())
 
     def test_relationships(self):
-        e = Ellipse(UnitVector3d.X(),
-                    Angle(math.pi / 3), Angle(math.pi / 6), Angle(0))
+        e = Ellipse(UnitVector3d.X(), Angle(math.pi / 3), Angle(math.pi / 6), Angle(0))
         self.assertTrue(e.contains(UnitVector3d.X()))
         self.assertTrue(UnitVector3d.X() in e)
         c = Circle(UnitVector3d.X(), Angle(math.pi / 2))
@@ -80,8 +75,7 @@ class EllipseTestCase(unittest.TestCase):
         self.assertEqual(e.relate(c), WITHIN)
 
     def test_vectorized_contains(self):
-        e = Ellipse(UnitVector3d.X(),
-                    Angle(math.pi / 3), Angle(math.pi / 6), Angle(0))
+        e = Ellipse(UnitVector3d.X(), Angle(math.pi / 3), Angle(math.pi / 6), Angle(0))
         x = np.random.rand(5, 3)
         y = np.random.rand(5, 3)
         z = np.random.rand(5, 3)
@@ -100,12 +94,11 @@ class EllipseTestCase(unittest.TestCase):
         for i in range(x.shape[0], 2):
             for j in range(x.shape[1]):
                 u = UnitVector3d(x[i, j], y[i, j], z[i, j])
-                self.assertEqual(c3[i//2, j], e.contains(u))
-                self.assertEqual(c4[i//2, j], e.contains(u))
+                self.assertEqual(c3[i // 2, j], e.contains(u))
+                self.assertEqual(c4[i // 2, j], e.contains(u))
 
     def test_complement(self):
-        e = Ellipse(UnitVector3d.X(),
-                    Angle(math.pi / 3), Angle(math.pi / 6), Angle(0))
+        e = Ellipse(UnitVector3d.X(), Angle(math.pi / 3), Angle(math.pi / 6), Angle(0))
         f = e.complemented().complement()
         self.assertEqual(e, f)
 
@@ -117,13 +110,11 @@ class EllipseTestCase(unittest.TestCase):
 
     def test_string(self):
         c = Ellipse(UnitVector3d.Z(), Angle(1.0))
-        self.assertEqual(str(c),
-                         'Ellipse([0.0, 0.0, 1.0], [0.0, 0.0, 1.0], 1.0)')
-        self.assertEqual(repr(c),
-                         'Ellipse(UnitVector3d(0.0, 0.0, 1.0), '
-                         'UnitVector3d(0.0, 0.0, 1.0), Angle(1.0))')
-        self.assertEqual(c, eval(repr(c), dict(
-            Angle=Angle, Ellipse=Ellipse, UnitVector3d=UnitVector3d)))
+        self.assertEqual(str(c), "Ellipse([0.0, 0.0, 1.0], [0.0, 0.0, 1.0], 1.0)")
+        self.assertEqual(
+            repr(c), "Ellipse(UnitVector3d(0.0, 0.0, 1.0), " "UnitVector3d(0.0, 0.0, 1.0), Angle(1.0))"
+        )
+        self.assertEqual(c, eval(repr(c), dict(Angle=Angle, Ellipse=Ellipse, UnitVector3d=UnitVector3d)))
 
     def test_pickle(self):
         a = Ellipse(UnitVector3d.X(), UnitVector3d.Y(), Angle(2 * math.pi / 3))
@@ -137,5 +128,5 @@ class EllipseTestCase(unittest.TestCase):
         self.assertEqual(a, b)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -21,6 +21,7 @@
 __all__ = ["PixelizationABC"]
 
 import abc
+
 from ._sphgeom import RangeSet, Region, UnitVector3d
 
 
@@ -68,7 +69,7 @@ class PixelizationABC(abc.ABC):
 
     @abc.abstractmethod
     def index(self, v: UnitVector3d) -> int:
-        """ Compute the index of the pixel.
+        """Compute the index of the pixel.
 
         Parameters
         ----------
