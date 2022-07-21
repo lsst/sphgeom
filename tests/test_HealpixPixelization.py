@@ -22,7 +22,7 @@
 import pickle
 import unittest
 
-import healpy as hp
+import hpgeom as hpg
 import numpy as np
 
 try:
@@ -30,7 +30,7 @@ try:
 except ImportError:
     yaml = None
 
-from lsst.sphgeom import Angle, Box, Circle, ConvexPolygon, HealpixPixelization, LonLat, UnitVector3d
+from lsst.sphgeom import Angle, Box, Circle, ConvexPolygon, Ellipse, HealpixPixelization, LonLat, UnitVector3d
 
 
 class HealpixPixelizationTestCase(unittest.TestCase):
@@ -52,9 +52,7 @@ class HealpixPixelizationTestCase(unittest.TestCase):
         h = HealpixPixelization(5)
         vec = UnitVector3d(1, 1, 1)
         lonlat = LonLat(vec)
-        pix = hp.ang2pix(
-            h.nside, lonlat.getLon().asDegrees(), lonlat.getLat().asDegrees(), lonlat=True, nest=True
-        )
+        pix = hpg.angle_to_pixel(h.nside, lonlat.getLon().asDegrees(), lonlat.getLat().asDegrees())
         self.assertEqual(h.index(UnitVector3d(1, 1, 1)), pix)
 
     def test_pixel(self):
@@ -68,10 +66,9 @@ class HealpixPixelizationTestCase(unittest.TestCase):
         # Make the hardest intersection: a region that _just_
         # touches a healpix pixel.
         h = HealpixPixelization(5)
-        pix = hp.ang2pix(h.nside, 50.0, 20.0, lonlat=True, nest=True)
+        pix = hpg.angle_to_pixel(h.nside, 50.0, 20.0)
 
-        corners = hp.boundaries(h.nside, pix, step=1, nest=True)
-        corners_ra, corners_dec = hp.vec2ang(corners.T, lonlat=True)
+        corners_ra, corners_dec = hpg.boundaries(h.nside, pix, step=1)
 
         # Take the southernmost corner...
         smost = np.argmin(corners_dec)
@@ -130,10 +127,9 @@ class HealpixPixelizationTestCase(unittest.TestCase):
         """Test interior method of HealpixPixelization."""
 
         h = HealpixPixelization(5)
-        pix = hp.ang2pix(h.nside, 50.0, 20.0, lonlat=True, nest=True)
+        pix = hpg.angle_to_pixel(h.nside, 50.0, 20.0)
 
-        corners = hp.boundaries(h.nside, pix, step=1, nest=True)
-        corners_ra, corners_dec = hp.vec2ang(corners.T, lonlat=True)
+        corners_ra, corners_dec = hpg.boundaries(h.nside, pix, step=1)
 
         ra_range = np.array([corners_ra.min() - 1.0, corners_ra.max() + 1.0])
         dec_range = np.array([corners_dec.min() - 1.0, corners_dec.max() + 1.0])
@@ -166,6 +162,17 @@ class HealpixPixelizationTestCase(unittest.TestCase):
             angle=Angle.fromDegrees(2.5),
         )
         self._check_interior(h, circle, [pix])
+
+        # Try an ellipse region
+        ellipse = Ellipse(
+            center=UnitVector3d(
+                LonLat.fromDegrees((ra_range[0] + ra_range[1]) / 2.0, (dec_range[0] + dec_range[1]) / 2.0)
+            ),
+            alpha=Angle.fromDegrees(1.5),
+            beta=Angle.fromDegrees(2.5),
+            orientation=Angle.fromDegrees(45.0),
+        )
+        self._check_interior(h, ellipse, [pix])
 
     def _check_interior(self, pixelization, region, check_pixels):
         """Check the interior from a region.

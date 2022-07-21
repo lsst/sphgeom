@@ -20,9 +20,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 __all__ = ["HealpixPixelization"]
 
+import hpgeom as hpg
 import numpy as np
 
-from ._sphgeom import Box, Circle, ConvexPolygon, Ellipse, RangeSet, Region, UnitVector3d
+from ._sphgeom import Box, Circle, ConvexPolygon, Ellipse, LonLat, RangeSet, Region, UnitVector3d
 from .pixelization_abc import PixelizationABC
 
 
@@ -38,15 +39,13 @@ class HealpixPixelization(PixelizationABC):
     MAX_LEVEL = 17
 
     def __init__(self, level: int):
-        import healpy as hp
-
         if level < 0:
             raise ValueError("HealPix level must be >= 0.")
 
         self._level = level
         self._nside = 2**level
 
-        self._npix = hp.nside2npix(self._nside)
+        self._npix = hpg.nside_to_npixel(self._nside)
 
         # Values used to do pixel/region intersections
         self._bit_shift = 8
@@ -65,24 +64,18 @@ class HealpixPixelization(PixelizationABC):
         return RangeSet(0, self._npix)
 
     def pixel(self, i) -> Region:
-        import healpy as hp
-
         # This is arbitrarily returning 4 points on a side
         # to approximate the pixel shape.
-        varr = hp.boundaries(self._nside, i, step=4, nest=True).T
+        varr = hpg.angle_to_vector(*hpg.boundaries(self._nside, i, step=4))
         return ConvexPolygon([UnitVector3d(*c) for c in varr])
 
     def index(self, v: UnitVector3d) -> int:
-        import healpy as hp
-
-        return hp.vec2pix(self._nside, v.x(), v.y(), v.z(), nest=True)
+        return hpg.vector_to_pixel(self._nside, v.x(), v.y(), v.z())
 
     def toString(self, i: int) -> str:
         return str(i)
 
     def envelope(self, region: Region, maxRanges: int = 0):
-        import healpy as hp
-
         if maxRanges > 0:
             # If this is important, the rangeset can be consolidated.
             raise NotImplementedError("HealpixPixelization: maxRanges not implemented")
@@ -90,15 +83,13 @@ class HealpixPixelization(PixelizationABC):
 
         # Dilate the high resolution pixels by one to ensure that the full
         # region is completely covered at high resolution.
-        neighbors = hp.get_all_neighbours(self._nside_highres, pixels_highres, nest=True)
+        neighbors = hpg.neighbors(self._nside_highres, pixels_highres)
         # Shift back to the original resolution and uniquify
-        pixels = np.unique(np.right_shift(neighbors, self._bit_shift))
+        pixels = np.unique(np.right_shift(neighbors.ravel(), self._bit_shift))
 
         return RangeSet(pixels)
 
     def interior(self, region: Region, maxRanges: int = 0):
-        import healpy as hp
-
         if maxRanges > 0:
             # If this is important, the rangeset can be consolidated.
             raise NotImplementedError("HealpixPixelization: maxRanges not implemented")
@@ -107,13 +98,10 @@ class HealpixPixelization(PixelizationABC):
         # Check that the corners of the pixels are entirely enclosed in
         # the region
 
-        # Returns array [npixels, 3, ncorners], where ncorners is 4, and
-        # the center index points to x, y, z.
-        corners = hp.boundaries(self._nside, pixels, step=1, nest=True)
+        # Returns arrays [npixels, ncorners], where ncorners is 4.
+        corners_lon, corners_lat = hpg.boundaries(self._nside, pixels, step=1, degrees=False)
 
-        corners_int = region.contains(
-            corners[:, 0, :].ravel(), corners[:, 1, :].ravel(), corners[:, 2, :].ravel()
-        ).reshape((len(pixels), 4))
+        corners_int = region.contains(corners_lon.ravel(), corners_lat.ravel()).reshape((len(pixels), 4))
         interior = np.sum(corners_int, axis=1) == 4
         pixels = pixels[interior]
 
@@ -134,29 +122,43 @@ class HealpixPixelization(PixelizationABC):
         pixels : `np.ndarray`
             Array of pixels at resolution nside, nest ordering.
         """
-        import healpy as hp
-
-        _circle = None
-        _poly = None
-        if isinstance(region, (Box, Ellipse)):
-            _circle = region.getBoundingCircle()
-        elif isinstance(region, Circle):
-            _circle = region
+        if isinstance(region, Circle):
+            center = LonLat(region.getCenter())
+            pixels = hpg.query_circle(
+                nside,
+                center.getLon().asRadians(),
+                center.getLat().asRadians(),
+                region.getOpeningAngle().asRadians(),
+                degrees=False,
+            )
         elif isinstance(region, ConvexPolygon):
-            _poly = region
-        else:
-            raise ValueError("Invalid region.")
-
-        # Find all pixels at an arbitrarily higher resolution
-        if _circle is not None:
-            center = _circle.getCenter()
-            vec = np.array([center.x(), center.y(), center.z()]).T
-            pixels = hp.query_disc(
-                nside, vec, _circle.getOpeningAngle().asRadians(), inclusive=False, nest=True
+            vertices = np.array([[v.x(), v.y(), v.z()] for v in region.getVertices()])
+            pixels = hpg.query_polygon_vec(nside, vertices)
+        elif isinstance(region, Box):
+            pixels = hpg.query_box(
+                nside,
+                region.getLon().getA().asRadians(),
+                region.getLon().getB().asRadians(),
+                region.getLat().getA().asRadians(),
+                region.getLat().getB().asRadians(),
+                degrees=False,
+            )
+        elif isinstance(region, Ellipse):
+            # hpgeom supports query_ellipse given center, alpha, beta,
+            # and orientation. However, until we figure out how to get
+            # the orientation out of the Ellipse region, we will use the
+            # bounding circle as was done with healpy.
+            _circle = region.getBoundingCircle()
+            center = LonLat(_circle.getCenter())
+            pixels = hpg.query_circle(
+                nside,
+                center.getLon().asRadians(),
+                center.getLat().asRadians(),
+                _circle.getOpeningAngle().asRadians(),
+                degrees=False,
             )
         else:
-            vertices = np.array([[v.x(), v.y(), v.z()] for v in _poly.getVertices()])
-            pixels = hp.query_polygon(nside, vertices, inclusive=False, nest=True)
+            raise ValueError("Invalid region.")
 
         return pixels
 
