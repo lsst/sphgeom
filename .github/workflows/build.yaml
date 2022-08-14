@@ -54,7 +54,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install --upgrade setuptools wheel build
+          pip install --upgrade "setuptools<=63.3" wheel build
 
       - name: Build and create distribution
         run: |
@@ -98,7 +98,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install --upgrade setuptools wheel cibuildwheel
+          pip install --upgrade "setuptools<=63.3" wheel cibuildwheel
 
       - name: Build and create distribution
         run: |
