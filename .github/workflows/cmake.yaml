@@ -7,47 +7,7 @@ on:
   pull_request:
 
 jobs:
-  cmake:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          # Need to clone everything to determine version from git.
-          fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: 3.8
-
-      - name: Install Python prereqs
-        run: |
-          pip install \
-            numpy \
-            pybind11[global] \
-            pytest \
-            pytest-flake8 \
-            pyyaml \
-            hpgeom
-
-      - name: CMake configure
-        run: |
-          cmake \
-            -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install \
-            -B ${{github.workspace}}/build
-
-      - name: CMake build
-        run: cmake --build ${{github.workspace}}/build --parallel `nproc`
-
-      - name: CMake test
-        working-directory: ${{github.workspace}}/build
-        run: ctest
-
-      - name: CMake install
-        run: cmake --build ${{github.workspace}}/build --target install
-
-      - name: Python tests
-        env:
-          PYTHONPATH: ${{github.workspace}}/build/install/python
-          LD_LIBRARY_PATH: ${{github.workspace}}/build/install/lib
-        run: pytest -r a -v
+  call-workflow:
+    uses: lsst/rubin_workflows/.github/workflows/cmake.yaml@tickets/DM-35133
+    with:
+      pip_deps: "numpy pybind11[global] pyyaml healpy"
