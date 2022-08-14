@@ -40,7 +40,7 @@ dynamic = ["version"]
 [project.optional-dependencies]
 test = [
     "pytest >= 3.2",
-    "flake8 >= 3.7.5",
+    "flake8 <5",
     "pytest-flake8 >= 1.0.4",
 ]
 yaml = ["pyyaml >= 5.1"]
