@@ -30,7 +30,7 @@ jobs:
 
       - name: Build and install
         run: |
-          python -m pip install --upgrade "pip<22" setuptools
+          python -m pip install --upgrade pip "setuptools<65" "flake8<5"
           python -m pip install .[yaml,test]
 
       - name: Run tests
@@ -54,7 +54,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install --upgrade setuptools wheel build
+          pip install --upgrade "setuptools<65" wheel build
 
       - name: Build and create distribution
         run: |
@@ -98,7 +98,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install --upgrade setuptools wheel cibuildwheel
+          pip install --upgrade "setuptools<65" wheel cibuildwheel
 
       - name: Build and create distribution
         run: |
