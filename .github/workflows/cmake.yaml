@@ -20,6 +20,9 @@ jobs:
         with:
           python-version: 3.8
 
+      - name: Update Python packages
+        run: pip install --upgrade "setuptools<65" "flake8<5"
+
       - name: Install Python prereqs
         run: |
           pip install \
