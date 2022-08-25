@@ -114,7 +114,7 @@ inline std::uint64_t decodeU64(uint8_t const * buffer) {
         (static_cast<uint64_t>(buffer[5]) << 40) +
         (static_cast<uint64_t>(buffer[6]) << 48) +
         (static_cast<uint64_t>(buffer[7]) << 56);
-    return d;
+    return u;
 #endif
 }
 
