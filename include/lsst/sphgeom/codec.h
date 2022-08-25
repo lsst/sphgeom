@@ -24,7 +24,10 @@
 #define LSST_SPHGEOM_CODEC_H_
 
 // Optimized path requires little endian arch and support for unaligned loads.
-#if defined(__x86_64__) or (defined(__aarch64__) and defined(__LITTLE_ENDIAN__))
+#if defined(__x86_64__) or          \
+    (defined(__aarch64__) and       \
+     (defined(__LITTLE_ENDIAN__) or \
+      (defined(__BYTE_ORDER__) and __BYTE_ORDER__ == 1234)))
 #define OPTIMIZED_LITTLE_ENDIAN
 #endif
 
@@ -114,7 +117,7 @@ inline std::uint64_t decodeU64(uint8_t const * buffer) {
         (static_cast<uint64_t>(buffer[5]) << 40) +
         (static_cast<uint64_t>(buffer[6]) << 48) +
         (static_cast<uint64_t>(buffer[7]) << 56);
-    return d;
+    return u;
 #endif
 }
 
