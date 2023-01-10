@@ -16,12 +16,12 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: 3.8
 
       - name: Update Python packages
-        run: pip install --upgrade "setuptools<65" "flake8<5"
+        run: pip install --upgrade setuptools "flake8<5"
 
       - name: Install Python prereqs
         run: |
