@@ -135,10 +135,10 @@ class Box3dTestCase(unittest.TestCase):
 
     def test_string(self):
         b = Box3d(Vector3d(0, 0, 0), 1, 1, 1)
-        self.assertEqual(str(b), "[[-1.0, 1.0],\n" " [-1.0, 1.0],\n" " [-1.0, 1.0]]")
+        self.assertEqual(str(b), "[[-1.0, 1.0],\n [-1.0, 1.0],\n [-1.0, 1.0]]")
         self.assertEqual(
             repr(b),
-            "Box3d(Interval1d(-1.0, 1.0),\n" "      Interval1d(-1.0, 1.0),\n" "      Interval1d(-1.0, 1.0))",
+            "Box3d(Interval1d(-1.0, 1.0),\n      Interval1d(-1.0, 1.0),\n      Interval1d(-1.0, 1.0))",
         )
         self.assertEqual(b, eval(repr(b), dict(Box3d=Box3d, Interval1d=Interval1d)))
 
