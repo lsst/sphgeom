@@ -114,8 +114,7 @@ def pixel_constructor(loader, node):
 
     if className not in pixelMap:
         raise RuntimeError(
-            f"Encountered unexpected class {className} associated with"
-            " sphgeom pixelization YAML constructor"
+            f"Encountered unexpected class {className} associated with sphgeom pixelization YAML constructor"
         )
 
     return pixelMap[className](mapping["level"])

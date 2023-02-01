@@ -165,7 +165,7 @@ class BoxTestCase(unittest.TestCase):
         self.assertEqual(str(b), "Box([0.0, 1.0], [0.0, 1.0])")
         self.assertEqual(
             repr(b),
-            "Box(NormalizedAngleInterval.fromRadians(0.0, 1.0), " "AngleInterval.fromRadians(0.0, 1.0))",
+            "Box(NormalizedAngleInterval.fromRadians(0.0, 1.0), AngleInterval.fromRadians(0.0, 1.0))",
         )
         self.assertEqual(
             b,

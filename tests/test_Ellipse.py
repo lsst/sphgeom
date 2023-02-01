@@ -112,7 +112,7 @@ class EllipseTestCase(unittest.TestCase):
         c = Ellipse(UnitVector3d.Z(), Angle(1.0))
         self.assertEqual(str(c), "Ellipse([0.0, 0.0, 1.0], [0.0, 0.0, 1.0], 1.0)")
         self.assertEqual(
-            repr(c), "Ellipse(UnitVector3d(0.0, 0.0, 1.0), " "UnitVector3d(0.0, 0.0, 1.0), Angle(1.0))"
+            repr(c), "Ellipse(UnitVector3d(0.0, 0.0, 1.0), UnitVector3d(0.0, 0.0, 1.0), Angle(1.0))"
         )
         self.assertEqual(c, eval(repr(c), dict(Angle=Angle, Ellipse=Ellipse, UnitVector3d=UnitVector3d)))
 
