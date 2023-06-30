@@ -68,7 +68,7 @@ def rotate_left(x, d):
 
 
 def bit_component(x, i):
-    """Return i-th bit of x"""
+    """Return i-th bit of x."""
     return (x & 2**i) >> i
 
 
@@ -106,7 +106,7 @@ def inverse_gc(g):
 
 
 def g(i):
-    """The direction between subcube i and the next one"""
+    """The direction between subcube i and the next one."""
     return int(np.log2(gc(i) ^ gc(i + 1)))
 
 
@@ -132,7 +132,7 @@ def T_inv(e, d, b):
 
 
 def TR_algo2(p, M):
-    """Return the Hilbert index of point p"""
+    """Return the Hilbert index of point p."""
     # h will contain the Hilbert index
     h = 0
     # ve and vd contain the entry point and dimension of the current subcube
@@ -158,7 +158,7 @@ def TR_algo2(p, M):
 
 
 def TR_algo3(h, M):
-    """Return the coordinates for the Hilbert index h"""
+    """Return the coordinates for the Hilbert index h."""
     ve = 0
     vd = 0
     p = [0] * N
@@ -184,7 +184,7 @@ def deinterleave(z, M):
 
 
 def make_TR_algo2_lut(M):
-    """Return a LUT for the Hilbert index of point p"""
+    """Return a LUT for the Hilbert index of point p."""
     h = 0
     lut = []
     for ie in (0, 3):
@@ -216,7 +216,7 @@ def make_TR_algo2_lut(M):
 
 
 def make_TR_algo3_lut(M):
-    """Return a LUT for the point corresponding to the Hilbert index h"""
+    """Return a LUT for the point corresponding to the Hilbert index h."""
     h = 0
     lut = []
     for ie in (0, 3):

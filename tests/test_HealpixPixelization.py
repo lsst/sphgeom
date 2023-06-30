@@ -125,7 +125,6 @@ class HealpixPixelizationTestCase(unittest.TestCase):
 
     def test_interior(self):
         """Test interior method of HealpixPixelization."""
-
         h = HealpixPixelization(5)
         pix = hpg.angle_to_pixel(h.nside, 50.0, 20.0)
 
