@@ -27,6 +27,8 @@ from lsst.sphgeom import Matrix3d, Vector3d
 
 
 class Matrix3dTestCase(unittest.TestCase):
+    """Test 3D Matrix."""
+
     def testConstruction(self):
         self.assertEqual(Matrix3d().getSquaredNorm(), 0)
         self.assertEqual(Matrix3d(1, 0, 0, 0, 1, 0, 0, 0, 1), Matrix3d(1))

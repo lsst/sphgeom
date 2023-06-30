@@ -28,6 +28,8 @@ from lsst.sphgeom import CONTAINS, DISJOINT, Box3d, Interval1d, Vector3d
 
 
 class Box3dTestCase(unittest.TestCase):
+    """Test Box3d."""
+
     def setUp(self):
         np.random.seed(1)
 

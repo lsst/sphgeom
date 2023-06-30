@@ -33,6 +33,8 @@ from lsst.sphgeom import Angle, Circle, ConvexPolygon, Q3cPixelization, RangeSet
 
 
 class Q3cPixelizationTestCase(unittest.TestCase):
+    """Test Q3C pixelization."""
+
     def test_construction(self):
         with self.assertRaises(ValueError):
             Q3cPixelization(-1)

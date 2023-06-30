@@ -35,6 +35,8 @@ from lsst.sphgeom import CONTAINS, WITHIN, Angle, Circle, Ellipse, Region, UnitV
 
 
 class EllipseTestCase(unittest.TestCase):
+    """Test Ellipse."""
+
     def test_construction(self):
         self.assertTrue(Ellipse.empty().isEmpty())
         self.assertTrue(Ellipse().isEmpty())

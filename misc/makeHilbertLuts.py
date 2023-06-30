@@ -24,7 +24,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""This script generates the lookup tables used by the C++ Hilbert index
+"""Generates the lookup tables used by the C++ Hilbert index
 functions in `lsst/sphgeom/curve.h`.
 """
 
@@ -96,7 +96,7 @@ def i_to_p(i):
 
 
 def inverse_gc(g):
-    """The inverse gray code."""
+    """Invert the gray code."""
     i = g
     j = 1
     while j < N:
@@ -106,12 +106,12 @@ def inverse_gc(g):
 
 
 def g(i):
-    """The direction between subcube i and the next one."""
+    """Return the direction between subcube i and the next one."""
     return int(np.log2(gc(i) ^ gc(i + 1)))
 
 
 def d(i):
-    """The direction of the arrow whithin a subcube."""
+    """Return the direction of the arrow within a subcube."""
     if i == 0:
         return 0
     elif (i % 2) == 0:
@@ -175,6 +175,7 @@ def TR_algo3(h, M):
 
 
 def deinterleave(z, M):
+    """De-interleave."""
     x = 0
     y = 0
     for i in range(M):

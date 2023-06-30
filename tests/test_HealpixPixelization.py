@@ -34,6 +34,8 @@ from lsst.sphgeom import Angle, Box, Circle, ConvexPolygon, Ellipse, HealpixPixe
 
 
 class HealpixPixelizationTestCase(unittest.TestCase):
+    """Test HEALPix pixelization."""
+
     def test_construction(self):
         """Test construction of a HealpixPixelization."""
         with self.assertRaises(ValueError):

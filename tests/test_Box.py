@@ -46,6 +46,8 @@ from lsst.sphgeom import (
 
 
 class BoxTestCase(unittest.TestCase):
+    """Test Box."""
+
     def setUp(self):
         np.random.seed(1)
 

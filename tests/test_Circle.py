@@ -35,6 +35,8 @@ from lsst.sphgeom import CONTAINS, DISJOINT, Angle, Circle, Region, UnitVector3d
 
 
 class CircleTestCase(unittest.TestCase):
+    """Test Circle."""
+
     def setUp(self):
         np.random.seed(1)
 

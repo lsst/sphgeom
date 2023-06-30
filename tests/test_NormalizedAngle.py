@@ -27,6 +27,8 @@ from lsst.sphgeom import Angle, LonLat, NormalizedAngle, UnitVector3d
 
 
 class NormalizedAngleTestCase(unittest.TestCase):
+    """Test normalized angle."""
+
     def testConstruction(self):
         a1 = NormalizedAngle(1.0)
         a2 = NormalizedAngle.fromRadians(1.0)

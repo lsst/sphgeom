@@ -28,6 +28,8 @@ from lsst.sphgeom import Angle, LonLat, UnitVector3d, Vector3d
 
 
 class UnitVector3dTestCase(unittest.TestCase):
+    """Test 3D UnitVector."""
+
     def testConstruction(self):
         v = Vector3d(1, 1, 1)
         u = UnitVector3d.orthogonalTo(v)

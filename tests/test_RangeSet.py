@@ -28,6 +28,8 @@ from lsst.sphgeom import RangeSet
 
 
 class RangeSetTestCase(unittest.TestCase):
+    """Test RangeSet."""
+
     def testConstruction(self):
         s1 = RangeSet(1)
         s2 = RangeSet()

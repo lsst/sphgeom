@@ -27,6 +27,8 @@ from lsst.sphgeom import Box, Chunker
 
 
 class ChunkerTestCase(unittest.TestCase):
+    """Test Chunker."""
+
     def testConstruction(self):
         chunker = Chunker(85, 12)
         self.assertEqual(chunker.numStripes, 85)

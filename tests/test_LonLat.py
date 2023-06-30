@@ -27,6 +27,8 @@ from lsst.sphgeom import Angle, LonLat, NormalizedAngle, UnitVector3d
 
 
 class LonLatTestCase(unittest.TestCase):
+    """Test LonLat."""
+
     def testConstruction(self):
         p = LonLat.fromDegrees(45, 45)
         self.assertEqual(p, LonLat(NormalizedAngle.fromDegrees(45), Angle.fromDegrees(45)))

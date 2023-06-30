@@ -28,6 +28,8 @@ from lsst.sphgeom import Angle, UnitVector3d, Vector3d
 
 
 class Vector3dTestCase(unittest.TestCase):
+    """Test 3D vector."""
+
     def testConstruction(self):
         v = Vector3d(1, 2, 3)
         self.assertEqual(v.x(), 1)

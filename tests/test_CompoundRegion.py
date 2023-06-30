@@ -150,6 +150,8 @@ class CompoundRegionTestMixin:
 
 
 class UnionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
+    """Test UnionRegion."""
+
     def setUp(self):
         CompoundRegionTestMixin.setUp(self)
         self.instance = UnionRegion(*self.operands)
@@ -172,6 +174,8 @@ class UnionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
 
 
 class IntersectionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
+    """Test intersection region."""
+
     def setUp(self):
         CompoundRegionTestMixin.setUp(self)
         self.instance = IntersectionRegion(*self.operands)

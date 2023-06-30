@@ -27,6 +27,8 @@ from lsst.sphgeom import Angle
 
 
 class AngleTestCase(unittest.TestCase):
+    """Test the Angle class."""
+
     def testConstruction(self):
         a1 = Angle(1.0)
         a2 = Angle.fromRadians(1.0)

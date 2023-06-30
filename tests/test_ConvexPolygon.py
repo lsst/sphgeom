@@ -34,6 +34,8 @@ from lsst.sphgeom import CONTAINS, Circle, ConvexPolygon, Region, UnitVector3d
 
 
 class ConvexPolygonTestCase(unittest.TestCase):
+    """Test ConvexPolygon."""
+
     def testConstruction(self):
         points = [UnitVector3d.Z(), UnitVector3d.X(), UnitVector3d.Y()]
         p1 = ConvexPolygon(points)
