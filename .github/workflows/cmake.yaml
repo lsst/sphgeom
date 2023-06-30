@@ -21,7 +21,7 @@ jobs:
           python-version: 3.8
 
       - name: Update Python packages
-        run: pip install --upgrade setuptools "flake8<5"
+        run: pip install --upgrade setuptools
 
       - name: Install Python prereqs
         run: |
@@ -29,7 +29,6 @@ jobs:
             numpy \
             pybind11[global] \
             pytest \
-            pytest-flake8 \
             pyyaml \
             hpgeom
 
