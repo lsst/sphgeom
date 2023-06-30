@@ -203,7 +203,7 @@ class HealpixPixelizationTestCase(unittest.TestCase):
         h = HealpixPixelization(5)
         self.assertEqual(str(h), "HealpixPixelization(5)")
         self.assertEqual(str(h), repr(h))
-        self.assertEqual(h, eval(repr(h), dict(HealpixPixelization=HealpixPixelization)))
+        self.assertEqual(h, eval(repr(h), {"HealpixPixelization": HealpixPixelization}))
 
     def test_pickle(self):
         """Test pickling of HealpixPixelization."""

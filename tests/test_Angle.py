@@ -65,7 +65,7 @@ class AngleTestCase(unittest.TestCase):
         self.assertEqual(str(Angle(1)), "1.0")
         self.assertEqual(repr(Angle(1)), "Angle(1.0)")
         a = Angle(2.5)
-        self.assertEqual(a, eval(repr(a), dict(Angle=Angle)))
+        self.assertEqual(a, eval(repr(a), {"Angle": Angle}))
 
     def testPickle(self):
         a = Angle(1.5)

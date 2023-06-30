@@ -130,16 +130,16 @@ class CompoundRegionTestMixin:
             self.instance,
             eval(
                 repr(self.instance),
-                dict(
-                    UnionRegion=UnionRegion,
-                    IntersectionRegion=IntersectionRegion,
-                    Box=Box,
-                    Circle=Circle,
-                    UnitVector3d=UnitVector3d,
-                    Angle=Angle,
-                    AngleInterval=AngleInterval,
-                    NormalizedAngleInterval=NormalizedAngleInterval,
-                ),
+                {
+                    "UnionRegion": UnionRegion,
+                    "IntersectionRegion": IntersectionRegion,
+                    "Box": Box,
+                    "Circle": Circle,
+                    "UnitVector3d": UnitVector3d,
+                    "Angle": Angle,
+                    "AngleInterval": AngleInterval,
+                    "NormalizedAngleInterval": NormalizedAngleInterval,
+                },
             ),
         )
 

@@ -173,7 +173,11 @@ class BoxTestCase(unittest.TestCase):
             b,
             eval(
                 repr(b),
-                dict(AngleInterval=AngleInterval, Box=Box, NormalizedAngleInterval=NormalizedAngleInterval),
+                {
+                    "AngleInterval": AngleInterval,
+                    "Box": Box,
+                    "NormalizedAngleInterval": NormalizedAngleInterval,
+                },
             ),
         )
 

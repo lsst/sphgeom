@@ -112,7 +112,7 @@ class Matrix3dTestCase(unittest.TestCase):
         m = Matrix3d(1, 2, 3, 4, 5, 6, 7, 8, 9)
         self.assertEqual(str(m), "[[1.0, 2.0, 3.0],\n [4.0, 5.0, 6.0],\n [7.0, 8.0, 9.0]]")
         self.assertEqual(repr(m), "Matrix3d(1.0, 2.0, 3.0,\n         4.0, 5.0, 6.0,\n         7.0, 8.0, 9.0)")
-        self.assertEqual(m, eval(repr(m), dict(Matrix3d=Matrix3d)))
+        self.assertEqual(m, eval(repr(m), {"Matrix3d": Matrix3d}))
 
     def testPickle(self):
         m = Matrix3d(1, 2, 3, 4, 5, 6, 7, 8, 9)

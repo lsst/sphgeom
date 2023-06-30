@@ -90,7 +90,7 @@ class IntervalTests:
         a = self.Interval.fromRadians(0.5, 1.5)
         self.assertEqual(str(a), "[0.5, 1.5]")
         self.assertEqual(repr(a), self.Interval.__name__ + ".fromRadians(0.5, 1.5)")
-        self.assertEqual(a, eval(repr(a), dict([(self.Interval.__name__, self.Interval)])))
+        self.assertEqual(a, eval(repr(a), {self.Interval.__name__: self.Interval}))
 
     def testPickle(self):
         a = self.Interval.fromRadians(1, 3)

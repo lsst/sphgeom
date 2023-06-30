@@ -50,7 +50,7 @@ class ChunkerTestCase(unittest.TestCase):
         chunker = Chunker(85, 12)
         self.assertEqual(str(chunker), "Chunker(85, 12)")
         self.assertEqual(repr(chunker), "Chunker(85, 12)")
-        self.assertEqual(chunker, eval(repr(chunker), dict(Chunker=Chunker)))
+        self.assertEqual(chunker, eval(repr(chunker), {"Chunker": Chunker}))
 
     def testPickle(self):
         a = Chunker(85, 12)

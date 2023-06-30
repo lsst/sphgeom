@@ -47,7 +47,7 @@ class LonLatTestCase(unittest.TestCase):
         p = LonLat.fromRadians(1, 1)
         self.assertEqual(str(p), "[1.0, 1.0]")
         self.assertEqual(repr(p), "LonLat.fromRadians(1.0, 1.0)")
-        self.assertEqual(p, eval(repr(p), dict(LonLat=LonLat)))
+        self.assertEqual(p, eval(repr(p), {"LonLat": LonLat}))
 
     def testPickle(self):
         p = LonLat.fromRadians(2, 1)
