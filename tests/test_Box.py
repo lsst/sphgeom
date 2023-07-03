@@ -46,6 +46,8 @@ from lsst.sphgeom import (
 
 
 class BoxTestCase(unittest.TestCase):
+    """Test Box."""
+
     def setUp(self):
         np.random.seed(1)
 
@@ -171,7 +173,11 @@ class BoxTestCase(unittest.TestCase):
             b,
             eval(
                 repr(b),
-                dict(AngleInterval=AngleInterval, Box=Box, NormalizedAngleInterval=NormalizedAngleInterval),
+                {
+                    "AngleInterval": AngleInterval,
+                    "Box": Box,
+                    "NormalizedAngleInterval": NormalizedAngleInterval,
+                },
             ),
         )
 

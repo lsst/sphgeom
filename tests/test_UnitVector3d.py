@@ -28,6 +28,8 @@ from lsst.sphgeom import Angle, LonLat, UnitVector3d, Vector3d
 
 
 class UnitVector3dTestCase(unittest.TestCase):
+    """Test 3D UnitVector."""
+
     def testConstruction(self):
         v = Vector3d(1, 1, 1)
         u = UnitVector3d.orthogonalTo(v)
@@ -90,7 +92,7 @@ class UnitVector3dTestCase(unittest.TestCase):
         v = UnitVector3d.X()
         self.assertEqual(str(v), "[1.0, 0.0, 0.0]")
         self.assertEqual(repr(v), "UnitVector3d(1.0, 0.0, 0.0)")
-        self.assertEqual(v, eval(repr(v), dict(UnitVector3d=UnitVector3d)))
+        self.assertEqual(v, eval(repr(v), {"UnitVector3d": UnitVector3d}))
 
     def testPickle(self):
         v = UnitVector3d(1, 1, 1)

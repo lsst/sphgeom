@@ -24,7 +24,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""This script generates the lookup tables used by the C++ Hilbert index
+"""Generates the lookup tables used by the C++ Hilbert index
 functions in `lsst/sphgeom/curve.h`.
 """
 
@@ -68,7 +68,7 @@ def rotate_left(x, d):
 
 
 def bit_component(x, i):
-    """Return i-th bit of x"""
+    """Return i-th bit of x."""
     return (x & 2**i) >> i
 
 
@@ -96,7 +96,7 @@ def i_to_p(i):
 
 
 def inverse_gc(g):
-    """The inverse gray code."""
+    """Invert the gray code."""
     i = g
     j = 1
     while j < N:
@@ -106,12 +106,12 @@ def inverse_gc(g):
 
 
 def g(i):
-    """The direction between subcube i and the next one"""
+    """Return the direction between subcube i and the next one."""
     return int(np.log2(gc(i) ^ gc(i + 1)))
 
 
 def d(i):
-    """The direction of the arrow whithin a subcube."""
+    """Return the direction of the arrow within a subcube."""
     if i == 0:
         return 0
     elif (i % 2) == 0:
@@ -132,7 +132,7 @@ def T_inv(e, d, b):
 
 
 def TR_algo2(p, M):
-    """Return the Hilbert index of point p"""
+    """Return the Hilbert index of point p."""
     # h will contain the Hilbert index
     h = 0
     # ve and vd contain the entry point and dimension of the current subcube
@@ -158,7 +158,7 @@ def TR_algo2(p, M):
 
 
 def TR_algo3(h, M):
-    """Return the coordinates for the Hilbert index h"""
+    """Return the coordinates for the Hilbert index h."""
     ve = 0
     vd = 0
     p = [0] * N
@@ -175,6 +175,7 @@ def TR_algo3(h, M):
 
 
 def deinterleave(z, M):
+    """De-interleave."""
     x = 0
     y = 0
     for i in range(M):
@@ -184,7 +185,7 @@ def deinterleave(z, M):
 
 
 def make_TR_algo2_lut(M):
-    """Return a LUT for the Hilbert index of point p"""
+    """Return a LUT for the Hilbert index of point p."""
     h = 0
     lut = []
     for ie in (0, 3):
@@ -216,7 +217,7 @@ def make_TR_algo2_lut(M):
 
 
 def make_TR_algo3_lut(M):
-    """Return a LUT for the point corresponding to the Hilbert index h"""
+    """Return a LUT for the point corresponding to the Hilbert index h."""
     h = 0
     lut = []
     for ie in (0, 3):

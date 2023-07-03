@@ -33,6 +33,8 @@ from lsst.sphgeom import Angle, Circle, ConvexPolygon, Q3cPixelization, RangeSet
 
 
 class Q3cPixelizationTestCase(unittest.TestCase):
+    """Test Q3C pixelization."""
+
     def test_construction(self):
         with self.assertRaises(ValueError):
             Q3cPixelization(-1)
@@ -80,7 +82,7 @@ class Q3cPixelizationTestCase(unittest.TestCase):
         p = Q3cPixelization(3)
         self.assertEqual(str(p), "Q3cPixelization(3)")
         self.assertEqual(str(p), repr(p))
-        self.assertEqual(p, eval(repr(p), dict(Q3cPixelization=Q3cPixelization)))
+        self.assertEqual(p, eval(repr(p), {"Q3cPixelization": Q3cPixelization}))
 
     def test_pickle(self):
         a = Q3cPixelization(20)

@@ -130,16 +130,16 @@ class CompoundRegionTestMixin:
             self.instance,
             eval(
                 repr(self.instance),
-                dict(
-                    UnionRegion=UnionRegion,
-                    IntersectionRegion=IntersectionRegion,
-                    Box=Box,
-                    Circle=Circle,
-                    UnitVector3d=UnitVector3d,
-                    Angle=Angle,
-                    AngleInterval=AngleInterval,
-                    NormalizedAngleInterval=NormalizedAngleInterval,
-                ),
+                {
+                    "UnionRegion": UnionRegion,
+                    "IntersectionRegion": IntersectionRegion,
+                    "Box": Box,
+                    "Circle": Circle,
+                    "UnitVector3d": UnitVector3d,
+                    "Angle": Angle,
+                    "AngleInterval": AngleInterval,
+                    "NormalizedAngleInterval": NormalizedAngleInterval,
+                },
             ),
         )
 
@@ -150,6 +150,8 @@ class CompoundRegionTestMixin:
 
 
 class UnionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
+    """Test UnionRegion."""
+
     def setUp(self):
         CompoundRegionTestMixin.setUp(self)
         self.instance = UnionRegion(*self.operands)
@@ -172,6 +174,8 @@ class UnionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
 
 
 class IntersectionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
+    """Test intersection region."""
+
     def setUp(self):
         CompoundRegionTestMixin.setUp(self)
         self.instance = IntersectionRegion(*self.operands)

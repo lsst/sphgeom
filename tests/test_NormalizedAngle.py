@@ -27,6 +27,8 @@ from lsst.sphgeom import Angle, LonLat, NormalizedAngle, UnitVector3d
 
 
 class NormalizedAngleTestCase(unittest.TestCase):
+    """Test normalized angle."""
+
     def testConstruction(self):
         a1 = NormalizedAngle(1.0)
         a2 = NormalizedAngle.fromRadians(1.0)
@@ -68,7 +70,7 @@ class NormalizedAngleTestCase(unittest.TestCase):
         self.assertEqual(str(NormalizedAngle(1)), "1.0")
         self.assertEqual(repr(NormalizedAngle(1)), "NormalizedAngle(1.0)")
         a = NormalizedAngle(0.5)
-        self.assertEqual(a, eval(repr(a), dict(NormalizedAngle=NormalizedAngle)))
+        self.assertEqual(a, eval(repr(a), {"NormalizedAngle": NormalizedAngle}))
 
     def testPickle(self):
         a = NormalizedAngle(1.5)

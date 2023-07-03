@@ -71,7 +71,7 @@ def region_representer(dumper, data):
 
 
 def region_constructor(loader, node):
-    """Construct a sphgeom region from YAML"""
+    """Construct a sphgeom region from YAML."""
     mapping = loader.construct_mapping(node)
     encoded = bytes.fromhex(mapping["encoded"])
     # The generic Region base class can instantiate a region of the
@@ -92,7 +92,7 @@ if yaml:
 
 
 def pixel_representer(dumper, data):
-    """Represent a pixelization in YAML
+    """Represent a pixelization in YAML.
 
     Stored as the pixelization level in a mapping with a single key
     ``level``.

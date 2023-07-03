@@ -34,6 +34,8 @@ from lsst.sphgeom import Angle, Box, Circle, ConvexPolygon, Ellipse, HealpixPixe
 
 
 class HealpixPixelizationTestCase(unittest.TestCase):
+    """Test HEALPix pixelization."""
+
     def test_construction(self):
         """Test construction of a HealpixPixelization."""
         with self.assertRaises(ValueError):
@@ -125,7 +127,6 @@ class HealpixPixelizationTestCase(unittest.TestCase):
 
     def test_interior(self):
         """Test interior method of HealpixPixelization."""
-
         h = HealpixPixelization(5)
         pix = hpg.angle_to_pixel(h.nside, 50.0, 20.0)
 
@@ -202,7 +203,7 @@ class HealpixPixelizationTestCase(unittest.TestCase):
         h = HealpixPixelization(5)
         self.assertEqual(str(h), "HealpixPixelization(5)")
         self.assertEqual(str(h), repr(h))
-        self.assertEqual(h, eval(repr(h), dict(HealpixPixelization=HealpixPixelization)))
+        self.assertEqual(h, eval(repr(h), {"HealpixPixelization": HealpixPixelization}))
 
     def test_pickle(self):
         """Test pickling of HealpixPixelization."""

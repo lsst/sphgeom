@@ -33,6 +33,8 @@ from lsst.sphgeom import Angle, Circle, ConvexPolygon, HtmPixelization, RangeSet
 
 
 class HtmPixelizationTestCase(unittest.TestCase):
+    """Test HTM pixels."""
+
     def test_construction(self):
         with self.assertRaises(ValueError):
             HtmPixelization(-1)
@@ -86,7 +88,7 @@ class HtmPixelizationTestCase(unittest.TestCase):
         p = HtmPixelization(3)
         self.assertEqual(str(p), "HtmPixelization(3)")
         self.assertEqual(str(p), repr(p))
-        self.assertEqual(p, eval(repr(p), dict(HtmPixelization=HtmPixelization)))
+        self.assertEqual(p, eval(repr(p), {"HtmPixelization": HtmPixelization}))
 
     def test_pickle(self):
         a = HtmPixelization(20)

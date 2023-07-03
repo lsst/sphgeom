@@ -34,6 +34,8 @@ from lsst.sphgeom import CONTAINS, Circle, ConvexPolygon, Region, UnitVector3d
 
 
 class ConvexPolygonTestCase(unittest.TestCase):
+    """Test ConvexPolygon."""
+
     def testConstruction(self):
         points = [UnitVector3d.Z(), UnitVector3d.X(), UnitVector3d.Y()]
         p1 = ConvexPolygon(points)
@@ -100,7 +102,7 @@ class ConvexPolygonTestCase(unittest.TestCase):
             "UnitVector3d(1.0, 0.0, 0.0), "
             "UnitVector3d(0.0, 1.0, 0.0)])",
         )
-        self.assertEqual(p, eval(repr(p), dict(ConvexPolygon=ConvexPolygon, UnitVector3d=UnitVector3d)))
+        self.assertEqual(p, eval(repr(p), {"ConvexPolygon": ConvexPolygon, "UnitVector3d": UnitVector3d}))
 
     def testPickle(self):
         a = ConvexPolygon([UnitVector3d.Z(), UnitVector3d.X(), UnitVector3d.Y()])

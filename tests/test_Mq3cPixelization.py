@@ -33,6 +33,8 @@ from lsst.sphgeom import Angle, Circle, Mq3cPixelization, RangeSet, UnitVector3d
 
 
 class Mq3cPixelizationTestCase(unittest.TestCase):
+    """Test MQ3C pixelization."""
+
     def test_construction(self):
         with self.assertRaises(ValueError):
             Mq3cPixelization(-1)
@@ -89,7 +91,7 @@ class Mq3cPixelizationTestCase(unittest.TestCase):
         p = Mq3cPixelization(3)
         self.assertEqual(str(p), "Mq3cPixelization(3)")
         self.assertEqual(str(p), repr(p))
-        self.assertEqual(p, eval(repr(p), dict(Mq3cPixelization=Mq3cPixelization)))
+        self.assertEqual(p, eval(repr(p), {"Mq3cPixelization": Mq3cPixelization}))
 
     def test_pickle(self):
         a = Mq3cPixelization(20)

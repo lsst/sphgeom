@@ -40,8 +40,6 @@ dynamic = ["version"]
 [project.optional-dependencies]
 test = [
     "pytest >= 3.2",
-    "flake8 >= 3.7.5",
-    "pytest-flake8 >= 1.0.4",
 ]
 yaml = ["pyyaml >= 5.1"]
 
@@ -67,8 +65,7 @@ line_length = 110
 write_to = "python/lsst/sphgeom/version.py"
 
 [tool.pytest.ini_options]
-addopts = "--flake8"
-flake8-ignore = ["E133", "E226", "E228", "N802", "N803", "N806", "N812", "N815", "N816", "W503"]
+addopts = "--import-mode=importlib"  # Recommended as best practice
 
 [tool.pydocstyle]
 convention = "numpy"
@@ -78,4 +75,54 @@ convention = "numpy"
 # Docstring at the very first line is not required
 # D200, D205 and D400 all complain if the first sentence of the docstring does
 # not fit on one line.
-add-ignore = ["D107", "D105", "D102", "D100", "D200", "D205", "D400"]
+add-ignore = ["D107", "D105", "D102", "D100", "D200", "D205", "D400", "D104"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+
+[tool.ruff]
+exclude = [
+    "__init__.py",
+]
+ignore = [
+    "N802",
+    "N803",
+    "N806",
+    "N812",
+    "N815",
+    "N816",
+    "N999",
+    "D107",
+    "D105",
+    "D102",
+    "D104",
+    "D100",
+    "D200",
+    "D205",
+]
+line-length = 110
+select = [
+    "E",  # pycodestyle
+    "F",  # pyflakes
+    "N",  # pep8-naming
+    "W",  # pycodestyle
+    "D",  # pydocstyle
+    "UP", # pyupgrade
+]
+target-version = "py310"
+extend-select = [
+    "RUF100", # Warn about unused noqa
+]
+
+[tool.ruff.pycodestyle]
+max-doc-length = 79
+
+[tool.ruff.pydocstyle]
+convention = "numpy"

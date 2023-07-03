@@ -28,6 +28,8 @@ from lsst.sphgeom import CONTAINS, DISJOINT, Box3d, Interval1d, Vector3d
 
 
 class Box3dTestCase(unittest.TestCase):
+    """Test Box3d."""
+
     def setUp(self):
         np.random.seed(1)
 
@@ -140,7 +142,7 @@ class Box3dTestCase(unittest.TestCase):
             repr(b),
             "Box3d(Interval1d(-1.0, 1.0),\n      Interval1d(-1.0, 1.0),\n      Interval1d(-1.0, 1.0))",
         )
-        self.assertEqual(b, eval(repr(b), dict(Box3d=Box3d, Interval1d=Interval1d)))
+        self.assertEqual(b, eval(repr(b), {"Box3d": Box3d, "Interval1d": Interval1d}))
 
     def test_pickle(self):
         a = Box3d(Vector3d(0, 0, 0), 1, 1, 1)

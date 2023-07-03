@@ -35,6 +35,8 @@ from lsst.sphgeom import CONTAINS, DISJOINT, Angle, Circle, Region, UnitVector3d
 
 
 class CircleTestCase(unittest.TestCase):
+    """Test Circle."""
+
     def setUp(self):
         np.random.seed(1)
 
@@ -152,7 +154,7 @@ class CircleTestCase(unittest.TestCase):
         c = Circle(UnitVector3d.Z(), Angle(1.0))
         self.assertEqual(str(c), "Circle([0.0, 0.0, 1.0], 1.0)")
         self.assertEqual(repr(c), "Circle(UnitVector3d(0.0, 0.0, 1.0), Angle(1.0))")
-        self.assertEqual(c, eval(repr(c), dict(Angle=Angle, Circle=Circle, UnitVector3d=UnitVector3d)))
+        self.assertEqual(c, eval(repr(c), {"Angle": Angle, "Circle": Circle, "UnitVector3d": UnitVector3d}))
 
     def test_pickle(self):
         a = Circle(UnitVector3d(1, -1, 1), 1.0)

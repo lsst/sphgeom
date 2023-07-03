@@ -35,6 +35,8 @@ from lsst.sphgeom import CONTAINS, WITHIN, Angle, Circle, Ellipse, Region, UnitV
 
 
 class EllipseTestCase(unittest.TestCase):
+    """Test Ellipse."""
+
     def test_construction(self):
         self.assertTrue(Ellipse.empty().isEmpty())
         self.assertTrue(Ellipse().isEmpty())
@@ -114,7 +116,7 @@ class EllipseTestCase(unittest.TestCase):
         self.assertEqual(
             repr(c), "Ellipse(UnitVector3d(0.0, 0.0, 1.0), UnitVector3d(0.0, 0.0, 1.0), Angle(1.0))"
         )
-        self.assertEqual(c, eval(repr(c), dict(Angle=Angle, Ellipse=Ellipse, UnitVector3d=UnitVector3d)))
+        self.assertEqual(c, eval(repr(c), {"Angle": Angle, "Ellipse": Ellipse, "UnitVector3d": UnitVector3d}))
 
     def test_pickle(self):
         a = Ellipse(UnitVector3d.X(), UnitVector3d.Y(), Angle(2 * math.pi / 3))

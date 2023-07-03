@@ -27,6 +27,8 @@ from lsst.sphgeom import CONTAINS, DISJOINT, Angle, AngleInterval, NormalizedAng
 
 
 class IntervalTests:
+    """Test intervals."""
+
     def testConstruction(self):
         i = self.Interval(self.Scalar(1))
         self.assertEqual(i.getA(), i.getB())
@@ -88,7 +90,7 @@ class IntervalTests:
         a = self.Interval.fromRadians(0.5, 1.5)
         self.assertEqual(str(a), "[0.5, 1.5]")
         self.assertEqual(repr(a), self.Interval.__name__ + ".fromRadians(0.5, 1.5)")
-        self.assertEqual(a, eval(repr(a), dict([(self.Interval.__name__, self.Interval)])))
+        self.assertEqual(a, eval(repr(a), {self.Interval.__name__: self.Interval}))
 
     def testPickle(self):
         a = self.Interval.fromRadians(1, 3)
@@ -97,12 +99,16 @@ class IntervalTests:
 
 
 class AngleIntervalTestCase(unittest.TestCase, IntervalTests):
+    """Angle interval test cases."""
+
     def setUp(self):
         self.Interval = AngleInterval
         self.Scalar = Angle
 
 
 class NormalizedAngleIntervalTestCase(unittest.TestCase, IntervalTests):
+    """Normalized angle interval test cases."""
+
     def setUp(self):
         self.Interval = NormalizedAngleInterval
         self.Scalar = NormalizedAngle

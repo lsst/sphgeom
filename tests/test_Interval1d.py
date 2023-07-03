@@ -27,6 +27,8 @@ from lsst.sphgeom import CONTAINS, DISJOINT, Interval1d
 
 
 class Interval1dTestCase(unittest.TestCase):
+    """Test 1D intervals."""
+
     def testConstruction(self):
         i = Interval1d(1)
         self.assertEqual(i.getA(), i.getB())
@@ -83,7 +85,7 @@ class Interval1dTestCase(unittest.TestCase):
         i = Interval1d(1, 2)
         self.assertEqual(str(i), "[1.0, 2.0]")
         self.assertEqual(repr(i), "Interval1d(1.0, 2.0)")
-        self.assertEqual(i, eval(repr(i), dict(Interval1d=Interval1d)))
+        self.assertEqual(i, eval(repr(i), {"Interval1d": Interval1d}))
 
     def testPickle(self):
         a = Interval1d(1.5, 3.5)

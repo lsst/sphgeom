@@ -28,6 +28,8 @@ from lsst.sphgeom import RangeSet
 
 
 class RangeSetTestCase(unittest.TestCase):
+    """Test RangeSet."""
+
     def testConstruction(self):
         s1 = RangeSet(1)
         s2 = RangeSet()
@@ -90,7 +92,7 @@ class RangeSetTestCase(unittest.TestCase):
             # pybind11 maps C++ integers to Python long instances in Python 2.
             self.assertEqual(str(s), "[(1L, 10L)]")
             self.assertEqual(repr(s), "RangeSet([(1L, 10L)])")
-        self.assertEqual(s, eval(repr(s), dict(RangeSet=RangeSet)))
+        self.assertEqual(s, eval(repr(s), {"RangeSet": RangeSet}))
 
     def testPickle(self):
         r = RangeSet([2, 3, 5, 7, 11, 13, 17, 19])
