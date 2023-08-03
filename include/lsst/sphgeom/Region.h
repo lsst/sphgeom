@@ -162,7 +162,7 @@ public:
     static std::unique_ptr<Region> decode(std::vector<std::uint8_t> const & s) {
         return decode(s.data(), s.size());
     }
-
+    static void  decode(Region &region, std::uint8_t const * buffer, size_t n);
     static std::unique_ptr<Region> decode(std::uint8_t const * buffer, size_t n);
     ///@}
 

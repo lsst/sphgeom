@@ -26,27 +26,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
+#include <nanobind/nanobind.h>
 
 #include "lsst/sphgeom/python.h"
 #include "lsst/sphgeom/python/utils.h"
 #include "lsst/sphgeom/CompoundRegion.h"
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 namespace {
 
-py::str _repr(const char *class_name, CompoundRegion const &self) {
+nb::str _repr(const char *class_name, CompoundRegion const &self) {
     std::string format = class_name;
     format += "(";
-    py::tuple operands(self.nOperands());
+    nb::tuple operands(self.nOperands());
     for (unsigned i = 0; i != self.nOperands(); i++) {
-        py::object operand = py::cast(self.getOperand(i), py::return_value_policy::reference);
+        nb::object operand = nb::cast(self.getOperand(i), nb::rv_policy::reference);
         operands[i] = operand;
         if (i != 0) {
             format += ", ";
@@ -54,11 +53,11 @@ py::str _repr(const char *class_name, CompoundRegion const &self) {
         format += "{!r}";
     }
     format += ")";
-    return py::str(format).format(*operands);
+    return nb::str(format).attr("format")(*operands);
 }
 
 template <typename _CompoundRegion>
-std::unique_ptr<_CompoundRegion> _args_factory(const py::args& args) {
+std::unique_ptr<_CompoundRegion> _args_factory(const nb::args& args) {
     std::vector<std::unique_ptr<Region>> operands;
     for (auto&& item: args) {
         Region* region = item.cast<Region*>();
@@ -91,17 +90,17 @@ private:
 }  // namespace
 
 template <>
-void defineClass(py::classh<CompoundRegion, Region> &cls) {
+void defineClass(nb::class_<CompoundRegion, Region> &cls) {
     cls.def("nOperands", &CompoundRegion::nOperands);
     cls.def("__len__", &CompoundRegion::nOperands);
     cls.def(
         "__iter__",
         [](CompoundRegion const& region) {
-            return py::make_iterator(
+            return nb::make_iterator(
                 CompoundIterator(region, 0U), CompoundIterator(region, region.nOperands())
             );
         },
-        py::return_value_policy::reference_internal  // Keeps region alive while iterator is in use.
+        nb::rv_policy::reference_internal  // Keeps region alive while iterator is in use.
     );
     cls.def(
         "cloneOperand",
@@ -113,19 +112,23 @@ void defineClass(py::classh<CompoundRegion, Region> &cls) {
 }
 
 template <>
-void defineClass(py::classh<UnionRegion, CompoundRegion> &cls) {
-    cls.attr("TYPE_CODE") = py::int_(UnionRegion::TYPE_CODE);
-    cls.def(py::init(&_args_factory<UnionRegion>));
-    cls.def(py::pickle(&python::encode, &python::decode<UnionRegion>));
-    cls.def("__repr__", [](CompoundRegion const &self) { return _repr("UnionRegion", self); });
+void defineClass(nb::class_<UnionRegion, CompoundRegion> &cls) {
+    cls.attr("TYPE_CODE") = nb::int_(UnionRegion::TYPE_CODE);
+    cls.def(nb::init<Region const &, Region const &>());
+    //cls.def(nb::pickle(&python::encode, &python::decode<UnionRegion>));
+    cls.def("__getstate__", &python::encode);
+    cls.def("__setstate__", &python::decode<UnionRegion, nb::bytes>);
+    cls.def("__repr__", [](CompoundRegion const &self) { return _repr("UnionRegion({!r}, {!r})", self); });
 }
 
 template <>
-void defineClass(py::classh<IntersectionRegion, CompoundRegion> &cls) {
-    cls.attr("TYPE_CODE") = py::int_(IntersectionRegion::TYPE_CODE);
-    cls.def(py::init(&_args_factory<IntersectionRegion>));
-    cls.def(py::pickle(&python::encode, &python::decode<IntersectionRegion>));
-    cls.def("__repr__", [](CompoundRegion const &self) { return _repr("IntersectionRegion", self); });
+void defineClass(nb::class_<IntersectionRegion, CompoundRegion> &cls) {
+    cls.attr("TYPE_CODE") = nb::int_(IntersectionRegion::TYPE_CODE);
+    cls.def(nb::init<Region const &, Region const &>());
+    cls.def("__getstate__", &python::encode);
+    cls.def("__setstate__", &python::decode<IntersectionRegion, nb::bytes>);
+    //cls.def(nb::pickle(&python::encode, &python::decode<IntersectionRegion>));
+    cls.def("__repr__", [](CompoundRegion const &self) { return _repr("IntersectionRegion({!r}, {!r})", self); });
 }
 
 }  // namespace sphgeom

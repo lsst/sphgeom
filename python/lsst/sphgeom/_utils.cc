@@ -26,7 +26,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
+#include <nanobind/nanobind.h>
 
 #include "lsst/sphgeom/python.h"
 
@@ -35,13 +35,13 @@
 #include "lsst/sphgeom/utils.h"
 #include "lsst/sphgeom/Vector3d.h"
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
-void defineUtils(py::module &mod) {
+void defineUtils(nb::module_ &mod) {
     mod.def("getMinSquaredChordLength", &getMinSquaredChordLength, "v"_a, "a"_a,
             "b"_a, "n"_a);
     mod.def("getMaxSquaredChordLength", &getMaxSquaredChordLength, "v"_a, "a"_a,

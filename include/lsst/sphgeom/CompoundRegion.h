@@ -85,6 +85,8 @@ public:
     ///@{
     /// `decode` deserializes a CompoundRegion from a byte string produced by
     /// encode.
+    static void decode(CompoundRegion &region, std::uint8_t const *buffer, size_t n);
+
     static std::unique_ptr<CompoundRegion> decode(std::vector<std::uint8_t> const &s) {
         return decode(s.data(), s.size());
     }
@@ -143,7 +145,12 @@ public:
     /// encode.
     static std::unique_ptr<UnionRegion> decode(std::vector<std::uint8_t> const &s) {
         return decode(s.data(), s.size());
+        return decode(s.data(), s.size());
     }
+    static void decode(CompoundRegion &region, std::uint8_t const *buffer, size_t n) {
+        new (&region) UnionRegion(_decode(TYPE_CODE, buffer, n));
+    }
+
     static std::unique_ptr<UnionRegion> decode(std::uint8_t const *buffer, size_t n) {
         return std::make_unique<UnionRegion>(_decode(TYPE_CODE, buffer, n));
     }
@@ -184,6 +191,11 @@ public:
     static std::unique_ptr<IntersectionRegion> decode(std::vector<std::uint8_t> const &s) {
         return decode(s.data(), s.size());
     }
+
+    static void  decode(CompoundRegion &region, std::uint8_t const *buffer, size_t n) {
+        new (&region) IntersectionRegion(_decode(TYPE_CODE, buffer, n));
+    }
+
     static std::unique_ptr<IntersectionRegion> decode(std::uint8_t const *buffer, size_t n) {
         return std::make_unique<IntersectionRegion>(_decode(TYPE_CODE, buffer, n));
     }

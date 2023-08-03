@@ -26,17 +26,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
+#include <nanobind/nanobind.h>
 
 #include "lsst/sphgeom/orientation.h"
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
-void defineOrientation(py::module &mod) {
+void defineOrientation(nb::module_ &mod) {
     mod.def("orientationExact", &orientationExact, "a"_a, "b"_a, "c"_a);
     mod.def("orientation", &orientation, "a"_a, "b"_a, "c"_a);
     mod.def("orientationX", &orientationX, "b"_a, "c"_a);

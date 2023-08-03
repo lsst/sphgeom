@@ -85,6 +85,7 @@ class RangeSetTestCase(unittest.TestCase):
         s.insert(2, 3)
         self.assertEqual(s.ranges(), [(0, 1), (2, 3)])
         s = RangeSet(4, 2)
+        print("RangeSet" , list(s))
         self.assertEqual(list(s), [(0, 2), (4, 0)])
 
     def testString(self):

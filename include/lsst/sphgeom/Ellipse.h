@@ -318,6 +318,7 @@ public:
     static std::unique_ptr<Ellipse> decode(std::vector<std::uint8_t> const & s) {
         return decode(s.data(), s.size());
     }
+    static void decode(Ellipse &ellipse, std::uint8_t const * buffer, size_t n);
     static std::unique_ptr<Ellipse> decode(std::uint8_t const * buffer, size_t n);
     ///@}
 

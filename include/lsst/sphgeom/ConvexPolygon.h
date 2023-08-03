@@ -66,6 +66,8 @@ class ConvexPolygon : public Region {
 public:
     static constexpr std::uint8_t TYPE_CODE = 'p';
 
+    static void decode(ConvexPolygon &poly, uint8_t const * buffer, size_t n);
+
     /// `convexHull` returns the convex hull of the given set of points if it
     /// exists and throws an exception otherwise. Though points are supplied
     /// in a vector, they really are conceptually a set - the ConvexPolygon

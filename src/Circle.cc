@@ -368,6 +368,22 @@ std::vector<std::uint8_t> Circle::encode() const {
     return buffer;
 }
 
+void Circle::decode(Circle &circle, std::uint8_t const * buffer, size_t n) {
+    if (buffer == nullptr || n != ENCODED_SIZE || *buffer != TYPE_CODE) {
+        throw std::runtime_error("Byte-string is not an encoded Circle");
+    }
+    new (&circle) Circle();
+    ++buffer;
+    double x = decodeDouble(buffer); buffer += 8;
+    double y = decodeDouble(buffer); buffer += 8;
+    double z = decodeDouble(buffer); buffer += 8;
+    double squaredChordLength = decodeDouble(buffer); buffer += 8;
+    double openingAngle = decodeDouble(buffer); buffer += 8;
+    circle._center = UnitVector3d::fromNormalized(x, y, z);
+    circle._squaredChordLength = squaredChordLength;
+    circle._openingAngle = Angle(openingAngle);
+}
+
 std::unique_ptr<Circle> Circle::decode(std::uint8_t const * buffer, size_t n) {
     if (buffer == nullptr || n != ENCODED_SIZE || *buffer != TYPE_CODE) {
         throw std::runtime_error("Byte-string is not an encoded Circle");

@@ -154,6 +154,20 @@ std::vector<std::unique_ptr<Region>> CompoundRegion::_decode(
     return result;
 }
 
+void CompoundRegion::decode(CompoundRegion &region, std::uint8_t const *buffer, size_t n) {
+    if (n == 0) {
+        throw std::runtime_error("Encoded CompoundRegion is truncated.");
+    }
+    switch (buffer[0]) {
+        case UnionRegion::TYPE_CODE:
+            UnionRegion::decode(dynamic_cast<UnionRegion &>(region), buffer, n);
+        case IntersectionRegion::TYPE_CODE:
+            IntersectionRegion::decode(dynamic_cast<IntersectionRegion &>(region), buffer, n);
+        default:
+            throw std::runtime_error("Byte string is not an encoded CompoundRegion.");
+    }
+}
+
 std::unique_ptr<CompoundRegion> CompoundRegion::decode(std::uint8_t const *buffer, size_t n) {
     if (n == 0) {
         throw std::runtime_error("Encoded CompoundRegion is truncated.");

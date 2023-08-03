@@ -390,6 +390,25 @@ std::vector<std::uint8_t> ConvexPolygon::encode() const {
     return buffer;
 }
 
+void ConvexPolygon::decode(ConvexPolygon &poly, std::uint8_t const * buffer, size_t n)
+{
+    if (buffer == nullptr || *buffer != TYPE_CODE ||
+        n < 1 + 24*3 || (n - 1) % 24 != 0) {
+        throw std::runtime_error("Byte-string is not an encoded ConvexPolygon");
+    }
+    new (&poly) ConvexPolygon();
+    ++buffer;
+    size_t nv = (n - 1) / 24;
+    poly._vertices.reserve(nv);
+    for (size_t i = 0; i < nv; ++i, buffer += 24) {
+        poly._vertices.push_back(UnitVector3d::fromNormalized(
+            decodeDouble(buffer),
+            decodeDouble(buffer + 8),
+            decodeDouble(buffer + 16)
+        ));
+    }
+}
+
 std::unique_ptr<ConvexPolygon> ConvexPolygon::decode(std::uint8_t const * buffer,
                                                      size_t n)
 {

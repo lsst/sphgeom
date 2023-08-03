@@ -385,6 +385,36 @@ std::vector<std::uint8_t> Ellipse::encode() const {
     return buffer;
 }
 
+void Ellipse::decode(Ellipse &ellipse, std::uint8_t const * buffer, size_t n) {
+    if (buffer == nullptr || n != ENCODED_SIZE || buffer[0] != TYPE_CODE) {
+        throw std::runtime_error("Byte-string is not an encoded Ellipse");
+    }
+    new (&ellipse) Ellipse();
+    ++buffer;
+    double m00 = decodeDouble(buffer); buffer += 8;
+    double m01 = decodeDouble(buffer); buffer += 8;
+    double m02 = decodeDouble(buffer); buffer += 8;
+    double m10 = decodeDouble(buffer); buffer += 8;
+    double m11 = decodeDouble(buffer); buffer += 8;
+    double m12 = decodeDouble(buffer); buffer += 8;
+    double m20 = decodeDouble(buffer); buffer += 8;
+    double m21 = decodeDouble(buffer); buffer += 8;
+    double m22 = decodeDouble(buffer); buffer += 8;
+    ellipse._S = Matrix3d(m00, m01, m02,
+                           m10, m11, m12,
+                           m20, m21, m22);
+    double a = decodeDouble(buffer); buffer += 8;
+    double b = decodeDouble(buffer); buffer += 8;
+    double gamma = decodeDouble(buffer); buffer += 8;
+    ellipse._a = Angle(a);
+    ellipse._b = Angle(b);
+    ellipse._gamma = Angle(gamma);
+    double tana = decodeDouble(buffer); buffer += 8;
+    double tanb = decodeDouble(buffer); buffer += 8;
+    ellipse._tana = tana;
+    ellipse._tanb = tanb;
+}
+
 std::unique_ptr<Ellipse> Ellipse::decode(std::uint8_t const * buffer, size_t n) {
     if (buffer == nullptr || n != ENCODED_SIZE || buffer[0] != TYPE_CODE) {
         throw std::runtime_error("Byte-string is not an encoded Ellipse");

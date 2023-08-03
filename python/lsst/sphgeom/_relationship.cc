@@ -26,21 +26,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
+#include <nanobind/nanobind.h>
 
 #include "lsst/sphgeom/python/relationship.h"
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
-void defineRelationship(py::module &mod) {
-    mod.attr("DISJOINT") = py::cast(DISJOINT.to_ulong());
-    mod.attr("INTERSECTS") = py::cast(INTERSECTS.to_ulong());
-    mod.attr("CONTAINS") = py::cast(CONTAINS.to_ulong());
-    mod.attr("WITHIN") = py::cast(WITHIN.to_ulong());
+void defineRelationship(nb::module_ &mod) {
+    mod.attr("DISJOINT") = nb::cast(DISJOINT.to_ulong());
+    mod.attr("INTERSECTS") = nb::cast(INTERSECTS.to_ulong());
+    mod.attr("CONTAINS") = nb::cast(CONTAINS.to_ulong());
+    mod.attr("WITHIN") = nb::cast(WITHIN.to_ulong());
 
     mod.def("invert", &invert, "relationship"_a);
 }
