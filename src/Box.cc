@@ -463,6 +463,21 @@ std::vector<uint8_t> Box::encode() const {
     return buffer;
 }
 
+void Box::decode(Box &box, uint8_t const * buffer, size_t n) {
+    if (buffer == nullptr || n != ENCODED_SIZE || *buffer != TYPE_CODE) {
+        throw std::runtime_error("Byte-string is not an encoded Box");
+    }
+    new (&box) Box();
+    ++buffer;
+    double a = decodeDouble(buffer); buffer += 8;
+    double b = decodeDouble(buffer); buffer += 8;
+    box._lon = NormalizedAngleInterval::fromRadians(a, b);
+    a = decodeDouble(buffer); buffer += 8;
+    b = decodeDouble(buffer); buffer += 8;
+    box._lat = AngleInterval::fromRadians(a, b);
+    box._enforceInvariants();
+}
+
 std::unique_ptr<Box> Box::decode(uint8_t const * buffer, size_t n) {
     if (buffer == nullptr || n != ENCODED_SIZE || *buffer != TYPE_CODE) {
         throw std::runtime_error("Byte-string is not an encoded Box");

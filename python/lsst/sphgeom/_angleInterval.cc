@@ -26,22 +26,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
+#include "nanobind/nanobind.h"
 
 #include "lsst/sphgeom/python.h"
 
 #include "lsst/sphgeom/AngleInterval.h"
 #include "lsst/sphgeom/python/interval.h"
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
 void defineClass(
-        py::class_<AngleInterval, std::shared_ptr<AngleInterval>> &cls) {
+        nb::class_<AngleInterval> &cls) {
     python::defineInterval<decltype(cls), AngleInterval, Angle>(cls);
 
     cls.def_static("fromDegrees", &AngleInterval::fromDegrees, "x"_a, "y"_a);
@@ -49,17 +49,17 @@ void defineClass(
     cls.def_static("empty", &AngleInterval::empty);
     cls.def_static("full", &AngleInterval::full);
 
-    cls.def(py::init<>());
-    cls.def(py::init<Angle>(), "x"_a);
-    cls.def(py::init<Angle, Angle>(), "x"_a, "y"_a);
-    cls.def(py::init<AngleInterval const &>(), "interval"_a);
+    cls.def(nb::init<>());
+    cls.def(nb::init<Angle>(), "x"_a);
+    cls.def(nb::init<Angle, Angle>(), "x"_a, "y"_a);
+    cls.def(nb::init<AngleInterval const &>(), "interval"_a);
 
     cls.def("__str__", [](AngleInterval const &self) {
-        return py::str("[{!s}, {!s}]")
+        return nb::str("[{!s}, {!s}]")
                 .format(self.getA().asRadians(), self.getB().asRadians());
     });
     cls.def("__repr__", [](AngleInterval const &self) {
-        return py::str("AngleInterval.fromRadians({!r}, {!r})")
+        return nb::str("AngleInterval.fromRadians({!r}, {!r})")
                 .format(self.getA().asRadians(), self.getB().asRadians());
     });
 }

@@ -26,65 +26,66 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
 
 #include "lsst/sphgeom/python.h"
 
 #include "lsst/sphgeom/Chunker.h"
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 namespace {
-py::str toString(Chunker const &self) {
-    return py::str("Chunker({!s}, {!s})")
+nb::str toString(Chunker const &self) {
+    return nb::str("Chunker({!s}, {!s})")
             .format(self.getNumStripes(), self.getNumSubStripesPerStripe());
 }
 }
 
 template <>
-void defineClass(py::class_<Chunker, std::shared_ptr<Chunker>> &cls) {
-    cls.def(py::init<int32_t, int32_t>(), "numStripes"_a,
-            "numSubStripesPerStripe"_a);
+void defineClass(nb::class_<Chunker> &cls) {
+    cls.def(nb::init<int32_t, int32_t>(), nb::arg("numStripes"),
+            nb::arg("numSubStripesPerStripe"));
 
-    cls.def("__eq__", &Chunker::operator==, py::is_operator());
-    cls.def("__ne__", &Chunker::operator!=, py::is_operator());
+    cls.def("__eq__", &Chunker::operator==, nb::is_operator());
+    cls.def("__ne__", &Chunker::operator!=, nb::is_operator());
 
-    cls.def_property_readonly("numStripes", &Chunker::getNumStripes);
-    cls.def_property_readonly("numSubStripesPerStripe",
+    cls.def_prop_ro("numStripes", &Chunker::getNumStripes);
+    cls.def_prop_ro("numSubStripesPerStripe",
                               &Chunker::getNumSubStripesPerStripe);
 
     cls.def("getChunksIntersecting", &Chunker::getChunksIntersecting,
-            "region"_a);
+            nb::arg("region"));
     cls.def("getSubChunksIntersecting",
             [](Chunker const &self, Region const &region) {
-                py::list results;
+                nb::list results;
                 for (auto const &sc : self.getSubChunksIntersecting(region)) {
-                    results.append(py::make_tuple(sc.chunkId, sc.subChunkIds));
+                    results.append(nb::make_tuple(sc.chunkId, sc.subChunkIds));
                 }
                 return results;
             },
-            "region"_a);
+            nb::arg("region"));
     cls.def("getAllChunks", &Chunker::getAllChunks);
-    cls.def("getAllSubChunks", &Chunker::getAllSubChunks, "chunkId"_a);
+    cls.def("getAllSubChunks", &Chunker::getAllSubChunks, nb::arg("chunkId"));
 
-    cls.def("getChunkBoundingBox", &Chunker::getChunkBoundingBox, "stripe"_a, "chunk"_a);
-    cls.def("getSubChunkBoundingBox", &Chunker::getSubChunkBoundingBox, "subStripe"_a, "subChunk"_a);
+    cls.def("getChunkBoundingBox", &Chunker::getChunkBoundingBox, nb::arg("stripe"), nb::arg("chunk"));
+    cls.def("getSubChunkBoundingBox", &Chunker::getSubChunkBoundingBox, nb::arg("subStripe"), nb::arg("subChunk"));
 
-    cls.def("getStripe", &Chunker::getStripe, "chunkId"_a);
-    cls.def("getChunk", &Chunker::getChunk, "chunkId"_a, "stripe"_a);
+    cls.def("getStripe", &Chunker::getStripe, nb::arg("chunkId"));
+    cls.def("getChunk", &Chunker::getChunk, nb::arg("chunkId"), nb::arg("stripe"));
 
 
     cls.def("__str__", &toString);
     cls.def("__repr__", &toString);
 
     cls.def("__reduce__", [cls](Chunker const &self) {
-        return py::make_tuple(cls,
-                              py::make_tuple(self.getNumStripes(),
+        return nb::make_tuple(cls,
+                              nb::make_tuple(self.getNumStripes(),
                                              self.getNumSubStripesPerStripe()));
     });
 }

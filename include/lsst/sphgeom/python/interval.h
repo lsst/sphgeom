@@ -30,12 +30,12 @@
 #ifndef LSST_SPHGEOM_PYTHON_INTERVAL_H_
 #define LSST_SPHGEOM_PYTHON_INTERVAL_H_
 
-#include "pybind11/pybind11.h"
-
+#include "nanobind/nanobind.h"
+#include <memory>
 #include "relationship.h"
-
-namespace py = pybind11;
-using namespace pybind11::literals;
+#include <typeinfo>
+namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
@@ -51,16 +51,16 @@ template <typename PyClass, typename Class, typename Scalar>
 void defineInterval(PyClass& cls) {
     cls.def("__eq__", [](Class const& self,
                          Class const& other) { return self == other; },
-            py::is_operator());
+            nb::is_operator());
     cls.def("__eq__",
             [](Class const& self, Scalar other) { return self == other; },
-            py::is_operator());
+            nb::is_operator());
     cls.def("__ne__", [](Class const& self,
                          Class const& other) { return self != other; },
-            py::is_operator());
+            nb::is_operator());
     cls.def("__ne__",
             [](Class const& self, Scalar other) { return self != other; },
-            py::is_operator());
+            nb::is_operator());
 
     cls.def("getA", [](Class const& self) { return self.getA(); });
     cls.def("getB", [](Class const& self) { return self.getB(); });
@@ -70,12 +70,12 @@ void defineInterval(PyClass& cls) {
 
     cls.def("__contains__", [](Class const& self,
                                Scalar other) { return self.contains(other); },
-            py::is_operator());
+            nb::is_operator());
     cls.def("__contains__",
             [](Class const& self, Class const& other) {
                 return self.contains(other);
             },
-            py::is_operator());
+            nb::is_operator());
 
     cls.def("contains", [](Class const& self, Scalar other) {
         return self.contains(other);
@@ -117,11 +117,11 @@ void defineInterval(PyClass& cls) {
     cls.def("clipTo", [](Class& self, Scalar other) -> Class & {
         self.clipTo(other);
         return self;
-    });
+    }, nb::rv_policy::reference);
     cls.def("clipTo", [](Class& self, Class const& other) -> Class & {
         self.clipTo(other);
         return self;
-    });
+    }, nb::rv_policy::reference);
     cls.def("clippedTo", [](Class const& self, Scalar other) {
         Class instance = self.clippedTo(other);
         return instance;
@@ -133,11 +133,11 @@ void defineInterval(PyClass& cls) {
     cls.def("expandTo", [](Class& self, Scalar other) -> Class & {
         self.expandTo(other);
         return self;
-    });
+    }, nb::rv_policy::reference);
     cls.def("expandTo", [](Class& self, Class const& other) -> Class & {
         self.expandTo(other);
         return self;
-    });
+    }, nb::rv_policy::reference);
     cls.def("expandedTo", [](Class const& self, Scalar other) {
         Class instance = self.expandedTo(other);
         return instance;
@@ -147,10 +147,10 @@ void defineInterval(PyClass& cls) {
         return instance;
     });
 
-    cls.def("dilateBy", [](Class& self, Scalar other) -> Class & {
+    cls.def("dilateBy", [](Class& self, Scalar other) -> Class &{
         self.dilateBy(other);
         return self;
-    });
+    }, nb::rv_policy::reference);
     cls.def("dilatedBy", [](Class const& self, Scalar other) {
         Class instance = self.dilatedBy(other);
         return instance;
@@ -158,14 +158,14 @@ void defineInterval(PyClass& cls) {
     cls.def("erodeBy", [](Class& self, Scalar other) -> Class & {
         self.erodeBy(other);
         return self;
-    });
+    }, nb::rv_policy::reference);
     cls.def("erodedBy", [](Class const& self, Scalar other) {
         Class instance = self.erodedBy(other);
         return instance;
     });
 
     cls.def("__reduce__", [cls](Class const &self) {
-        return py::make_tuple(cls, py::make_tuple(self.getA(), self.getB()));
+        return nb::make_tuple(cls, nb::make_tuple(self.getA(), self.getB()));
     });
 }
 

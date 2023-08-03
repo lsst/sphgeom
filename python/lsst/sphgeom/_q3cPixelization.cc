@@ -26,24 +26,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
+#include <nanobind/nanobind.h>
 
 #include "lsst/sphgeom/python.h"
 
 #include "lsst/sphgeom/Q3cPixelization.h"
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<Q3cPixelization, Pixelization> &cls) {
-    cls.attr("MAX_LEVEL") = py::int_(Q3cPixelization::MAX_LEVEL);
+void defineClass(nb::class_<Q3cPixelization, Pixelization> &cls) {
+    cls.attr("MAX_LEVEL") = nb::int_(Q3cPixelization::MAX_LEVEL);
 
-    cls.def(py::init<int>(), "level"_a);
-    cls.def(py::init<Q3cPixelization const &>(), "q3cPixelization"_a);
+    cls.def(nb::init<int>(), "level"_a);
+    cls.def(nb::init<Q3cPixelization const &>(), "q3cPixelization"_a);
 
     cls.def("getLevel", &Q3cPixelization::getLevel);
     cls.def("quad", &Q3cPixelization::quad);
@@ -58,10 +58,10 @@ void defineClass(py::class_<Q3cPixelization, Pixelization> &cls) {
                 return self.getLevel() != other.getLevel();
             });
     cls.def("__repr__", [](Q3cPixelization const &self) {
-        return py::str("Q3cPixelization({!s})").format(self.getLevel());
+        return nb::str("Q3cPixelization({!s})").format(self.getLevel());
     });
     cls.def("__reduce__", [cls](Q3cPixelization const &self) {
-        return py::make_tuple(cls, py::make_tuple(self.getLevel()));
+        return nb::make_tuple(cls, nb::make_tuple(self.getLevel()));
     });
 }
 

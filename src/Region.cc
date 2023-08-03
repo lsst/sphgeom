@@ -52,6 +52,27 @@ bool Region::contains(double lon, double lat) const {
     return contains(UnitVector3d(LonLat::fromRadians(lon, lat)));
 }
 
+void Region::decode(Region &region, uint8_t const * buffer, size_t n) {
+    if (buffer == nullptr || n == 0) {
+        throw std::runtime_error("Byte-string is not an encoded Region");
+    }
+    uint8_t type = *buffer;
+    if (type == Box::TYPE_CODE) {
+        Box::decode((Box &) region,buffer, n);
+    } else if (type == Circle::TYPE_CODE) {
+        Circle::decode((Circle &) region, buffer, n);
+    } else if (type == ConvexPolygon::TYPE_CODE) {
+        ConvexPolygon::decode((ConvexPolygon &) region, buffer, n);
+    } else if (type == Ellipse::TYPE_CODE) {
+        Ellipse::decode((Ellipse &) region, buffer, n);
+    } else if (type == UnionRegion::TYPE_CODE) {
+        UnionRegion::decode((UnionRegion &) region, buffer, n);
+    } else if (type == IntersectionRegion::TYPE_CODE) {
+        IntersectionRegion::decode((IntersectionRegion &) region, buffer, n);
+    }
+    throw std::runtime_error("Byte-string is not an encoded Region");
+}
+
 std::unique_ptr<Region> Region::decode(uint8_t const * buffer, size_t n) {
     if (buffer == nullptr || n == 0) {
         throw std::runtime_error("Byte-string is not an encoded Region");

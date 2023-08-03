@@ -26,8 +26,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
-#include "pybind11/numpy.h"
+#include "nanobind/nanobind.h"
 
 #include "lsst/sphgeom/python.h"
 
@@ -35,49 +34,50 @@
 #include "lsst/sphgeom/python/relationship.h"
 #include "lsst/sphgeom/python/utils.h"
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<Box3d, std::shared_ptr<Box3d>> &cls) {
+void defineClass(nb::class_<Box3d> &cls) {
     cls.def_static("empty", &Box3d::empty);
     cls.def_static("full", &Box3d::full);
     cls.def_static("aroundUnitSphere", &Box3d::aroundUnitSphere);
 
-    cls.def(py::init<>());
-    cls.def(py::init<Vector3d const &>(), "vector"_a);
-    cls.def(py::init<Vector3d const &, Vector3d const &>(), "vector1"_a,
+    cls.def(nb::init<>());
+    cls.def(nb::init<Vector3d const &>(), "vector"_a);
+    cls.def(nb::init<Vector3d const &, Vector3d const &>(), "vector1"_a,
             "vector2"_a);
-    cls.def(py::init<Vector3d const &, double, double, double>(), "center"_a,
+    cls.def(nb::init<Vector3d const &, double, double, double>(), "center"_a,
             "halfWidth"_a, "halfHeight"_a, "halfDepth"_a);
-    cls.def(py::init<Interval1d const &, Interval1d const &,
+    cls.def(nb::init<Interval1d const &, Interval1d const &,
                      Interval1d const &>(),
             "x"_a, "y"_a, "z"_a);
-    cls.def(py::init<Box3d const &>(), "box3d"_a);
+    cls.def(nb::init<Box3d const &>(), "box3d"_a);
 
     cls.def("__eq__",
             (bool (Box3d::*)(Box3d const &) const) & Box3d::operator==,
-            py::is_operator());
+            nb::is_operator());
     cls.def("__eq__",
             (bool (Box3d::*)(Vector3d const &) const) & Box3d::operator==,
-            py::is_operator());
+            nb::is_operator());
     cls.def("__ne__",
             (bool (Box3d::*)(Box3d const &) const) & Box3d::operator!=,
-            py::is_operator());
+            nb::is_operator());
     cls.def("__ne__",
             (bool (Box3d::*)(Vector3d const &) const) & Box3d::operator!=,
-            py::is_operator());
+            nb::is_operator());
     cls.def("__contains__",
             (bool (Box3d::*)(Vector3d const &) const) & Box3d::contains,
-            py::is_operator());
+            nb::is_operator());
     cls.def("__contains__",
             (bool (Box3d::*)(Box3d const &) const) & Box3d::contains,
-            py::is_operator());
-    cls.def("__len__", [](Box3d const &self) { return py::int_(3); });
-    cls.def("__getitem__", [](Box3d const &self, py::int_ row) {
+            nb::is_operator());
+    cls.def("__len__", [](Box3d const &self) { return nb::int_(3); });
+    cls.def("__getitem__", [](Box3d const &self, nb::int_ row) {
         return self(static_cast<int>(python::convertIndex(3, row)));
     });
 
@@ -95,8 +95,9 @@ void defineClass(py::class_<Box3d, std::shared_ptr<Box3d>> &cls) {
             (bool (Box3d::*)(Vector3d const &) const) & Box3d::contains);
     cls.def("contains",
             (bool (Box3d::*)(Box3d const &) const) & Box3d::contains);
-    cls.def("contains", py::vectorize((bool (Box3d::*)(double, double, double) const)&Box3d::contains),
-            "x"_a, "y"_a, "z"_a);
+    auto  f = nb::vectorize((bool (Box3d::*)(double, double, double) const)&Box3d::contains);
+    cls.def("contains", nb::vectorize((bool (Box3d::*)(double, double, double) const)&Box3d::contains),
+            nb::arg("x"), nb::arg("y"), nb::arg("z"));
     cls.def("isDisjointFrom",
             (bool (Box3d::*)(Vector3d const &) const) & Box3d::isDisjointFrom);
     cls.def("isDisjointFrom",
@@ -117,7 +118,7 @@ void defineClass(py::class_<Box3d, std::shared_ptr<Box3d>> &cls) {
     cls.def("clippedTo",
             (Box3d(Box3d::*)(Box3d const &) const) & Box3d::clippedTo);
     cls.def("expandTo",
-            (Box3d & (Box3d::*)(Vector3d const &)) & Box3d::expandTo);
+            (Box3d & (Box3d::*)(Vector3d const &)) & Box3d::expandTo, nb::rv_policy::reference);
     cls.def("expandTo", (Box3d & (Box3d::*)(Box3d const &)) & Box3d::expandTo);
     cls.def("expandedTo",
             (Box3d(Box3d::*)(Vector3d const &) const) & Box3d::expandedTo);
@@ -125,20 +126,20 @@ void defineClass(py::class_<Box3d, std::shared_ptr<Box3d>> &cls) {
             (Box3d(Box3d::*)(Box3d const &) const) & Box3d::expandedTo);
 
     cls.def("dilateBy", (Box3d & (Box3d::*)(double)) & Box3d::dilateBy,
-            "radius"_a);
+            "radius"_a, nb::rv_policy::reference);
     cls.def("dilateBy",
             (Box3d & (Box3d::*)(double, double, double)) & Box3d::dilateBy,
-            "width"_a, "height"_a, "depth"_a);
+            "width"_a, "height"_a, "depth"_a, nb::rv_policy::reference);
     cls.def("dilatedBy", (Box3d(Box3d::*)(double) const) & Box3d::dilatedBy,
             "radius"_a);
     cls.def("dilatedBy",
             (Box3d(Box3d::*)(double, double, double) const) & Box3d::dilatedBy,
             "width"_a, "height"_a, "depth"_a);
     cls.def("erodeBy", (Box3d & (Box3d::*)(double)) & Box3d::erodeBy,
-            "radius"_a);
+            "radius"_a, nb::rv_policy::reference);
     cls.def("erodeBy",
             (Box3d & (Box3d::*)(double, double, double)) & Box3d::erodeBy,
-            "width"_a, "height"_a, "depth"_a);
+            "width"_a, "height"_a, "depth"_a, nb::rv_policy::reference);
     cls.def("erodedBy", (Box3d(Box3d::*)(double) const) & Box3d::erodedBy,
             "radius"_a);
     cls.def("erodedBy",
@@ -151,20 +152,20 @@ void defineClass(py::class_<Box3d, std::shared_ptr<Box3d>> &cls) {
             (Relationship(Box3d::*)(Box3d const &) const) & Box3d::relate);
 
     cls.def("__str__", [](Box3d const &self) {
-        return py::str("[{!s},\n"
+        return nb::str("[{!s},\n"
                        " {!s},\n"
                        " {!s}]")
                 .format(self.x(), self.y(), self.z());
     });
     cls.def("__repr__", [](Box3d const &self) {
-        return py::str("Box3d({!r},\n"
+        return nb::str("Box3d({!r},\n"
                        "      {!r},\n"
                        "      {!r})")
                 .format(self.x(), self.y(), self.z());
     });
     cls.def("__reduce__", [cls](Box3d const &self) {
-        return py::make_tuple(cls,
-                              py::make_tuple(self.x(), self.y(), self.z()));
+        return nb::make_tuple(cls,
+                              nb::make_tuple(self.x(), self.y(), self.z()));
     });
 }
 

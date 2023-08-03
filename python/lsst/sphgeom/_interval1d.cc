@@ -26,38 +26,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
+#include "nanobind/nanobind.h"
 
 #include "lsst/sphgeom/python.h"
 
 #include "lsst/sphgeom/Interval1d.h"
 #include "lsst/sphgeom/python/interval.h"
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<Interval1d, std::shared_ptr<Interval1d>> &cls) {
+void defineClass(nb::class_<Interval1d> &cls) {
     python::defineInterval<decltype(cls), Interval1d, double>(cls);
 
     cls.def_static("empty", &Interval1d::empty);
     cls.def_static("full", &Interval1d::full);
 
-    cls.def(py::init<>());
-    cls.def(py::init<double>(), "x"_a);
-    cls.def(py::init<double, double>(), "x"_a, "y"_a);
-    cls.def(py::init<Interval1d const &>(), "interval"_a);
+    cls.def(nb::init<>());
+    cls.def(nb::init<double>(), "x"_a);
+    cls.def(nb::init<double, double>(), "x"_a, "y"_a);
+    cls.def(nb::init<Interval1d const &>(), "interval"_a);
 
     cls.def("isFull", &Interval1d::isFull);
 
     cls.def("__str__", [](Interval1d const &self) {
-        return py::str("[{!s}, {!s}]").format(self.getA(), self.getB());
+        return nb::str("[{!s}, {!s}]").format(self.getA(), self.getB());
     });
     cls.def("__repr__", [](Interval1d const &self) {
-        return py::str("Interval1d({!r}, {!r})")
+        return nb::str("Interval1d({!r}, {!r})")
                 .format(self.getA(), self.getB());
     });
 }

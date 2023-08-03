@@ -131,6 +131,7 @@ class CompoundRegionTestMixin:
         """Test that repr returns a string that can be eval'd to yield an
         equivalent instance.
         """
+        print(repr(self.instance))
         self.assertCompoundRegionsEqual(
             self.instance,
             eval(

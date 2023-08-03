@@ -26,58 +26,58 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
+#include "nanobind/nanobind.h"
 
 #include "lsst/sphgeom/python.h"
 
 #include "lsst/sphgeom/LonLat.h"
 #include "lsst/sphgeom/Vector3d.h"
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<LonLat, std::shared_ptr<LonLat>> &cls) {
+void defineClass(nb::class_<LonLat> &cls) {
     cls.def_static("fromDegrees", &LonLat::fromDegrees);
     cls.def_static("fromRadians", &LonLat::fromRadians);
     cls.def_static("latitudeOf", &LonLat::latitudeOf);
     cls.def_static("longitudeOf", &LonLat::longitudeOf);
 
-    cls.def(py::init<>());
-    cls.def(py::init<LonLat const &>());
-    cls.def(py::init<NormalizedAngle, Angle>(), "lon"_a, "lat"_a);
-    cls.def(py::init<Vector3d const &>(), "vector"_a);
+    cls.def(nb::init<>());
+    cls.def(nb::init<LonLat const &>());
+    cls.def(nb::init<NormalizedAngle, Angle>(), "lon"_a, "lat"_a);
+    cls.def(nb::init<Vector3d const &>(), "vector"_a);
 
-    cls.def("__eq__", &LonLat::operator==, py::is_operator());
-    cls.def("__nq__", &LonLat::operator!=, py::is_operator());
+    cls.def("__eq__", &LonLat::operator==, nb::is_operator());
+    cls.def("__nq__", &LonLat::operator!=, nb::is_operator());
 
     cls.def("getLon", &LonLat::getLon);
     cls.def("getLat", &LonLat::getLat);
 
-    cls.def("__len__", [](LonLat const &self) { return py::int_(2); });
-    cls.def("__getitem__", [](LonLat const &self, py::object key) {
-        auto t = py::make_tuple(self.getLon(), self.getLat());
+    cls.def("__len__", [](LonLat const &self) { return nb::int_(2); });
+    cls.def("__getitem__", [](LonLat const &self, nb::object key) {
+        auto t = nb::make_tuple(self.getLon(), self.getLat());
         return t.attr("__getitem__")(key);
     });
     cls.def("__iter__", [](LonLat const &self) {
-        auto t = py::make_tuple(self.getLon(), self.getLat());
+        auto t = nb::make_tuple(self.getLon(), self.getLat());
         return t.attr("__iter__")();
     });
 
     cls.def("__str__", [](LonLat const &self) {
-        return py::str("[{!s}, {!s}]")
+        return nb::str("[{!s}, {!s}]")
                 .format(self.getLon().asRadians(), self.getLat().asRadians());
     });
     cls.def("__repr__", [](LonLat const &self) {
-        return py::str("LonLat.fromRadians({!r}, {!r})")
+        return nb::str("LonLat.fromRadians({!r}, {!r})")
                 .format(self.getLon().asRadians(), self.getLat().asRadians());
     });
     cls.def("__reduce__", [cls](LonLat const &self) {
-        return py::make_tuple(cls,
-                              py::make_tuple(self.getLon(), self.getLat()));
+        return nb::make_tuple(cls,
+                              nb::make_tuple(self.getLon(), self.getLat()));
     });
 }
 

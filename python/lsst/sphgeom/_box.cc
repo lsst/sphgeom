@@ -26,8 +26,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
-#include "pybind11/numpy.h"
+#include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
+#include <nanobind/stl/bind_vector.h>
 
 #include "lsst/sphgeom/python.h"
 
@@ -45,15 +46,15 @@
 #include "lsst/sphgeom/python/relationship.h"
 #include "lsst/sphgeom/python/utils.h"
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<Box, std::unique_ptr<Box>, Region> &cls) {
-    cls.attr("TYPE_CODE") = py::int_(Box::TYPE_CODE);
+void defineClass(nb::class_<Box, Region> &cls) {
+    cls.attr("TYPE_CODE") = nb::int_(Box::TYPE_CODE);
 
     cls.def_static("fromDegrees", &Box::fromDegrees, "lon1"_a, "lat1"_a,
                    "lon2"_a, "lat2"_a);
@@ -66,32 +67,32 @@ void defineClass(py::class_<Box, std::unique_ptr<Box>, Region> &cls) {
     cls.def_static("allLongitudes", &Box::allLongitudes);
     cls.def_static("allLatitudes", &Box::allLatitudes);
 
-    cls.def(py::init<>());
-    cls.def(py::init<LonLat const &>(), "point"_a);
-    cls.def(py::init<LonLat const &, LonLat const &>(), "point1"_a, "point2"_a);
-    cls.def(py::init<LonLat const &, Angle, Angle>(), "center"_a, "width"_a,
+    cls.def(nb::init<>());
+    cls.def(nb::init<LonLat const &>(), "point"_a);
+    cls.def(nb::init<LonLat const &, LonLat const &>(), "point1"_a, "point2"_a);
+    cls.def(nb::init<LonLat const &, Angle, Angle>(), "center"_a, "width"_a,
             "height"_a);
-    cls.def(py::init<NormalizedAngleInterval const &, AngleInterval const &>(),
+    cls.def(nb::init<NormalizedAngleInterval const &, AngleInterval const &>(),
             "lon"_a, "lat"_a);
-    cls.def(py::init<Box const &>(), "box"_a);
+    cls.def(nb::init<Box const &>(), "box"_a);
 
     cls.def("__eq__", (bool (Box::*)(Box const &) const) & Box::operator==,
-            py::is_operator());
+            nb::is_operator());
     cls.def("__eq__", (bool (Box::*)(LonLat const &) const) & Box::operator==,
-            py::is_operator());
+            nb::is_operator());
     cls.def("__ne__", (bool (Box::*)(Box const &) const) & Box::operator!=,
-            py::is_operator());
+            nb::is_operator());
     cls.def("__ne__", (bool (Box::*)(LonLat const &) const) & Box::operator!=,
-            py::is_operator());
+            nb::is_operator());
     cls.def("__contains__",
             (bool (Box::*)(LonLat const &) const) & Box::contains,
-            py::is_operator());
+            nb::is_operator());
     cls.def("__contains__", (bool (Box::*)(Box const &) const) & Box::contains,
-            py::is_operator());
+            nb::is_operator());
     // Rewrap this base class method since there are overloads in this subclass
     cls.def("__contains__",
             (bool (Box::*)(UnitVector3d const &) const) & Box::contains,
-            py::is_operator());
+            nb::is_operator());
 
     cls.def("getLon", &Box::getLon);
     cls.def("getLat", &Box::getLat);
@@ -105,10 +106,12 @@ void defineClass(py::class_<Box, std::unique_ptr<Box>, Region> &cls) {
     // Rewrap these base class methods since there are overloads in this subclass
     cls.def("contains",
             (bool (Box::*)(UnitVector3d const &) const) & Box::contains);
-    cls.def("contains", py::vectorize((bool (Box::*)(double, double, double) const)&Box::contains),
-            "x"_a, "y"_a, "z"_a);
-    cls.def("contains", py::vectorize((bool (Box::*)(double, double) const)&Box::contains),
-            "lon"_a, "lat"_a);
+    auto k = nb::vectorize((bool (Box::*)(double, double, double) const)&Box::contains);
+    auto a = nb::args();
+    cls.def("contains", nb::vectorize((bool (Box::*)(double, double, double) const)&Box::contains),
+            nb::arg("x"), nb::arg("y"), nb::arg("z"));
+    cls.def("contains", nb::vectorize((bool (Box::*)(double, double) const)&Box::contains),
+            nb::arg("lon"), nb::arg("lat"));
     cls.def("isDisjointFrom",
             (bool (Box::*)(LonLat const &) const) & Box::isDisjointFrom);
     cls.def("isDisjointFrom",
@@ -127,16 +130,16 @@ void defineClass(py::class_<Box, std::unique_ptr<Box>, Region> &cls) {
     cls.def("expandedTo",
             (Box(Box::*)(LonLat const &) const) & Box::expandedTo);
     cls.def("expandedTo", (Box(Box::*)(Box const &) const) & Box::expandedTo);
-    cls.def("dilateBy", (Box & (Box::*)(Angle)) & Box::dilateBy, "angle"_a);
+    cls.def("dilateBy", (Box & (Box::*)(Angle)) & Box::dilateBy, "angle"_a, nb::rv_policy::reference);
     cls.def("dilateBy", (Box & (Box::*)(Angle, Angle)) & Box::dilateBy,
-            "width"_a, "height"_a);
+            "width"_a, "height"_a, nb::rv_policy::reference);
     cls.def("dilatedBy", (Box(Box::*)(Angle) const) & Box::dilatedBy,
-            "angle"_a);
+            nb::arg("angle"));
     cls.def("dilatedBy", (Box(Box::*)(Angle, Angle) const) & Box::dilatedBy,
             "width"_a, "height"_a);
-    cls.def("erodeBy", (Box & (Box::*)(Angle)) & Box::erodeBy, "angle"_a);
+    cls.def("erodeBy", (Box & (Box::*)(Angle)) & Box::erodeBy, "angle"_a, nb::rv_policy::reference);
     cls.def("erodeBy", (Box & (Box::*)(Angle, Angle)) & Box::erodeBy, "width"_a,
-            "height"_a);
+            "height"_a, nb::rv_policy::reference);
     cls.def("erodedBy", (Box(Box::*)(Angle) const) & Box::erodedBy, "angle"_a);
     cls.def("erodedBy", (Box(Box::*)(Angle, Angle) const) & Box::erodedBy,
             "width"_a, "height"_a);
@@ -152,12 +155,13 @@ void defineClass(py::class_<Box, std::unique_ptr<Box>, Region> &cls) {
     // Note that the Region interface has already been wrapped.
 
     cls.def("__str__", [](Box const &self) {
-        return py::str("Box({!s}, {!s})").format(self.getLon(), self.getLat());
+        return nb::str("Box({!s}, {!s})").format(self.getLon(), self.getLat());
     });
     cls.def("__repr__", [](Box const &self) {
-        return py::str("Box({!r}, {!r})").format(self.getLon(), self.getLat());
+        return nb::str("Box({!r}, {!r})").format(self.getLon(), self.getLat());
     });
-    cls.def(py::pickle(&python::encode, &python::decode<Box>));
+    cls.def("__getstate__", &python::encode);
+    cls.def("__setstate__", &python::decode<Box, nb::bytes>);
 }
 
 }  // sphgeom

@@ -26,22 +26,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
+#include <nanobind/nanobind.h>
 
 #include "lsst/sphgeom/python.h"
 
 #include "lsst/sphgeom/NormalizedAngleInterval.h"
 #include "lsst/sphgeom/python/interval.h"
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<NormalizedAngleInterval,
-                            std::shared_ptr<NormalizedAngleInterval>> &cls) {
+void defineClass(nb::class_<NormalizedAngleInterval> &cls) {
     python::defineInterval<decltype(cls), NormalizedAngleInterval,
                            NormalizedAngle>(cls);
 
@@ -52,23 +51,23 @@ void defineClass(py::class_<NormalizedAngleInterval,
     cls.def_static("empty", &NormalizedAngleInterval::empty);
     cls.def_static("full", &NormalizedAngleInterval::full);
 
-    cls.def(py::init<>());
-    cls.def(py::init<Angle>(), "x"_a);
-    cls.def(py::init<NormalizedAngle>(), "x"_a);
-    cls.def(py::init<Angle, Angle>(), "x"_a, "y"_a);
-    cls.def(py::init<NormalizedAngle, NormalizedAngle>(), "x"_a, "y"_a);
-    cls.def(py::init<NormalizedAngleInterval const &>(), "angleInterval"_a);
+    cls.def(nb::init<>());
+    cls.def(nb::init<Angle>(), "x"_a);
+    cls.def(nb::init<NormalizedAngle>(), "x"_a);
+    cls.def(nb::init<Angle, Angle>(), "x"_a, "y"_a);
+    cls.def(nb::init<NormalizedAngle, NormalizedAngle>(), "x"_a, "y"_a);
+    cls.def(nb::init<NormalizedAngleInterval const &>(), "angleInterval"_a);
 
     cls.def("isEmpty", &NormalizedAngleInterval::isEmpty);
     cls.def("isFull", &NormalizedAngleInterval::isFull);
     cls.def("wraps", &NormalizedAngleInterval::wraps);
 
     cls.def("__str__", [](NormalizedAngleInterval const &self) {
-        return py::str("[{!s}, {!s}]")
+        return nb::str("[{!s}, {!s}]")
                 .format(self.getA().asRadians(), self.getB().asRadians());
     });
     cls.def("__repr__", [](NormalizedAngleInterval const &self) {
-        return py::str("NormalizedAngleInterval.fromRadians({!r},"
+        return nb::str("NormalizedAngleInterval.fromRadians({!r},"
                        " {!r})")
                 .format(self.getA().asRadians(), self.getB().asRadians());
     });

@@ -34,6 +34,7 @@
 /// \brief This file defines a template representing closed real intervals.
 
 #include <algorithm>
+#include <iostream>
 
 #include "Relationship.h"
 

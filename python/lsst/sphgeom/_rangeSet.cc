@@ -26,15 +26,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/list.h>
+#include <nanobind/stl/tuple.h>
 
 #include "lsst/sphgeom/python.h"
 
 #include "lsst/sphgeom/RangeSet.h"
 #include "lsst/sphgeom/python/utils.h"
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
@@ -42,11 +44,11 @@ namespace sphgeom {
 namespace {
 
 /// Convert a Python integer to a uint64_t.
-uint64_t _uint64(py::handle const &obj) {
+uint64_t _uint64(nb::handle const &obj) {
     try {
-        return obj.cast<uint64_t>();
-    } catch (py::cast_error const &) {
-        throw py::value_error(
+        return nb::cast<uint64_t>(obj);
+    } catch (nb::cast_error const &) {
+        throw nb::value_error(
                 "RangeSet elements and range beginning and "
                 "end points must be non-negative integers "
                 "less than 2**64");
@@ -55,14 +57,14 @@ uint64_t _uint64(py::handle const &obj) {
 
 /// Make a RangeSet from an iterable. Each item must be an integer that fits
 /// in a uint64_t, or a sequence of two such integers.
-RangeSet makeRangeSet(py::iterable iterable) {
+RangeSet makeRangeSet(nb::iterable iterable) {
     RangeSet rs;
-    for (py::handle item : iterable) {
+    for (nb::handle item : iterable) {
         PyObject *o = item.ptr();
         if (PySequence_Check(o) && PySequence_Size(o) == 2) {
-            uint64_t first = _uint64(py::reinterpret_steal<py::object>(
+            uint64_t first = _uint64(nb::steal<nb::object>(
                     PySequence_GetItem(o, 0)));
-            uint64_t last = _uint64(py::reinterpret_steal<py::object>(
+            uint64_t last = _uint64(nb::steal<nb::object>(
                     PySequence_GetItem(o, 1)));
             rs.insert(first, last);
         } else {
@@ -73,11 +75,11 @@ RangeSet makeRangeSet(py::iterable iterable) {
 }
 
 /// Make a python list of the ranges in the given RangeSet.
-py::list ranges(RangeSet const &self) {
-    py::list list;
+nb::list ranges(RangeSet const &self) {
+    nb::list list;
     for (auto t : self) {
-        list.append(py::make_tuple(py::int_(std::get<0>(t)),
-                                   py::int_(std::get<1>(t))));
+        list.append(nb::make_tuple(nb::int_(std::get<0>(t)),
+                                   nb::int_(std::get<1>(t))));
     }
     return list;
 }
@@ -91,21 +93,19 @@ py::list ranges(RangeSet const &self) {
 }  // <anonymous>
 
 template <>
-void defineClass(py::class_<RangeSet, std::shared_ptr<RangeSet>> &cls) {
-    cls.def(py::init<>());
-    cls.def(py::init<uint64_t>(), "integer"_a);
-    cls.def(py::init([](uint64_t a, uint64_t b) {
-                return new RangeSet(a, b);
-            }),
-            "first"_a, "last"_a);
-    cls.def(py::init<RangeSet const &>(), "rangeSet"_a);
-    cls.def(py::init(
-            [](py::iterable iterable) {
-                return new RangeSet(makeRangeSet(iterable));
-            }),
-            "iterable"_a);
-    cls.def("__eq__", &RangeSet::operator==, py::is_operator());
-    cls.def("__ne__", &RangeSet::operator!=, py::is_operator());
+void defineClass(nb::class_<RangeSet> &cls) {
+    cls.def(nb::init<>());
+    cls.def(nb::init<uint64_t>(), "integer"_a);
+    cls.def("__init__", [](RangeSet *t, uint64_t a, uint64_t b) {
+                new (t) RangeSet(a, b);
+            }, nb::arg("first"), nb::arg("last"));
+    cls.def(nb::init<RangeSet const &>(), "rangeSet"_a);
+    cls.def("__init__",
+            [](RangeSet *t, nb::iterable iterable) {
+                new (t) RangeSet(makeRangeSet(iterable));
+            }), nb::arg("iterable");
+    cls.def("__eq__", &RangeSet::operator==, nb::is_operator());
+    cls.def("__ne__", &RangeSet::operator!=, nb::is_operator());
 
     cls.def("insert", (void (RangeSet::*)(uint64_t)) & RangeSet::insert,
             "integer"_a);
@@ -126,20 +126,20 @@ void defineClass(py::class_<RangeSet, std::shared_ptr<RangeSet>> &cls) {
     cls.def("difference", &RangeSet::difference, "rangeSet"_a);
     cls.def("symmetricDifference", &RangeSet::symmetricDifference,
             "rangeSet"_a);
-    cls.def("__invert__", &RangeSet::operator~, py::is_operator());
-    cls.def("__and__", &RangeSet::operator&, py::is_operator());
-    cls.def("__or__", &RangeSet::operator|, py::is_operator());
-    cls.def("__sub__", &RangeSet::operator-, py::is_operator());
-    cls.def("__xor__", &RangeSet::operator^, py::is_operator());
+    cls.def("__invert__", &RangeSet::operator~, nb::is_operator());
+    cls.def("__and__", &RangeSet::operator&, nb::is_operator());
+    cls.def("__or__", &RangeSet::operator|, nb::is_operator());
+    cls.def("__sub__", &RangeSet::operator-, nb::is_operator());
+    cls.def("__xor__", &RangeSet::operator^, nb::is_operator());
     cls.def("__iand__", &RangeSet::operator&=);
     cls.def("__ior__", &RangeSet::operator|=);
     cls.def("__isub__", &RangeSet::operator-=);
     cls.def("__ixor__", &RangeSet::operator^=);
 
     cls.def("__len__", &RangeSet::size);
-    cls.def("__getitem__", [](RangeSet const &self, py::int_ i) {
+    cls.def("__getitem__", [](RangeSet const &self, nb::int_ i) {
         auto j = python::convertIndex(static_cast<ptrdiff_t>(self.size()), i);
-        return py::cast(self.begin()[j]);
+        return nb::cast(self.begin()[j]);
     });
 
     cls.def("intersects",
@@ -164,13 +164,13 @@ void defineClass(py::class_<RangeSet, std::shared_ptr<RangeSet>> &cls) {
             "rangeSet"_a);
     cls.def("__contains__",
             (bool (RangeSet::*)(uint64_t) const) & RangeSet::contains,
-            "integer"_a, py::is_operator());
+            "integer"_a, nb::is_operator());
     cls.def("__contains__",
             (bool (RangeSet::*)(uint64_t, uint64_t) const) & RangeSet::contains,
-            "first"_a, "last"_a, py::is_operator());
+            "first"_a, "last"_a, nb::is_operator());
     cls.def("__contains__",
             (bool (RangeSet::*)(RangeSet const &) const) & RangeSet::contains,
-            "rangeSet"_a, py::is_operator());
+            "rangeSet"_a, nb::is_operator());
 
     cls.def("isWithin",
             (bool (RangeSet::*)(uint64_t) const) & RangeSet::isWithin,
@@ -210,13 +210,13 @@ void defineClass(py::class_<RangeSet, std::shared_ptr<RangeSet>> &cls) {
     cls.def("ranges", &ranges);
 
     cls.def("__str__",
-            [](RangeSet const &self) { return py::str(ranges(self)); });
+            [](RangeSet const &self) { return nb::str(ranges(self)); });
     cls.def("__repr__", [](RangeSet const &self) {
-        return py::str("RangeSet({!s})").format(ranges(self));
+        return nb::str("RangeSet({!s})").format(ranges(self));
     });
 
     cls.def("__reduce__", [cls](RangeSet const &self) {
-        return py::make_tuple(cls, py::make_tuple(ranges(self)));
+        return nb::make_tuple(cls, nb::make_tuple(ranges(self)));
     });
 }
 

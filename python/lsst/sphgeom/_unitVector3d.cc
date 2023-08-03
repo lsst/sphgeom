@@ -26,7 +26,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/tuple.h>
 
 #include "lsst/sphgeom/python.h"
 
@@ -36,17 +37,17 @@
 #include "lsst/sphgeom/UnitVector3d.h"
 #include "lsst/sphgeom/python/utils.h"
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<UnitVector3d, std::shared_ptr<UnitVector3d>> &cls) {
+void defineClass(nb::class_<UnitVector3d> &cls) {
     // Provide the equivalent of the UnitVector3d to Vector3d C++ cast
     // operator in Python
-    py::implicitly_convertible<UnitVector3d, Vector3d>();
+    nb::implicitly_convertible<UnitVector3d, Vector3d>();
 
     cls.def_static(
             "orthogonalTo",
@@ -68,24 +69,24 @@ void defineClass(py::class_<UnitVector3d, std::shared_ptr<UnitVector3d>> &cls) {
     // Python, as they are easy to misuse and intended only for performance
     // critical code (i.e. not Python).
 
-    cls.def(py::init<>());
-    cls.def(py::init<UnitVector3d const &>(), "unitVector"_a);
-    cls.def(py::init<Vector3d const &>(), "vector"_a);
-    cls.def(py::init<double, double, double>(), "x"_a, "y"_a, "z"_a);
-    cls.def(py::init<LonLat const &>(), "lonLat"_a);
-    cls.def(py::init<Angle, Angle>(), "lon"_a, "lat"_a);
+    cls.def(nb::init<>());
+    cls.def(nb::init<UnitVector3d const &>(), "unitVector"_a);
+    cls.def(nb::init<Vector3d const &>(), "vector"_a);
+    cls.def(nb::init<double, double, double>(), "x"_a, "y"_a, "z"_a);
+    cls.def(nb::init<LonLat const &>(), "lonLat"_a);
+    cls.def(nb::init<Angle, Angle>(), "lon"_a, "lat"_a);
 
-    cls.def("__eq__", &UnitVector3d::operator==, py::is_operator());
-    cls.def("__ne__", &UnitVector3d::operator!=, py::is_operator());
+    cls.def("__eq__", &UnitVector3d::operator==, nb::is_operator());
+    cls.def("__ne__", &UnitVector3d::operator!=, nb::is_operator());
     cls.def("__neg__",
             (UnitVector3d(UnitVector3d::*)() const) & UnitVector3d::operator-);
-    cls.def("__add__", &UnitVector3d::operator+, py::is_operator());
+    cls.def("__add__", &UnitVector3d::operator+, nb::is_operator());
     cls.def("__sub__",
             (Vector3d(UnitVector3d::*)(Vector3d const &) const) &
                     UnitVector3d::operator-,
-            py::is_operator());
-    cls.def("__mul__", &UnitVector3d::operator*, py::is_operator());
-    cls.def("__truediv__", &UnitVector3d::operator/, py::is_operator());
+            nb::is_operator());
+    cls.def("__mul__", &UnitVector3d::operator*, nb::is_operator());
+    cls.def("__truediv__", &UnitVector3d::operator/, nb::is_operator());
 
     cls.def("x", &UnitVector3d::x);
     cls.def("y", &UnitVector3d::y);
@@ -97,17 +98,17 @@ void defineClass(py::class_<UnitVector3d, std::shared_ptr<UnitVector3d>> &cls) {
     cls.def("cwiseProduct", &UnitVector3d::cwiseProduct);
     cls.def("rotatedAround", &UnitVector3d::rotatedAround, "axis"_a, "angle"_a);
 
-    cls.def("__len__", [](UnitVector3d const &self) { return py::int_(3); });
-    cls.def("__getitem__", [](UnitVector3d const &self, py::int_ i) {
+    cls.def("__len__", [](UnitVector3d const &self) { return nb::int_(3); });
+    cls.def("__getitem__", [](UnitVector3d const &self, nb::int_ i) {
         return self(python::convertIndex(3, i));
     });
 
     cls.def("__str__", [](UnitVector3d const &self) {
-        return py::str("[{!s}, {!s}, {!s}]")
+        return nb::str("[{!s}, {!s}, {!s}]")
                 .format(self.x(), self.y(), self.z());
     });
     cls.def("__repr__", [](UnitVector3d const &self) {
-        return py::str("UnitVector3d({!r}, {!r}, {!r})")
+        return nb::str("UnitVector3d({!r}, {!r}, {!r})")
                 .format(self.x(), self.y(), self.z());
     });
 
@@ -120,15 +121,12 @@ void defineClass(py::class_<UnitVector3d, std::shared_ptr<UnitVector3d>> &cls) {
     // components. Furthermore, UnitVector3d::fromNormalized is not visible to
     // Python, and even if it were, pybind11 is currently incapable of returning
     // a picklable reference to it.
-    cls.def(py::pickle([](UnitVector3d const &self) { return py::make_tuple(self.x(), self.y(), self.z()); },
-                       [](py::tuple t) {
-                           if (t.size() != 3) {
-                               throw std::runtime_error("Tuple size = " + std::to_string(t.size()) +
-                                                        "; must be 3 for a UnitVector3d");
-                           }
-                           return new UnitVector3d(UnitVector3d::fromNormalized(
-                                   t[0].cast<double>(), t[1].cast<double>(), t[2].cast<double>()));
-                       }));
+
+    cls.def("__getstate__", [](UnitVector3d const &self) { return std::make_tuple(self.x(), self.y(), self.z());});
+    cls.def("__setstate__", [](UnitVector3d &v, std::tuple<double, double, double> const &t) {
+        return new (&v) UnitVector3d(UnitVector3d::fromNormalized(
+                std::get<0>(t), std::get<1>(t), std::get<2>(t)));
+    });
 }
 
 }  // sphgeom

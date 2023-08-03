@@ -120,6 +120,7 @@ class BoxTestCase(unittest.TestCase):
         y = np.random.rand(5, 3)
         z = np.random.rand(5, 3)
         c = b.contains(x, y, z)
+        print("c", c)
         lon = np.arctan2(y, x)
         lat = np.arctan2(z, np.hypot(x, y))
         c2 = b.contains(lon, lat)

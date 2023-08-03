@@ -26,7 +26,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
+#include <nanobind/nanobind.h>
 
 #include "lsst/sphgeom/python.h"
 
@@ -53,65 +53,65 @@
 #include "lsst/sphgeom/UnitVector3d.h"
 #include "lsst/sphgeom/Vector3d.h"
 
-namespace py = pybind11;
+
+namespace nb = nanobind;
 
 namespace lsst {
 namespace sphgeom {
 
-void defineCurve(py::module&);
-void defineOrientation(py::module&);
-void defineRelationship(py::module&);
-void defineUtils(py::module&);
+void defineCurve(nb::module_&);
+void defineOrientation(nb::module_&);
+void defineRelationship(nb::module_&);
+void defineUtils(nb::module_&);
 
 namespace {
 
-PYBIND11_MODULE(_sphgeom, mod) {
+NB_MODULE(_sphgeom, mod) {
     // Create all Python class instances up front, then define them.
     //
     // This results in docstrings containing only Python type names, even
     // when there are circular dependencies in C++.
 
-    py::class_<Angle> angle(mod, "Angle");
-    py::class_<NormalizedAngle> normalizedAngle(mod, "NormalizedAngle");
-    py::class_<LonLat, std::shared_ptr<LonLat>> lonLat(mod, "LonLat");
-    py::class_<Vector3d, std::shared_ptr<Vector3d>> vector3d(mod, "Vector3d");
-    py::class_<UnitVector3d, std::shared_ptr<UnitVector3d>> unitVector3d(
+    nb::class_<Angle> angle(mod, "Angle");
+    nb::class_<NormalizedAngle> normalizedAngle(mod, "NormalizedAngle");
+    nb::class_<LonLat> lonLat(mod, "LonLat");
+    nb::class_<Vector3d> vector3d(mod, "Vector3d");
+    nb::class_<UnitVector3d> unitVector3d(
             mod, "UnitVector3d");
-    py::class_<Matrix3d, std::shared_ptr<Matrix3d>> matrix3d(mod, "Matrix3d");
+    nb::class_<Matrix3d> matrix3d(mod, "Matrix3d");
 
-    py::class_<AngleInterval, std::shared_ptr<AngleInterval>> angleInterval(
+    nb::class_<AngleInterval> angleInterval(
             mod, "AngleInterval");
-    py::class_<NormalizedAngleInterval,
-               std::shared_ptr<NormalizedAngleInterval>>
+    nb::class_<NormalizedAngleInterval>
             normalizedAngleInterval(mod, "NormalizedAngleInterval");
-    py::class_<Interval1d, std::shared_ptr<Interval1d>> interval1d(
+    nb::class_<Interval1d> interval1d(
             mod, "Interval1d");
 
-    py::class_<Box3d, std::shared_ptr<Box3d>> box3d(mod, "Box3d");
+    nb::class_<Box3d> box3d(mod, "Box3d");
 
-    py::class_<Region, std::unique_ptr<Region>> region(mod, "Region");
-    py::class_<Box, std::unique_ptr<Box>, Region> box(mod, "Box");
-    py::class_<Circle, std::unique_ptr<Circle>, Region> circle(mod, "Circle");
-    py::class_<ConvexPolygon, std::unique_ptr<ConvexPolygon>, Region>
+    nb::class_<Region> region(mod, "Region");
+    nb::class_<Box, Region> box(mod, "Box");
+    nb::class_<Circle, Region> circle(mod, "Circle");
+    nb::class_<ConvexPolygon, Region>
             convexPolygon(mod, "ConvexPolygon");
-    py::class_<Ellipse, std::unique_ptr<Ellipse>, Region> ellipse(mod,
+    nb::class_<Ellipse, Region> ellipse(mod,
                                                                   "Ellipse");
-    py::class_<CompoundRegion, std::unique_ptr<CompoundRegion>, Region> compoundRegion(mod, "CompoundRegion");
-    py::class_<UnionRegion, std::unique_ptr<UnionRegion>, CompoundRegion> unionRegion(mod, "UnionRegion");
-    py::class_<IntersectionRegion, std::unique_ptr<IntersectionRegion>, CompoundRegion>
+    nb::class_<CompoundRegion, Region> compoundRegion(mod, "CompoundRegion");
+    nb::class_<UnionRegion, CompoundRegion> unionRegion(mod, "UnionRegion");
+    nb::class_<IntersectionRegion, CompoundRegion>
             intersectionRegion(mod, "IntersectionRegion");
 
-    py::class_<RangeSet, std::shared_ptr<RangeSet>> rangeSet(mod, "RangeSet");
+    nb::class_<RangeSet> rangeSet(mod, "RangeSet");
 
-    py::class_<Pixelization> pixelization(mod, "Pixelization");
-    py::class_<HtmPixelization, Pixelization> htmPixelization(
+    nb::class_<Pixelization> pixelization(mod, "Pixelization");
+    nb::class_<HtmPixelization, Pixelization> htmPixelization(
             mod, "HtmPixelization");
-    py::class_<Mq3cPixelization, Pixelization> mq3cPixelization(
+    nb::class_<Mq3cPixelization, Pixelization> mq3cPixelization(
             mod, "Mq3cPixelization");
-    py::class_<Q3cPixelization, Pixelization> q3cPixelization(
+    nb::class_<Q3cPixelization, Pixelization> q3cPixelization(
             mod, "Q3cPixelization");
 
-    py::class_<Chunker, std::shared_ptr<Chunker>> chunker(mod, "Chunker");
+    nb::class_<Chunker> chunker(mod, "Chunker");
 
     defineClass(angle);
     defineClass(normalizedAngle);

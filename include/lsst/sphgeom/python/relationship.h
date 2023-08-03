@@ -30,11 +30,11 @@
 #ifndef LSST_SPHGEOM_PYTHON_RELATIONSHIP_H_
 #define LSST_SPHGEOM_PYTHON_RELATIONSHIP_H_
 
-#include "pybind11/pybind11.h"
+#include "nanobind/nanobind.h"
 
 #include "../Relationship.h"
 
-namespace pybind11 {
+namespace nanobind {
 namespace detail {
 
 /// This struct is a partial specialization of type_caster for
@@ -49,17 +49,22 @@ public:
     // Declare a local variable `value` of type lsst::sphgeom::Relationship,
     // and describe the Relationship type as an "int" in pybind11-generated
     // docstrings.
-    PYBIND11_TYPE_CASTER(lsst::sphgeom::Relationship, _("int"));
+    NB_TYPE_CASTER(lsst::sphgeom::Relationship, const_name("int"));
 
     // Convert a Python object to an lsst::sphgeom::Relationship.
-    bool load(handle src, bool) {
-        value = lsst::sphgeom::Relationship(src.cast<unsigned long long>());
+    bool from_python(handle src, uint8_t flags, cleanup_list *cleanup) {
+        (void) flags;
+        (void) cleanup;
+        PyLong_AsLongLong(src.ptr());
+        value = lsst::sphgeom::Relationship(PyLong_AsUnsignedLong(src.ptr()));
         return true;
     }
 
     // Convert an lsst::sphgeom::Relationship to a Python integer.
-    static handle cast(lsst::sphgeom::Relationship src, return_value_policy,
-                       handle) {
+    static nanobind::handle from_cpp(lsst::sphgeom::Relationship src, nanobind::rv_policy policy,
+                                     cleanup_list *cleanup) {
+        (void) policy;
+        (void) cleanup;
         return PyLong_FromUnsignedLong(src.to_ulong());
     }
 };

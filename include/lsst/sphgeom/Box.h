@@ -344,6 +344,8 @@ public:
 
     ///@{
     /// `decode` deserializes a Box from a byte string produced by encode.
+    static void decode(Box &box, uint8_t const * buffer, size_t n);
+
     static std::unique_ptr<Box> decode(std::vector<uint8_t> const & s) {
         return decode(s.data(), s.size());
     }

@@ -26,7 +26,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
+#include <nanobind/nanobind.h>
 
 #include "lsst/sphgeom/python.h"
 
@@ -41,31 +41,31 @@
 #include "lsst/sphgeom/python/relationship.h"
 #include "lsst/sphgeom/python/utils.h"
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<Ellipse, std::unique_ptr<Ellipse>, Region> &cls) {
-    cls.attr("TYPE_CODE") = py::int_(Ellipse::TYPE_CODE);
+void defineClass(nb::class_<Ellipse, Region> &cls) {
+    cls.attr("TYPE_CODE") = nb::int_(Ellipse::TYPE_CODE);
 
     cls.def_static("empty", &Ellipse::empty);
     cls.def_static("full", &Ellipse::full);
 
-    cls.def(py::init<>());
-    cls.def(py::init<Circle const &>(), "circle"_a);
-    cls.def(py::init<UnitVector3d const &, Angle>(), "center"_a,
+    cls.def(nb::init<>());
+    cls.def(nb::init<Circle const &>(), "circle"_a);
+    cls.def(nb::init<UnitVector3d const &, Angle>(), "center"_a,
             "angle"_a = Angle(0.0));
-    cls.def(py::init<UnitVector3d const &, UnitVector3d const &, Angle>(),
+    cls.def(nb::init<UnitVector3d const &, UnitVector3d const &, Angle>(),
             "focus1"_a, "focus2"_a, "alpha"_a);
-    cls.def(py::init<UnitVector3d const &, Angle, Angle, Angle>(), "center"_a,
+    cls.def(nb::init<UnitVector3d const &, Angle, Angle, Angle>(), "center"_a,
             "alpha"_a, "beta"_a, "orientation"_a);
-    cls.def(py::init<Ellipse const &>(), "ellipse"_a);
+    cls.def(nb::init<Ellipse const &>(), "ellipse"_a);
 
-    cls.def("__eq__", &Ellipse::operator==, py::is_operator());
-    cls.def("__ne__", &Ellipse::operator!=, py::is_operator());
+    cls.def("__eq__", &Ellipse::operator==, nb::is_operator());
+    cls.def("__ne__", &Ellipse::operator!=, nb::is_operator());
 
     cls.def("isEmpty", &Ellipse::isEmpty);
     cls.def("isFull", &Ellipse::isFull);
@@ -84,14 +84,16 @@ void defineClass(py::class_<Ellipse, std::unique_ptr<Ellipse>, Region> &cls) {
     // Note that the Region interface has already been wrapped.
 
     cls.def("__str__", [](Ellipse const &self) {
-        return py::str("Ellipse({!s}, {!s}, {!s})")
+        return nb::str("Ellipse({!s}, {!s}, {!s})")
                 .format(self.getF1(), self.getF2(), self.getAlpha());
     });
     cls.def("__repr__", [](Ellipse const &self) {
-        return py::str("Ellipse({!r}, {!r}, {!r})")
+        return nb::str("Ellipse({!r}, {!r}, {!r})")
                 .format(self.getF1(), self.getF2(), self.getAlpha());
     });
-    cls.def(py::pickle(&python::encode, &python::decode<Ellipse>));
+    //cls.def(nb::pickle(&python::encode, &python::decode<Ellipse>));
+    cls.def("__getstate__", &python::encode);
+    cls.def("__setstate__", &python::decode<Ellipse, nb::bytes>);
 }
 
 }  // sphgeom

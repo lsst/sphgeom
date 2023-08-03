@@ -26,56 +26,54 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
+#include "nanobind/nanobind.h"
 
 #include "lsst/sphgeom/python.h"
 
 #include "lsst/sphgeom/Angle.h"
 #include "lsst/sphgeom/NormalizedAngle.h"
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<Angle> &cls) {
+void defineClass(nb::class_<Angle> &cls) {
     cls.def_static("nan", &Angle::nan);
     cls.def_static("fromDegrees", &Angle::fromDegrees);
     cls.def_static("fromRadians", &Angle::fromRadians);
 
-    cls.def(py::init<>());
-    cls.def(py::init<double>(), "radians"_a);
-    cls.def(py::init<Angle>(), "angle"_a);
+    cls.def(nb::init<>());
+    cls.def(nb::init<double>(), "radians"_a);
+    cls.def(nb::init<Angle>(), "angle"_a);
     // Construct an Angle from a NormalizedAngle, enabling implicit
     // conversion from NormalizedAngle to Angle in python via
-    // py::implicitly_convertible
-    cls.def(py::init(
-            [](NormalizedAngle &a) {
-                return new Angle(a.asRadians());
-            }),
-            "normalizedAngle"_a);
+    // nb::implicitly_convertible
+    cls.def("__init__", [](Angle *t, NormalizedAngle &a) {
+               new (t) Angle(a.asRadians());
+            }, "normalizedAngle"_a);
 
-    cls.def("__eq__", &Angle::operator==, py::is_operator());
-    cls.def("__ne__", &Angle::operator!=, py::is_operator());
-    cls.def("__lt__", &Angle::operator<, py::is_operator());
-    cls.def("__gt__", &Angle::operator>, py::is_operator());
-    cls.def("__le__", &Angle::operator<=, py::is_operator());
-    cls.def("__ge__", &Angle::operator>=, py::is_operator());
+    cls.def("__eq__", &Angle::operator==, nb::is_operator());
+    cls.def("__ne__", &Angle::operator!=, nb::is_operator());
+    cls.def("__lt__", &Angle::operator<, nb::is_operator());
+    cls.def("__gt__", &Angle::operator>, nb::is_operator());
+    cls.def("__le__", &Angle::operator<=, nb::is_operator());
+    cls.def("__ge__", &Angle::operator>=, nb::is_operator());
 
     cls.def("__neg__", (Angle(Angle::*)() const) & Angle::operator-);
-    cls.def("__add__", &Angle::operator+, py::is_operator());
+    cls.def("__add__", &Angle::operator+, nb::is_operator());
     cls.def("__sub__",
             (Angle(Angle::*)(Angle const &) const) & Angle::operator-,
-            py::is_operator());
-    cls.def("__mul__", &Angle::operator*, py::is_operator());
-    cls.def("__rmul__", &Angle::operator*, py::is_operator());
+            nb::is_operator());
+    cls.def("__mul__", &Angle::operator*, nb::is_operator());
+    cls.def("__rmul__", &Angle::operator*, nb::is_operator());
     cls.def("__truediv__", (Angle(Angle::*)(double) const) & Angle::operator/,
-            py::is_operator());
+            nb::is_operator());
     cls.def("__truediv__",
             (double (Angle::*)(Angle const &) const) & Angle::operator/,
-            py::is_operator());
+            nb::is_operator());
 
     cls.def("__iadd__", &Angle::operator+=);
     cls.def("__isub__", &Angle::operator-=);
@@ -88,14 +86,14 @@ void defineClass(py::class_<Angle> &cls) {
     cls.def("isNan", &Angle::isNan);
 
     cls.def("__str__", [](Angle const &self) {
-        return py::str("{!s}").format(self.asRadians());
+        return nb::str("{!s}").format(self.asRadians());
     });
     cls.def("__repr__", [](Angle const &self) {
-        return py::str("Angle({!r})").format(self.asRadians());
+        return nb::str("Angle({!r})").format(self.asRadians());
     });
 
     cls.def("__reduce__", [cls](Angle const &self) {
-        return py::make_tuple(cls, py::make_tuple(self.asRadians()));
+        return nb::make_tuple(cls, nb::make_tuple(self.asRadians()));
     });
 }
 

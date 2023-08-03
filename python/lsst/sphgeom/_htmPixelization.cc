@@ -26,28 +26,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/string.h>
 
 #include "lsst/sphgeom/python.h"
 
 #include "lsst/sphgeom/HtmPixelization.h"
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<HtmPixelization, Pixelization> &cls) {
-    cls.attr("MAX_LEVEL") = py::int_(HtmPixelization::MAX_LEVEL);
+void defineClass(nb::class_<HtmPixelization, Pixelization> &cls) {
+    cls.attr("MAX_LEVEL") = nb::int_(HtmPixelization::MAX_LEVEL);
 
     cls.def_static("level", &HtmPixelization::level, "i"_a);
     cls.def_static("triangle", &HtmPixelization::triangle, "i"_a);
     cls.def_static("asString", &HtmPixelization::asString, "i"_a);
 
-    cls.def(py::init<int>(), "level"_a);
-    cls.def(py::init<HtmPixelization const &>(), "htmPixelization"_a);
+    cls.def(nb::init<int>(), "level"_a);
+    cls.def(nb::init<HtmPixelization const &>(), "htmPixelization"_a);
 
     cls.def("getLevel", &HtmPixelization::getLevel);
 
@@ -60,10 +61,10 @@ void defineClass(py::class_<HtmPixelization, Pixelization> &cls) {
                 return self.getLevel() != other.getLevel();
             });
     cls.def("__repr__", [](HtmPixelization const &self) {
-        return py::str("HtmPixelization({!s})").format(self.getLevel());
+        return nb::str("HtmPixelization({!s})").format(self.getLevel());
     });
     cls.def("__reduce__", [cls](HtmPixelization const &self) {
-        return py::make_tuple(cls, py::make_tuple(self.getLevel()));
+        return nb::make_tuple(cls, nb::make_tuple(self.getLevel()));
     });
 }
 
