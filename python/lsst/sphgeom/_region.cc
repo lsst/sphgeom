@@ -26,7 +26,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
+#include "nanobind/nanobind.h"
 #include "pybind11/numpy.h"
 
 #include "lsst/sphgeom/python.h"
@@ -42,26 +42,26 @@
 #include "lsst/sphgeom/python/relationship.h"
 #include "lsst/sphgeom/python/utils.h"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<Region, std::unique_ptr<Region>> &cls) {
+void defineClass(nb::class_<Region, std::unique_ptr<Region>> &cls) {
     cls.def("clone", &Region::clone);
     cls.def("getBoundingBox", &Region::getBoundingBox);
     cls.def("getBoundingBox3d", &Region::getBoundingBox3d);
     cls.def("getBoundingCircle", &Region::getBoundingCircle);
-    cls.def("contains", py::overload_cast<UnitVector3d const &>(&Region::contains, py::const_),
+    cls.def("contains", nb::overload_cast<UnitVector3d const &>(&Region::contains, nb::const_),
             "unitVector"_a);
-    cls.def("contains", py::vectorize((bool (Region::*)(double, double, double) const)&Region::contains),
+    cls.def("contains", nb::vectorize((bool (Region::*)(double, double, double) const)&Region::contains),
             "x"_a, "y"_a, "z"_a);
-    cls.def("contains", py::vectorize((bool (Region::*)(double, double) const)&Region::contains),
+    cls.def("contains", nb::vectorize((bool (Region::*)(double, double) const)&Region::contains),
             "lon"_a, "lat"_a);
-    cls.def("__contains__", py::overload_cast<UnitVector3d const &>(&Region::contains, py::const_),
-            py::is_operator());
+    cls.def("__contains__", nb::overload_cast<UnitVector3d const &>(&Region::contains, nb::const_),
+            nb::is_operator());
     // The per-subclass relate() overloads are used to implement
     // double-dispatch in C++, and are not needed in Python.
     cls.def("relate",

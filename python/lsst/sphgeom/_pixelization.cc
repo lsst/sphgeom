@@ -26,7 +26,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
+#include "nanobind/nanobind.h"
 
 #include "lsst/sphgeom/python.h"
 
@@ -34,14 +34,14 @@
 #include "lsst/sphgeom/Region.h"
 #include "lsst/sphgeom/UnitVector3d.h"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<Pixelization> &cls) {
+void defineClass(nb::class_<Pixelization> &cls) {
     cls.def("universe", &Pixelization::universe);
     cls.def("pixel", &Pixelization::pixel, "i"_a);
     cls.def("index", &Pixelization::index, "i"_a);

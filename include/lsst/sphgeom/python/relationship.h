@@ -30,7 +30,7 @@
 #ifndef LSST_SPHGEOM_PYTHON_RELATIONSHIP_H_
 #define LSST_SPHGEOM_PYTHON_RELATIONSHIP_H_
 
-#include "pybind11/pybind11.h"
+#include "nanobind/nanobind.h"
 
 #include "../Relationship.h"
 

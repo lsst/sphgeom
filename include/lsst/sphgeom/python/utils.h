@@ -30,7 +30,7 @@
 #ifndef LSST_SPHGEOM_PYTHON_UTILS_H_
 #define LSST_SPHGEOM_PYTHON_UTILS_H_
 
-#include "pybind11/pybind11.h"
+#include "nanobind/nanobind.h"
 
 #include <limits>
 #include <sstream>
@@ -73,7 +73,7 @@ std::unique_ptr<R> decode(pybind11::bytes bytes) {
 }
 
 /// Create a vector of Region (or Region-subclass) pointers by copying the
-/// regions from a sized Python iterable (e.g. S == py::tuple).
+/// regions from a sized Python iterable (e.g. S == nb::tuple).
 ///
 /// Note that the pybind11 built-in STL conversions don't work, because they
 /// use unique_ptr - we can't transfer ownership out of Python, and those

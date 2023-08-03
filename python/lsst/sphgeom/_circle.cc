@@ -26,7 +26,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
+#include "nanobind/nanobind.h"
 #include "pybind11/numpy.h"
 
 #include "lsst/sphgeom/python.h"
@@ -41,15 +41,15 @@
 #include "lsst/sphgeom/python/relationship.h"
 #include "lsst/sphgeom/python/utils.h"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<Circle, std::unique_ptr<Circle>, Region> &cls) {
-    cls.attr("TYPE_CODE") = py::int_(Circle::TYPE_CODE);
+void defineClass(nb::class_<Circle, std::unique_ptr<Circle>, Region> &cls) {
+    cls.attr("TYPE_CODE") = nb::int_(Circle::TYPE_CODE);
 
     cls.def_static("empty", &Circle::empty);
     cls.def_static("full", &Circle::full);
@@ -58,22 +58,22 @@ void defineClass(py::class_<Circle, std::unique_ptr<Circle>, Region> &cls) {
     cls.def_static("openingAngleFor", &Circle::openingAngleFor,
                    "squaredChordLength"_a);
 
-    cls.def(py::init<>());
-    cls.def(py::init<UnitVector3d const &>(), "center"_a);
-    cls.def(py::init<UnitVector3d const &, Angle>(), "center"_a, "angle"_a);
-    cls.def(py::init<UnitVector3d const &, double>(), "center"_a,
+    cls.def(nb::init<>());
+    cls.def(nb::init<UnitVector3d const &>(), "center"_a);
+    cls.def(nb::init<UnitVector3d const &, Angle>(), "center"_a, "angle"_a);
+    cls.def(nb::init<UnitVector3d const &, double>(), "center"_a,
             "squaredChordLength"_a);
-    cls.def(py::init<Circle const &>(), "circle"_a);
+    cls.def(nb::init<Circle const &>(), "circle"_a);
 
-    cls.def("__eq__", &Circle::operator==, py::is_operator());
-    cls.def("__ne__", &Circle::operator!=, py::is_operator());
+    cls.def("__eq__", &Circle::operator==, nb::is_operator());
+    cls.def("__ne__", &Circle::operator!=, nb::is_operator());
     cls.def("__contains__",
             (bool (Circle::*)(Circle const &) const) & Circle::contains,
-            py::is_operator());
+            nb::is_operator());
     // Rewrap this base class method since there are overloads in this subclass
     cls.def("__contains__",
             (bool (Circle::*)(UnitVector3d const &) const) & Circle::contains,
-            py::is_operator());
+            nb::is_operator());
 
     cls.def("isEmpty", &Circle::isEmpty);
     cls.def("isFull", &Circle::isFull);
@@ -85,9 +85,9 @@ void defineClass(py::class_<Circle, std::unique_ptr<Circle>, Region> &cls) {
     // Rewrap these base class methods since there are overloads in this subclass
     cls.def("contains",
             (bool (Circle::*)(UnitVector3d const &) const) & Circle::contains);
-    cls.def("contains", py::vectorize((bool (Circle::*)(double, double, double) const)&Circle::contains),
+    cls.def("contains", nb::vectorize((bool (Circle::*)(double, double, double) const)&Circle::contains),
             "x"_a, "y"_a, "z"_a);
-    cls.def("contains", py::vectorize((bool (Circle::*)(double, double) const)&Circle::contains),
+    cls.def("contains", nb::vectorize((bool (Circle::*)(double, double) const)&Circle::contains),
             "lon"_a, "lat"_a);
 
     cls.def("isDisjointFrom",
@@ -132,14 +132,14 @@ void defineClass(py::class_<Circle, std::unique_ptr<Circle>, Region> &cls) {
     // Note that the Region interface has already been wrapped.
 
     cls.def("__str__", [](Circle const &self) {
-        return py::str("Circle({!s}, {!s})")
+        return nb::str("Circle({!s}, {!s})")
                 .format(self.getCenter(), self.getOpeningAngle());
     });
     cls.def("__repr__", [](Circle const &self) {
-        return py::str("Circle({!r}, {!r})")
+        return nb::str("Circle({!r}, {!r})")
                 .format(self.getCenter(), self.getOpeningAngle());
     });
-    cls.def(py::pickle(&python::encode, &python::decode<Circle>));
+    cls.def(nb::pickle(&python::encode, &python::decode<Circle>));
 }
 
 }  // sphgeom

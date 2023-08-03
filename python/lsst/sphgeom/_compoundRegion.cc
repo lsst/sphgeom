@@ -26,14 +26,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
+#include "nanobind/nanobind.h"
 #include "pybind11/stl.h"
 
 #include "lsst/sphgeom/python.h"
 #include "lsst/sphgeom/python/utils.h"
 #include "lsst/sphgeom/CompoundRegion.h"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 using namespace pybind11::literals;
 
 namespace lsst {
@@ -41,16 +41,16 @@ namespace sphgeom {
 
 namespace {
 
-py::str _repr(const char *format, CompoundRegion const &self) {
-    py::object first = py::cast(self.getOperand(0), py::return_value_policy::reference);
-    py::object second = py::cast(self.getOperand(1), py::return_value_policy::reference);
-    return py::str(format).format(first, second);
+nb::str _repr(const char *format, CompoundRegion const &self) {
+    nb::object first = nb::cast(self.getOperand(0), nb::return_value_policy::reference);
+    nb::object second = nb::cast(self.getOperand(1), nb::return_value_policy::reference);
+    return nb::str(format).format(first, second);
 }
 
 }  // namespace
 
 template <>
-void defineClass(py::class_<CompoundRegion, std::unique_ptr<CompoundRegion>, Region> &cls) {
+void defineClass(nb::class_<CompoundRegion, std::unique_ptr<CompoundRegion>, Region> &cls) {
     cls.def(
         "cloneOperand",
         [](CompoundRegion const &self, std::ptrdiff_t n) {
@@ -60,18 +60,18 @@ void defineClass(py::class_<CompoundRegion, std::unique_ptr<CompoundRegion>, Reg
 }
 
 template <>
-void defineClass(py::class_<UnionRegion, std::unique_ptr<UnionRegion>, CompoundRegion> &cls) {
-    cls.attr("TYPE_CODE") = py::int_(UnionRegion::TYPE_CODE);
-    cls.def(py::init<Region const &, Region const &>());
-    cls.def(py::pickle(&python::encode, &python::decode<UnionRegion>));
+void defineClass(nb::class_<UnionRegion, std::unique_ptr<UnionRegion>, CompoundRegion> &cls) {
+    cls.attr("TYPE_CODE") = nb::int_(UnionRegion::TYPE_CODE);
+    cls.def(nb::init<Region const &, Region const &>());
+    cls.def(nb::pickle(&python::encode, &python::decode<UnionRegion>));
     cls.def("__repr__", [](CompoundRegion const &self) { return _repr("UnionRegion({!r}, {!r})", self); });
 }
 
 template <>
-void defineClass(py::class_<IntersectionRegion, std::unique_ptr<IntersectionRegion>, CompoundRegion> &cls) {
-    cls.attr("TYPE_CODE") = py::int_(IntersectionRegion::TYPE_CODE);
-    cls.def(py::init<Region const &, Region const &>());
-    cls.def(py::pickle(&python::encode, &python::decode<IntersectionRegion>));
+void defineClass(nb::class_<IntersectionRegion, std::unique_ptr<IntersectionRegion>, CompoundRegion> &cls) {
+    cls.attr("TYPE_CODE") = nb::int_(IntersectionRegion::TYPE_CODE);
+    cls.def(nb::init<Region const &, Region const &>());
+    cls.def(nb::pickle(&python::encode, &python::decode<IntersectionRegion>));
     cls.def("__repr__", [](CompoundRegion const &self) { return _repr("IntersectionRegion({!r}, {!r})", self); });
 }
 

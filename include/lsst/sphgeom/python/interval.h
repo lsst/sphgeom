@@ -30,12 +30,12 @@
 #ifndef LSST_SPHGEOM_PYTHON_INTERVAL_H_
 #define LSST_SPHGEOM_PYTHON_INTERVAL_H_
 
-#include "pybind11/pybind11.h"
+#include "nanobind/nanobind.h"
+#include <memory>
+//#include "relationship.h"
 
-#include "relationship.h"
-
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
@@ -51,16 +51,16 @@ template <typename PyClass, typename Class, typename Scalar>
 void defineInterval(PyClass& cls) {
     cls.def("__eq__", [](Class const& self,
                          Class const& other) { return self == other; },
-            py::is_operator());
+            nb::is_operator());
     cls.def("__eq__",
             [](Class const& self, Scalar other) { return self == other; },
-            py::is_operator());
+            nb::is_operator());
     cls.def("__ne__", [](Class const& self,
                          Class const& other) { return self != other; },
-            py::is_operator());
+            nb::is_operator());
     cls.def("__ne__",
             [](Class const& self, Scalar other) { return self != other; },
-            py::is_operator());
+            nb::is_operator());
 
     cls.def("getA", [](Class const& self) { return self.getA(); });
     cls.def("getB", [](Class const& self) { return self.getB(); });
@@ -70,12 +70,12 @@ void defineInterval(PyClass& cls) {
 
     cls.def("__contains__", [](Class const& self,
                                Scalar other) { return self.contains(other); },
-            py::is_operator());
+            nb::is_operator());
     cls.def("__contains__",
             [](Class const& self, Class const& other) {
                 return self.contains(other);
             },
-            py::is_operator());
+            nb::is_operator());
 
     cls.def("contains", [](Class const& self, Scalar other) {
         return self.contains(other);
@@ -165,7 +165,7 @@ void defineInterval(PyClass& cls) {
     });
 
     cls.def("__reduce__", [cls](Class const &self) {
-        return py::make_tuple(cls, py::make_tuple(self.getA(), self.getB()));
+        return nb::make_tuple(cls, nb::make_tuple(self.getA(), self.getB()));
     });
 }
 

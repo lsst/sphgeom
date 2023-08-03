@@ -26,33 +26,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pybind11/pybind11.h"
+#include "nanobind/nanobind.h"
 #include "pybind11/stl.h"
 
 #include "lsst/sphgeom/python.h"
 
 #include "lsst/sphgeom/Chunker.h"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 namespace {
-py::str toString(Chunker const &self) {
-    return py::str("Chunker({!s}, {!s})")
+nb::str toString(Chunker const &self) {
+    return nb::str("Chunker({!s}, {!s})")
             .format(self.getNumStripes(), self.getNumSubStripesPerStripe());
 }
 }
 
 template <>
-void defineClass(py::class_<Chunker, std::shared_ptr<Chunker>> &cls) {
-    cls.def(py::init<int32_t, int32_t>(), "numStripes"_a,
+void defineClass(nb::class_<Chunker, std::shared_ptr<Chunker>> &cls) {
+    cls.def(nb::init<int32_t, int32_t>(), "numStripes"_a,
             "numSubStripesPerStripe"_a);
 
-    cls.def("__eq__", &Chunker::operator==, py::is_operator());
-    cls.def("__ne__", &Chunker::operator!=, py::is_operator());
+    cls.def("__eq__", &Chunker::operator==, nb::is_operator());
+    cls.def("__ne__", &Chunker::operator!=, nb::is_operator());
 
     cls.def_property_readonly("numStripes", &Chunker::getNumStripes);
     cls.def_property_readonly("numSubStripesPerStripe",
@@ -62,9 +62,9 @@ void defineClass(py::class_<Chunker, std::shared_ptr<Chunker>> &cls) {
             "region"_a);
     cls.def("getSubChunksIntersecting",
             [](Chunker const &self, Region const &region) {
-                py::list results;
+                nb::list results;
                 for (auto const &sc : self.getSubChunksIntersecting(region)) {
-                    results.append(py::make_tuple(sc.chunkId, sc.subChunkIds));
+                    results.append(nb::make_tuple(sc.chunkId, sc.subChunkIds));
                 }
                 return results;
             },
@@ -83,8 +83,8 @@ void defineClass(py::class_<Chunker, std::shared_ptr<Chunker>> &cls) {
     cls.def("__repr__", &toString);
 
     cls.def("__reduce__", [cls](Chunker const &self) {
-        return py::make_tuple(cls,
-                              py::make_tuple(self.getNumStripes(),
+        return nb::make_tuple(cls,
+                              nb::make_tuple(self.getNumStripes(),
                                              self.getNumSubStripesPerStripe()));
     });
 }
