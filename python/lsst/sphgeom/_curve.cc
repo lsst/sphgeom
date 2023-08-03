@@ -19,17 +19,17 @@
  * the GNU General Public License along with this program.  If not,
  * see <https://www.lsstcorp.org/LegalNotices/>.
  */
-#include "pybind11/pybind11.h"
+#include "nanobind/nanobind.h"
 
 #include "lsst/sphgeom/curve.h"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
 
-void defineCurve(py::module &mod) {
+void defineCurve(nb::module &mod) {
     mod.def("log2", (uint8_t(*)(uint64_t)) & log2);
     mod.def("mortonIndex", (uint64_t(*)(uint32_t, uint32_t)) & mortonIndex,
             "x"_a, "y"_a);

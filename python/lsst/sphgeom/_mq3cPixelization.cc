@@ -19,29 +19,29 @@
  * the GNU General Public License along with this program.  If not,
  * see <https://www.lsstcorp.org/LegalNotices/>.
  */
-#include "pybind11/pybind11.h"
+#include "nanobind/nanobind.h"
 
 #include "lsst/sphgeom/python.h"
 
 #include "lsst/sphgeom/Mq3cPixelization.h"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<Mq3cPixelization, Pixelization> &cls) {
-    cls.attr("MAX_LEVEL") = py::int_(Mq3cPixelization::MAX_LEVEL);
+void defineClass(nb::class_<Mq3cPixelization, Pixelization> &cls) {
+    cls.attr("MAX_LEVEL") = nb::int_(Mq3cPixelization::MAX_LEVEL);
 
     cls.def_static("level", &Mq3cPixelization::level);
     cls.def_static("quad", &Mq3cPixelization::quad);
     cls.def_static("neighborhood", &Mq3cPixelization::neighborhood);
     cls.def_static("asString", &Mq3cPixelization::asString);
 
-    cls.def(py::init<int>(), "level"_a);
-    cls.def(py::init<Mq3cPixelization const &>(), "mq3cPixelization"_a);
+    cls.def(nb::init<int>(), "level"_a);
+    cls.def(nb::init<Mq3cPixelization const &>(), "mq3cPixelization"_a);
 
     cls.def("getLevel", &Mq3cPixelization::getLevel);
 
@@ -54,10 +54,10 @@ void defineClass(py::class_<Mq3cPixelization, Pixelization> &cls) {
                 return self.getLevel() != other.getLevel();
             });
     cls.def("__repr__", [](Mq3cPixelization const &self) {
-        return py::str("Mq3cPixelization({!s})").format(self.getLevel());
+        return nb::str("Mq3cPixelization({!s})").format(self.getLevel());
     });
     cls.def("__reduce__", [cls](Mq3cPixelization const &self) {
-        return py::make_tuple(cls, py::make_tuple(self.getLevel()));
+        return nb::make_tuple(cls, nb::make_tuple(self.getLevel()));
     });
 }
 
