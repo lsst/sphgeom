@@ -24,6 +24,8 @@
 /// \brief This file contains tests for the Box class.
 
 #include <memory>
+// #include <iostream>
+#include "stdio.h"
 
 #include "lsst/sphgeom/Box.h"
 #include "lsst/sphgeom/Box3d.h"
@@ -388,6 +390,7 @@ TEST_CASE(Box3dBounds) {
     CHECK(bb.x().getB() >= 0.5 * std::sqrt(2.0));
     CHECK(bb.x().getB() <= 0.5 * std::sqrt(2.0) + TOLERANCE);
     CHECK(bb.y().getA() >= -0.5 * std::sqrt(2.0) - TOLERANCE);
+    fprintf(stdout, "y.A = %.20f, -0.5*sqrt(2) = %.20f\n", bb.y().getA(), -0.5 * std::sqrt(2.0));
     CHECK(bb.y().getA() <= -0.5 * std::sqrt(2.0));
     CHECK(bb.y().getB() == 1);
     CHECK(bb.z().getA() >= -0.5 * std::sqrt(2.0) - TOLERANCE);
