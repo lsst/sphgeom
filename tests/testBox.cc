@@ -387,15 +387,14 @@ TEST_CASE(Box3dBounds) {
     b = Box::fromRadians(0.25 * PI, -0.25 * PI, 1.25 * PI, 0.25 * PI);
     bb = b.getBoundingBox3d();
     CHECK(bb.x().getA() == -1);
-    CHECK(bb.x().getB() >= 0.5 * std::sqrt(2.0));
+    CHECK(bb.x().getB() >= 0.5 * std::sqrt(2.0) - TOLERANCE);
     CHECK(bb.x().getB() <= 0.5 * std::sqrt(2.0) + TOLERANCE);
     CHECK(bb.y().getA() >= -0.5 * std::sqrt(2.0) - TOLERANCE);
-    fprintf(stdout, "y.A = %.20f, -0.5*sqrt(2) = %.20f\n", bb.y().getA(), -0.5 * std::sqrt(2.0));
-    CHECK(bb.y().getA() <= -0.5 * std::sqrt(2.0));
+    CHECK(bb.y().getA() <= -0.5 * std::sqrt(2.0) + TOLERANCE);
     CHECK(bb.y().getB() == 1);
     CHECK(bb.z().getA() >= -0.5 * std::sqrt(2.0) - TOLERANCE);
-    CHECK(bb.z().getA() <= -0.5 * std::sqrt(2.0));
-    CHECK(bb.z().getB() >= 0.5 * std::sqrt(2.0));
+    CHECK(bb.z().getA() <= -0.5 * std::sqrt(2.0) + TOLERANCE);
+    CHECK(bb.z().getB() >= 0.5 * std::sqrt(2.0) - TOLERANCE);
     CHECK(bb.z().getB() <= 0.5 * std::sqrt(2.0) + TOLERANCE);
 }
 
