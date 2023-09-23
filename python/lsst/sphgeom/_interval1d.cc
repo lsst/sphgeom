@@ -34,7 +34,6 @@
 #include "lsst/sphgeom/python/interval.h"
 
 namespace nb = nanobind;
-using namespace pybind11::literals;
 
 namespace lsst {
 namespace sphgeom {
