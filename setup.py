@@ -11,10 +11,11 @@ This is not a complete definition.
 
 import glob
 
-# Importing this automatically enables parallelized builds
-import numpy.distutils.ccompiler  # noqa: F401
-from pybind11.setup_helpers import Pybind11Extension, build_ext
+from pybind11.setup_helpers import ParallelCompile, Pybind11Extension, build_ext
 from setuptools import setup
+
+# Optional multithreaded build.
+ParallelCompile("NPY_NUM_BUILD_JOBS").install()
 
 # Find the source code -- we can combine it into a single module
 pybind_src = sorted(glob.glob("python/lsst/sphgeom/*.cc"))
