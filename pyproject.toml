@@ -11,14 +11,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "lsst-sphgeom"
 description = "A spherical geometry library."
-license = {text = "GPLv3+ License"}
+license = {text = "BSD 3-Clause License"}
 readme = "README.md"
 authors = [
     {name="Rubin Observatory Data Management", email="dm-admin@lists.lsst.org"},
 ]
 classifiers = [
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "License :: OSI Approved :: BSD License",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS :: MacOS X",
     "Programming Language :: Python :: 3",
@@ -48,7 +48,7 @@ where = ["python"]
 
 [tool.setuptools]
 zip-safe = false
-license-files = ["LICENSE"]
+license-files = ["COPYRIGHT", "LICENSE", "bsd_license.txt", "gpl-v3.0.txt"]
 
 [tool.setuptools.dynamic]
 version = { attr = "lsst_versions.get_lsst_version" }
