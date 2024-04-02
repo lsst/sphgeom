@@ -59,10 +59,10 @@ namespace nb = nanobind;
 namespace lsst {
 namespace sphgeom {
 
-void defineCurve(nb::module&);
-void defineOrientation(nb::module&);
-void defineRelationship(nb::module&);
-void defineUtils(nb::module&);
+void defineCurve(nb::module_&);
+void defineOrientation(nb::module_&);
+void defineRelationship(nb::module_&);
+void defineUtils(nb::module_&);
 
 namespace {
 
@@ -74,35 +74,34 @@ NB_MODULE(_sphgeom, mod) {
 
     nb::class_<Angle> angle(mod, "Angle");
     nb::class_<NormalizedAngle> normalizedAngle(mod, "NormalizedAngle");
-    nb::class_<LonLat, std::shared_ptr<LonLat>> lonLat(mod, "LonLat");
-    nb::class_<Vector3d, std::shared_ptr<Vector3d>> vector3d(mod, "Vector3d");
-    nb::class_<UnitVector3d, std::shared_ptr<UnitVector3d>> unitVector3d(
+    nb::class_<LonLat> lonLat(mod, "LonLat");
+    nb::class_<Vector3d> vector3d(mod, "Vector3d");
+    nb::class_<UnitVector3d> unitVector3d(
             mod, "UnitVector3d");
-    nb::class_<Matrix3d, std::shared_ptr<Matrix3d>> matrix3d(mod, "Matrix3d");
+    nb::class_<Matrix3d> matrix3d(mod, "Matrix3d");
 
-    nb::class_<AngleInterval, std::shared_ptr<AngleInterval>> angleInterval(
+    nb::class_<AngleInterval> angleInterval(
             mod, "AngleInterval");
-    nb::class_<NormalizedAngleInterval,
-               std::shared_ptr<NormalizedAngleInterval>>
+    nb::class_<NormalizedAngleInterval>
             normalizedAngleInterval(mod, "NormalizedAngleInterval");
-    nb::class_<Interval1d, std::shared_ptr<Interval1d>> interval1d(
+    nb::class_<Interval1d> interval1d(
             mod, "Interval1d");
 
-    nb::class_<Box3d, std::shared_ptr<Box3d>> box3d(mod, "Box3d");
+    nb::class_<Box3d> box3d(mod, "Box3d");
 
-    nb::class_<Region, std::unique_ptr<Region>> region(mod, "Region");
-    nb::class_<Box, std::unique_ptr<Box>, Region> box(mod, "Box");
-    nb::class_<Circle, std::unique_ptr<Circle>, Region> circle(mod, "Circle");
-    nb::class_<ConvexPolygon, std::unique_ptr<ConvexPolygon>, Region>
+    nb::class_<Region> region(mod, "Region");
+    nb::class_<Box, Region> box(mod, "Box");
+    nb::class_<Circle, Region> circle(mod, "Circle");
+    nb::class_<ConvexPolygon, Region>
             convexPolygon(mod, "ConvexPolygon");
-    nb::class_<Ellipse, std::unique_ptr<Ellipse>, Region> ellipse(mod,
+    nb::class_<Ellipse, Region> ellipse(mod,
                                                                   "Ellipse");
-    nb::class_<CompoundRegion, std::unique_ptr<CompoundRegion>, Region> compoundRegion(mod, "CompoundRegion");
-    nb::class_<UnionRegion, std::unique_ptr<UnionRegion>, CompoundRegion> unionRegion(mod, "UnionRegion");
-    nb::class_<IntersectionRegion, std::unique_ptr<IntersectionRegion>, CompoundRegion>
+    nb::class_<CompoundRegion, Region> compoundRegion(mod, "CompoundRegion");
+    nb::class_<UnionRegion, CompoundRegion> unionRegion(mod, "UnionRegion");
+    nb::class_<IntersectionRegion, CompoundRegion>
             intersectionRegion(mod, "IntersectionRegion");
 
-    nb::class_<RangeSet, std::shared_ptr<RangeSet>> rangeSet(mod, "RangeSet");
+    nb::class_<RangeSet> rangeSet(mod, "RangeSet");
 
     nb::class_<Pixelization> pixelization(mod, "Pixelization");
     nb::class_<HtmPixelization, Pixelization> htmPixelization(
@@ -112,7 +111,7 @@ NB_MODULE(_sphgeom, mod) {
     nb::class_<Q3cPixelization, Pixelization> q3cPixelization(
             mod, "Q3cPixelization");
 
-    nb::class_<Chunker, std::shared_ptr<Chunker>> chunker(mod, "Chunker");
+    nb::class_<Chunker> chunker(mod, "Chunker");
 
     defineClass(angle);
     defineClass(normalizedAngle);

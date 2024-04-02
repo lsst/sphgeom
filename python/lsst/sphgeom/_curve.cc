@@ -31,12 +31,12 @@
 #include "lsst/sphgeom/curve.h"
 
 namespace nb = nanobind;
-using namespace pybind11::literals;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
-void defineCurve(nb::module &mod) {
+void defineCurve(nb::module_ &mod) {
     mod.def("log2", (uint8_t(*)(uint64_t)) & log2);
     mod.def("mortonIndex", (uint64_t(*)(uint32_t, uint32_t)) & mortonIndex,
             "x"_a, "y"_a);

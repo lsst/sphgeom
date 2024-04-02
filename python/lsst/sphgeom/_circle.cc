@@ -27,6 +27,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "nanobind/nanobind.h"
+#include <nanobind/stl/tuple.h>
 #include "pybind11/numpy.h"
 
 #include "lsst/sphgeom/python.h"
@@ -48,22 +49,22 @@ namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(nb::class_<Circle, std::unique_ptr<Circle>, Region> &cls) {
+void defineClass(nb::class_<Circle, Region> &cls) {
     cls.attr("TYPE_CODE") = nb::int_(Circle::TYPE_CODE);
 
     cls.def_static("empty", &Circle::empty);
     cls.def_static("full", &Circle::full);
     cls.def_static("squaredChordLengthFor", &Circle::squaredChordLengthFor,
-                   "openingAngle"_a);
+                   nb::arg("openingAngle"));
     cls.def_static("openingAngleFor", &Circle::openingAngleFor,
-                   "squaredChordLength"_a);
+                   nb::arg("squaredChordLength"));
 
     cls.def(nb::init<>());
-    cls.def(nb::init<UnitVector3d const &>(), "center"_a);
-    cls.def(nb::init<UnitVector3d const &, Angle>(), "center"_a, "angle"_a);
-    cls.def(nb::init<UnitVector3d const &, double>(), "center"_a,
-            "squaredChordLength"_a);
-    cls.def(nb::init<Circle const &>(), "circle"_a);
+    cls.def(nb::init<UnitVector3d const &>(), nb::arg("center"));
+    cls.def(nb::init<UnitVector3d const &, Angle>(), nb::arg("center"), nb::arg("angle"));
+    cls.def(nb::init<UnitVector3d const &, double>(), nb::arg("center"),
+            nb::arg("squaredChordLength"));
+    cls.def(nb::init<Circle const &>(), nb::arg("circle"));
 
     cls.def("__eq__", &Circle::operator==, nb::is_operator());
     cls.def("__ne__", &Circle::operator!=, nb::is_operator());
@@ -85,10 +86,10 @@ void defineClass(nb::class_<Circle, std::unique_ptr<Circle>, Region> &cls) {
     // Rewrap these base class methods since there are overloads in this subclass
     cls.def("contains",
             (bool (Circle::*)(UnitVector3d const &) const) & Circle::contains);
-    cls.def("contains", nb::vectorize((bool (Circle::*)(double, double, double) const)&Circle::contains),
-            "x"_a, "y"_a, "z"_a);
-    cls.def("contains", nb::vectorize((bool (Circle::*)(double, double) const)&Circle::contains),
-            "lon"_a, "lat"_a);
+    cls.def("contains", ((bool (Circle::*)(double, double, double) const)&Circle::contains),
+            nb::arg("x"), nb::arg("y"), nb::arg("z"));
+    cls.def("contains", ((bool (Circle::*)(double, double) const)&Circle::contains),
+            nb::arg("lon"), nb::arg("lat"));
 
     cls.def("isDisjointFrom",
             (bool (Circle::*)(UnitVector3d const &) const) &
@@ -121,10 +122,10 @@ void defineClass(nb::class_<Circle, std::unique_ptr<Circle>, Region> &cls) {
                     Circle::expandedTo);
     cls.def("expandedTo",
             (Circle(Circle::*)(Circle const &) const) & Circle::expandedTo);
-    cls.def("dilateBy", &Circle::dilateBy, "radius"_a);
-    cls.def("dilatedBy", &Circle::dilatedBy, "radius"_a);
-    cls.def("erodeBy", &Circle::erodeBy, "radius"_a);
-    cls.def("erodedBy", &Circle::erodedBy, "radius"_a);
+    cls.def("dilateBy", &Circle::dilateBy, nb::arg("radius"));
+    cls.def("dilatedBy", &Circle::dilatedBy, nb::arg("radius"));
+    cls.def("erodeBy", &Circle::erodeBy, nb::arg("radius"));
+    cls.def("erodedBy", &Circle::erodedBy, nb::arg("radius"));
     cls.def("getArea", &Circle::getArea);
     cls.def("complement", &Circle::complement);
     cls.def("complemented", &Circle::complemented);
@@ -139,7 +140,8 @@ void defineClass(nb::class_<Circle, std::unique_ptr<Circle>, Region> &cls) {
         return nb::str("Circle({!r}, {!r})")
                 .format(self.getCenter(), self.getOpeningAngle());
     });
-    cls.def(nb::pickle(&python::encode, &python::decode<Circle>));
+    cls.def("__getstate__",&python::decode<Circle>);
+    cls.def("__setstate__", [](Circle &circle) { return python::encode(circle);});
 }
 
 }  // sphgeom

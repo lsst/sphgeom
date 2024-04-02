@@ -42,13 +42,13 @@
 #include "lsst/sphgeom/python/utils.h"
 
 namespace nb = nanobind;
-using namespace pybind11::literals;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(nb::class_<Ellipse, std::unique_ptr<Ellipse>, Region> &cls) {
+void defineClass(nb::class_<Ellipse, Region> &cls) {
     cls.attr("TYPE_CODE") = nb::int_(Ellipse::TYPE_CODE);
 
     cls.def_static("empty", &Ellipse::empty);
@@ -91,7 +91,9 @@ void defineClass(nb::class_<Ellipse, std::unique_ptr<Ellipse>, Region> &cls) {
         return nb::str("Ellipse({!r}, {!r}, {!r})")
                 .format(self.getF1(), self.getF2(), self.getAlpha());
     });
-    cls.def(nb::pickle(&python::encode, &python::decode<Ellipse>));
+    //cls.def(nb::pickle(&python::encode, &python::decode<Ellipse>));
+    cls.def("__getstate__", &python::decode<Ellipse>);
+    cls.def("__setstate__)", [](const Ellipse &ellipse){return python::encode(ellipse);});
 }
 
 }  // sphgeom

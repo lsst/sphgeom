@@ -104,10 +104,10 @@ void defineClass(nb::class_<Box, Region> &cls) {
     // Rewrap these base class methods since there are overloads in this subclass
     cls.def("contains",
             (bool (Box::*)(UnitVector3d const &) const) & Box::contains);
-    //cls.def("contains", nb::vectorize((bool (Box::*)(double, double, double) const)&Box::contains),
-            "x"_a, "y"_a, "z"_a);
-    //cls.def("contains", nb::vectorize((bool (Box::*)(double, double) const)&Box::contains),
-            "lon"_a, "lat"_a);
+    cls.def("contains", ((bool (Box::*)(double, double, double) const)&Box::contains),
+            nb::arg("x"), nb::arg("y"), nb::arg("z"));
+    cls.def("contains", ((bool (Box::*)(double, double) const)&Box::contains),
+            nb::arg("lon"), nb::arg("lat"));
     cls.def("isDisjointFrom",
             (bool (Box::*)(LonLat const &) const) & Box::isDisjointFrom);
     cls.def("isDisjointFrom",
@@ -156,7 +156,8 @@ void defineClass(nb::class_<Box, Region> &cls) {
     cls.def("__repr__", [](Box const &self) {
         return nb::str("Box({!r}, {!r})").format(self.getLon(), self.getLat());
     });
-    cls.def(nb::pickle(&python::encode, &python::decode<Box>));
+    cls.def("__getstate__", &python::decode<Box>);
+    cls.def("__setstate__)", [](const Box &box){return python::encode(box);});
 }
 
 }  // sphgeom

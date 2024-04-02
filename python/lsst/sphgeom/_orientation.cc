@@ -31,12 +31,12 @@
 #include "lsst/sphgeom/orientation.h"
 
 namespace nb = nanobind;
-using namespace pybind11::literals;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
-void defineOrientation(nb::module &mod) {
+void defineOrientation(nb::module_ &mod) {
     mod.def("orientationExact", &orientationExact, "a"_a, "b"_a, "c"_a);
     mod.def("orientation", &orientation, "a"_a, "b"_a, "c"_a);
     mod.def("orientationX", &orientationX, "b"_a, "c"_a);

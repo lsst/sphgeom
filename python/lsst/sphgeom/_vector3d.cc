@@ -36,22 +36,22 @@
 #include "lsst/sphgeom/python/utils.h"
 
 namespace nb = nanobind;
-using namespace pybind11::literals;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(nb::class_<Vector3d, std::shared_ptr<Vector3d>> &cls) {
+void defineClass(nb::class_<Vector3d> &cls) {
     cls.def(nb::init<>());
     cls.def(nb::init<double, double, double>(), "x"_a, "y"_a, "z"_a);
     cls.def(nb::init<Vector3d const &>(), "vector"_a);
     // Construct a Vector3d from a UnitVector3d, enabling implicit
     // conversion from UnitVector3d to Vector3d in python via
     // nb::implicitly_convertible
-    cls.def(nb::init([](UnitVector3d const &u) {
+    cls.def("__init__", [](UnitVector3d const &u) {
         return new Vector3d(u.x(), u.y(), u.z());
-    }));
+    });
 
     cls.def("__eq__", &Vector3d::operator==, nb::is_operator());
     cls.def("__ne__", &Vector3d::operator!=, nb::is_operator());

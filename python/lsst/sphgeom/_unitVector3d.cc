@@ -27,6 +27,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "nanobind/nanobind.h"
+#include "nanobind/stl/tuple.h"
 
 #include "lsst/sphgeom/python.h"
 
@@ -37,13 +38,13 @@
 #include "lsst/sphgeom/python/utils.h"
 
 namespace nb = nanobind;
-using namespace pybind11::literals;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(nb::class_<UnitVector3d, std::shared_ptr<UnitVector3d>> &cls) {
+void defineClass(nb::class_<UnitVector3d> &cls) {
     // Provide the equivalent of the UnitVector3d to Vector3d C++ cast
     // operator in Python
     nb::implicitly_convertible<UnitVector3d, Vector3d>();
@@ -120,15 +121,12 @@ void defineClass(nb::class_<UnitVector3d, std::shared_ptr<UnitVector3d>> &cls) {
     // components. Furthermore, UnitVector3d::fromNormalized is not visible to
     // Python, and even if it were, pybind11 is currently incapable of returning
     // a picklable reference to it.
-    cls.def(nb::pickle([](UnitVector3d const &self) { return nb::make_tuple(self.x(), self.y(), self.z()); },
-                       [](nb::tuple t) {
-                           if (t.size() != 3) {
-                               throw std::runtime_error("Tuple size = " + std::to_string(t.size()) +
-                                                        "; must be 3 for a UnitVector3d");
-                           }
-                           return new UnitVector3d(UnitVector3d::fromNormalized(
-                                   t[0].cast<double>(), t[1].cast<double>(), t[2].cast<double>()));
-                       }));
+
+    cls.def("__getstatus__", [](UnitVector3d const &self) { return std::make_tuple(self.x(), self.y(), self.z());});
+    cls.def("__setstatus__", [](std::tuple<double, double, double> const &t) {
+        return new UnitVector3d(UnitVector3d::fromNormalized(
+                std::get<0>(t), std::get<1>(t), std::get<2>(t)));
+    });
 }
 
 }  // sphgeom

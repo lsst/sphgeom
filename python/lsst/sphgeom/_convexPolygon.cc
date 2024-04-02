@@ -49,15 +49,14 @@ namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(nb::class_<ConvexPolygon, std::unique_ptr<ConvexPolygon>,
-                            Region> &cls) {
+void defineClass(nb::class_<ConvexPolygon, Region> &cls) {
     cls.attr("TYPE_CODE") = nb::int_(ConvexPolygon::TYPE_CODE);
 
-    cls.def_static("convexHull", &ConvexPolygon::convexHull, "points"_a);
+    cls.def_static("convexHull", &ConvexPolygon::convexHull, nb::arg("points"));
 
-    cls.def(nb::init<std::vector<UnitVector3d> const &>(), "points"_a);
+    cls.def(nb::init<std::vector<UnitVector3d> const &>(), nb::arg("points"));
     // Do not wrap the two unsafe (3 and 4 vertex) constructors
-    cls.def(nb::init<ConvexPolygon const &>(), "convexPolygon"_a);
+    cls.def(nb::init<ConvexPolygon const &>(), nb::arg("convexPolygon"));
 
     cls.def("__eq__", &ConvexPolygon::operator==, nb::is_operator());
     cls.def("__ne__", &ConvexPolygon::operator!=, nb::is_operator());
@@ -70,11 +69,11 @@ void defineClass(nb::class_<ConvexPolygon, std::unique_ptr<ConvexPolygon>,
     cls.def("contains", nb::overload_cast<UnitVector3d const &>(&ConvexPolygon::contains, nb::const_));
     cls.def("contains", nb::overload_cast<Region const &>(&ConvexPolygon::contains, nb::const_));
     cls.def("contains",
-            nb::vectorize((bool (ConvexPolygon::*)(double, double, double) const)&ConvexPolygon::contains),
-            "x"_a, "y"_a, "z"_a);
+            ((bool (ConvexPolygon::*)(double, double, double) const)&ConvexPolygon::contains),
+            nb::arg("x"), nb::arg("y"), nb::arg("z"));
     cls.def("contains",
-            nb::vectorize((bool (ConvexPolygon::*)(double, double) const)&ConvexPolygon::contains),
-            "lon"_a, "lat"_a);
+            ((bool (ConvexPolygon::*)(double, double) const)&ConvexPolygon::contains),
+            nb::arg("lon"), nb::arg("lat"));
     cls.def("isDisjointFrom", &ConvexPolygon::isDisjointFrom);
     cls.def("intersects", &ConvexPolygon::intersects);
     cls.def("isWithin", &ConvexPolygon::isWithin);
@@ -82,7 +81,9 @@ void defineClass(nb::class_<ConvexPolygon, std::unique_ptr<ConvexPolygon>,
     cls.def("__repr__", [](ConvexPolygon const &self) {
         return nb::str("ConvexPolygon({!r})").format(self.getVertices());
     });
-    cls.def(nb::pickle(&python::encode, &python::decode<ConvexPolygon>));
+    //cls.def(nb::pickle(&python::encode, &python::decode<ConvexPolygon>));
+    cls.def("__getstate__", &python::decode<ConvexPolygon>);
+    cls.def("__setstate__)", [](const ConvexPolygon &poly){return python::encode(poly);});
 }
 
 }  // sphgeom

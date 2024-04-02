@@ -26,7 +26,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "nanobind/nanobind.h"
+#include <nanobind/nanobind.h>
 
 #include "lsst/sphgeom/python.h"
 
@@ -34,8 +34,10 @@
 #include "lsst/sphgeom/Region.h"
 #include "lsst/sphgeom/UnitVector3d.h"
 
+#include <memory>
+
 namespace nb = nanobind;
-using namespace pybind11::literals;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {

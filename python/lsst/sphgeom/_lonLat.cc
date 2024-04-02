@@ -34,13 +34,13 @@
 #include "lsst/sphgeom/Vector3d.h"
 
 namespace nb = nanobind;
-using namespace pybind11::literals;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(nb::class_<LonLat, std::shared_ptr<LonLat>> &cls) {
+void defineClass(nb::class_<LonLat> &cls) {
     cls.def_static("fromDegrees", &LonLat::fromDegrees);
     cls.def_static("fromRadians", &LonLat::fromRadians);
     cls.def_static("latitudeOf", &LonLat::latitudeOf);

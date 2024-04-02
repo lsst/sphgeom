@@ -43,23 +43,23 @@
 #include "lsst/sphgeom/python/utils.h"
 
 namespace nb = nanobind;
-using namespace pybind11::literals;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(nb::class_<Region, std::unique_ptr<Region>> &cls) {
+void defineClass(nb::class_<Region> &cls) {
     cls.def("clone", &Region::clone);
     cls.def("getBoundingBox", &Region::getBoundingBox);
     cls.def("getBoundingBox3d", &Region::getBoundingBox3d);
     cls.def("getBoundingCircle", &Region::getBoundingCircle);
     cls.def("contains", nb::overload_cast<UnitVector3d const &>(&Region::contains, nb::const_),
             "unitVector"_a);
-    cls.def("contains", nb::vectorize((bool (Region::*)(double, double, double) const)&Region::contains),
-            "x"_a, "y"_a, "z"_a);
-    cls.def("contains", nb::vectorize((bool (Region::*)(double, double) const)&Region::contains),
-            "lon"_a, "lat"_a);
+    cls.def("contains", ((bool (Region::*)(double, double, double) const)&Region::contains),
+            nb::arg("x"), nb::arg("y"), nb::arg("z"));
+    cls.def("contains", ((bool (Region::*)(double, double) const)&Region::contains),
+            nb::arg("lon"), nb::arg("lat"));
     cls.def("__contains__", nb::overload_cast<UnitVector3d const &>(&Region::contains, nb::const_),
             nb::is_operator());
     // The per-subclass relate() overloads are used to implement

@@ -31,12 +31,12 @@
 #include "lsst/sphgeom/python/relationship.h"
 
 namespace nb = nanobind;
-using namespace pybind11::literals;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
-void defineRelationship(nb::module &mod) {
+void defineRelationship(nb::module_ &mod) {
     mod.attr("DISJOINT") = nb::cast(DISJOINT.to_ulong());
     mod.attr("INTERSECTS") = nb::cast(INTERSECTS.to_ulong());
     mod.attr("CONTAINS") = nb::cast(CONTAINS.to_ulong());

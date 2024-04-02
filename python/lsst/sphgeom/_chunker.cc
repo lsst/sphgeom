@@ -47,19 +47,19 @@ nb::str toString(Chunker const &self) {
 }
 
 template <>
-void defineClass(nb::class_<Chunker, std::shared_ptr<Chunker>> &cls) {
-    cls.def(nb::init<int32_t, int32_t>(), "numStripes"_a,
-            "numSubStripesPerStripe"_a);
+void defineClass(nb::class_<Chunker> &cls) {
+    cls.def(nb::init<int32_t, int32_t>(), nb::arg("numStripes"),
+            nb::arg("numSubStripesPerStripe"));
 
     cls.def("__eq__", &Chunker::operator==, nb::is_operator());
     cls.def("__ne__", &Chunker::operator!=, nb::is_operator());
 
-    cls.def_property_readonly("numStripes", &Chunker::getNumStripes);
-    cls.def_property_readonly("numSubStripesPerStripe",
+    cls.def_prop_ro("numStripes", &Chunker::getNumStripes);
+    cls.def_prop_ro("numSubStripesPerStripe",
                               &Chunker::getNumSubStripesPerStripe);
 
     cls.def("getChunksIntersecting", &Chunker::getChunksIntersecting,
-            "region"_a);
+            nb::arg("region"));
     cls.def("getSubChunksIntersecting",
             [](Chunker const &self, Region const &region) {
                 nb::list results;
@@ -68,15 +68,15 @@ void defineClass(nb::class_<Chunker, std::shared_ptr<Chunker>> &cls) {
                 }
                 return results;
             },
-            "region"_a);
+            nb::arg("region"));
     cls.def("getAllChunks", &Chunker::getAllChunks);
-    cls.def("getAllSubChunks", &Chunker::getAllSubChunks, "chunkId"_a);
+    cls.def("getAllSubChunks", &Chunker::getAllSubChunks, nb::arg("chunkId"));
 
-    cls.def("getChunkBoundingBox", &Chunker::getChunkBoundingBox, "stripe"_a, "chunk"_a);
-    cls.def("getSubChunkBoundingBox", &Chunker::getSubChunkBoundingBox, "subStripe"_a, "subChunk"_a);
+    cls.def("getChunkBoundingBox", &Chunker::getChunkBoundingBox, nb::arg("stripe"), nb::arg("chunk"));
+    cls.def("getSubChunkBoundingBox", &Chunker::getSubChunkBoundingBox, nb::arg("subStripe"), nb::arg("subChunk"));
 
-    cls.def("getStripe", &Chunker::getStripe, "chunkId"_a);
-    cls.def("getChunk", &Chunker::getChunk, "chunkId"_a, "stripe"_a);
+    cls.def("getStripe", &Chunker::getStripe, nb::arg("chunkId"));
+    cls.def("getChunk", &Chunker::getChunk, nb::arg("chunkId"), nb::arg("stripe"));
 
 
     cls.def("__str__", &toString);

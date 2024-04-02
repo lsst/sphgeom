@@ -36,12 +36,12 @@
 #include "lsst/sphgeom/Vector3d.h"
 
 namespace nb = nanobind;
-using namespace pybind11::literals;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
-void defineUtils(nb::module &mod) {
+void defineUtils(nb::module_ &mod) {
     mod.def("getMinSquaredChordLength", &getMinSquaredChordLength, "v"_a, "a"_a,
             "b"_a, "n"_a);
     mod.def("getMaxSquaredChordLength", &getMaxSquaredChordLength, "v"_a, "a"_a,

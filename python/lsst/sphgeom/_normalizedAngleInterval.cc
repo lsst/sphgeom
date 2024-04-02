@@ -34,14 +34,13 @@
 #include "lsst/sphgeom/python/interval.h"
 
 namespace nb = nanobind;
-using namespace pybind11::literals;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(nb::class_<NormalizedAngleInterval,
-                            std::shared_ptr<NormalizedAngleInterval>> &cls) {
+void defineClass(nb::class_<NormalizedAngleInterval> &cls) {
     python::defineInterval<decltype(cls), NormalizedAngleInterval,
                            NormalizedAngle>(cls);
 

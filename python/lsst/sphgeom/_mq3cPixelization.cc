@@ -33,7 +33,7 @@
 #include "lsst/sphgeom/Mq3cPixelization.h"
 
 namespace nb = nanobind;
-using namespace pybind11::literals;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {

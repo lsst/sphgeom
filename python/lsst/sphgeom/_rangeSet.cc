@@ -34,7 +34,7 @@
 #include "lsst/sphgeom/python/utils.h"
 
 namespace nb = nanobind;
-using namespace pybind11::literals;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
@@ -44,7 +44,7 @@ namespace {
 /// Convert a Python integer to a uint64_t.
 uint64_t _uint64(nb::handle const &obj) {
     try {
-        return obj.cast<uint64_t>();
+        return nb::cast<uint64_t>(obj);
     } catch (nb::cast_error const &) {
         throw nb::value_error(
                 "RangeSet elements and range beginning and "
@@ -60,9 +60,9 @@ RangeSet makeRangeSet(nb::iterable iterable) {
     for (nb::handle item : iterable) {
         PyObject *o = item.ptr();
         if (PySequence_Check(o) && PySequence_Size(o) == 2) {
-            uint64_t first = _uint64(nb::reinterpret_steal<nb::object>(
+            uint64_t first = _uint64(nb::steal<nb::object>(
                     PySequence_GetItem(o, 0)));
-            uint64_t last = _uint64(nb::reinterpret_steal<nb::object>(
+            uint64_t last = _uint64(nb::steal<nb::object>(
                     PySequence_GetItem(o, 1)));
             rs.insert(first, last);
         } else {
@@ -91,19 +91,19 @@ nb::list ranges(RangeSet const &self) {
 }  // <anonymous>
 
 template <>
-void defineClass(nb::class_<RangeSet, std::shared_ptr<RangeSet>> &cls) {
+void defineClass(nb::class_<RangeSet> &cls) {
     cls.def(nb::init<>());
     cls.def(nb::init<uint64_t>(), "integer"_a);
-    cls.def(nb::init([](uint64_t a, uint64_t b) {
+    cls.def("__init__", [](uint64_t a, uint64_t b) {
                 return new RangeSet(a, b);
             }),
-            "first"_a, "last"_a);
+            nb::arg("first"), nb::arg("last");
     cls.def(nb::init<RangeSet const &>(), "rangeSet"_a);
-    cls.def(nb::init(
+    cls.def("__init__",
             [](nb::iterable iterable) {
                 return new RangeSet(makeRangeSet(iterable));
             }),
-            "iterable"_a);
+            nb::arg("iterable");
     cls.def("__eq__", &RangeSet::operator==, nb::is_operator());
     cls.def("__ne__", &RangeSet::operator!=, nb::is_operator());
 

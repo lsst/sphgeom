@@ -34,7 +34,7 @@
 #include "lsst/sphgeom/python/utils.h"
 
 namespace nb = nanobind;
-using namespace pybind11::literals;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
@@ -46,7 +46,7 @@ Vector3d getRow(Matrix3d const &self, nb::int_ row) {
 }
 
 template <>
-void defineClass(nb::class_<Matrix3d, std::shared_ptr<Matrix3d>> &cls) {
+void defineClass(nb::class_<Matrix3d> &cls) {
     cls.def(nb::init<>());
     cls.def(nb::init<double, double, double, double, double, double, double,
                      double, double>(),
@@ -77,11 +77,14 @@ void defineClass(nb::class_<Matrix3d, std::shared_ptr<Matrix3d>> &cls) {
                 } else if (t.size() == 0) {
                     return nb::cast(self);
                 } else if (t.size() == 1) {
-                    return nb::cast(getRow(self, t[0].cast<nb::int_>()));
+                    auto t0 = nb::cast<nb::int_>(t[0]);
+                    return nb::cast(getRow(self, t0));
                 }
+                auto t0 = nb::cast<nb::int_>(t[0]);
+                auto t1 = nb::cast<nb::int_>(t[1]);
                 return nb::cast(
-                        self(python::convertIndex(3, t[0].cast<nb::int_>()),
-                             python::convertIndex(3, t[1].cast<nb::int_>())));
+                        self(python::convertIndex(3, t0),
+                             python::convertIndex(3, t1)));
             },
             nb::is_operator());
 

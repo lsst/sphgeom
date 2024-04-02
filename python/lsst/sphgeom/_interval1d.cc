@@ -39,7 +39,7 @@ namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(nb::class_<Interval1d, std::shared_ptr<Interval1d>> &cls) {
+void defineClass(nb::class_<Interval1d> &cls) {
     python::defineInterval<decltype(cls), Interval1d, double>(cls);
 
     cls.def_static("empty", &Interval1d::empty);
