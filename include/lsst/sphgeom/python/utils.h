@@ -44,31 +44,31 @@ namespace python {
 
 /// Convert a Python index `i` over a sequence with length `len` to a
 /// non-negative (C++ style) index, and perform a bounds-check.
-inline ptrdiff_t convertIndex(ptrdiff_t len, pybind11::int_ i) {
+inline ptrdiff_t convertIndex(ptrdiff_t len, nanobind::int_ i) {
     auto j = static_cast<ptrdiff_t>(i);
     if ((j == -1 && PyErr_Occurred()) || j < -len || j >= len) {
         PyErr_Clear();
-        throw pybind11::index_error(
-                pybind11::str("Index {} not in range({}, {})")
-                        .format(i, -len, len));
+        throw nanobind::index_error(
+                nanobind::str("Index {} not in range({}, {})")
+                        .format(i, -len, len).c_str());
     }
     return (j < 0) ? j + len : j;
 }
 
 
 /// Encode a Region as a pybind11 bytes object
-inline pybind11::bytes encode(Region const &self) {
+inline nanobind::bytes encode(Region const &self) {
     std::vector<uint8_t> bytes = self.encode();
-    return pybind11::bytes(reinterpret_cast<char const *>(bytes.data()),
+    return nanobind::bytes(reinterpret_cast<char const *>(bytes.data()),
                      bytes.size());
 }
 
 /// Decode a Region from a pybind11 bytes object.
 template <typename R>
-std::unique_ptr<R> decode(pybind11::bytes bytes) {
+std::unique_ptr<R> decode(nanobind::bytes bytes) {
     uint8_t const *buffer = reinterpret_cast<uint8_t const *>(
-            PYBIND11_BYTES_AS_STRING(bytes.ptr()));
-    size_t n = static_cast<size_t>(PYBIND11_BYTES_SIZE(bytes.ptr()));
+            PyBytes_AsString(bytes.ptr()));
+    size_t n = static_cast<size_t>(PyBytes_Size(bytes.ptr()));
     return R::decode(buffer, n);
 }
 
@@ -82,7 +82,7 @@ template <typename S>
 inline std::vector<std::unique_ptr<Region>> convert_region_sequence(S const & seq) {
     std::vector<std::unique_ptr<Region>> result;
     result.reserve(seq.size());
-    for (pybind11::handle py_region : seq) {
+    for (nanobind::handle py_region : seq) {
         result.push_back(py_region.cast<Region const &>().clone());
     }
     return result;
