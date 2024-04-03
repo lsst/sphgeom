@@ -1,6 +1,17 @@
-find_package(pybind11 REQUIRED)
+find_package(Python
+    REQUIRED COMPONENTS Interpreter Development.Module
+    OPTIONAL_COMPONENTS Development.SABIModule)
 
-pybind11_add_module(_sphgeom
+execute_process(
+    COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
+    OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE NB_DIR)
+
+list(APPEND CMAKE_PREFIX_PATH "${NB_DIR}")
+
+find_package(nanobind CONFIG REQUIRED)
+
+nanobind_add_module(_sphgeom
+    STABLE_ABI
     _angle.cc
     _angleInterval.cc
     _box3d.cc
