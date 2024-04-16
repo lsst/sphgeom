@@ -51,11 +51,6 @@ void defineClass(nb::class_<Angle> &cls) {
     // Construct an Angle from a NormalizedAngle, enabling implicit
     // conversion from NormalizedAngle to Angle in python via
     // nb::implicitly_convertible
-    //cls.def(nb::init(
-    //        [](NormalizedAngle &a) {
-    //            return new Angle(a.asRadians());
-    //        }),
-    //        "normalizedAngle"_a);
     cls.def("__init__", [](Angle *t, NormalizedAngle &a) {
                new (t) Angle(a.asRadians());
             }, "normalizedAngle"_a);

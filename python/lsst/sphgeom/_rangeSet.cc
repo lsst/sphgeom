@@ -26,7 +26,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "nanobind/nanobind.h"
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/list.h>
+#include <nanobind/stl/tuple.h>
 
 #include "lsst/sphgeom/python.h"
 
@@ -94,16 +96,14 @@ template <>
 void defineClass(nb::class_<RangeSet> &cls) {
     cls.def(nb::init<>());
     cls.def(nb::init<uint64_t>(), "integer"_a);
-    cls.def("__init__", [](uint64_t a, uint64_t b) {
-                return new RangeSet(a, b);
-            }),
-            nb::arg("first"), nb::arg("last");
+    cls.def("__init__", [](RangeSet *t, uint64_t a, uint64_t b) {
+                new (t) RangeSet(a, b);
+            }, nb::arg("first"), nb::arg("last"));
     cls.def(nb::init<RangeSet const &>(), "rangeSet"_a);
     cls.def("__init__",
-            [](nb::iterable iterable) {
-                return new RangeSet(makeRangeSet(iterable));
-            }),
-            nb::arg("iterable");
+            [](RangeSet *t, nb::iterable iterable) {
+                new (t) RangeSet(makeRangeSet(iterable));
+            }), nb::arg("iterable");
     cls.def("__eq__", &RangeSet::operator==, nb::is_operator());
     cls.def("__ne__", &RangeSet::operator!=, nb::is_operator());
 

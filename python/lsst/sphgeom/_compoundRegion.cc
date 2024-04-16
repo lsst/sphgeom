@@ -26,15 +26,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "nanobind/nanobind.h"
-#include "pybind11/stl.h"
+#include <nanobind/nanobind.h>
 
 #include "lsst/sphgeom/python.h"
 #include "lsst/sphgeom/python/utils.h"
 #include "lsst/sphgeom/CompoundRegion.h"
 
 namespace nb = nanobind;
-using namespace pybind11::literals;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
@@ -55,7 +54,7 @@ void defineClass(nb::class_<CompoundRegion, Region> &cls) {
         "cloneOperand",
         [](CompoundRegion const &self, std::ptrdiff_t n) {
             return self.getOperand(python::convertIndex(2, nanobind::int_(n))).clone();
-        }
+        }, nb::rv_policy::reference
     );
 }
 
@@ -64,8 +63,8 @@ void defineClass(nb::class_<UnionRegion, CompoundRegion> &cls) {
     cls.attr("TYPE_CODE") = nb::int_(UnionRegion::TYPE_CODE);
     cls.def(nb::init<Region const &, Region const &>());
     //cls.def(nb::pickle(&python::encode, &python::decode<UnionRegion>));
-    cls.def("__getstate__", &python::decode<UnionRegion>);
-    cls.def("__setstate__)", [](const UnionRegion &region){return python::encode(region);});
+    cls.def("__getstate__", &python::encode);
+    cls.def("__setstate__", &python::decode<UnionRegion>);
     cls.def("__repr__", [](CompoundRegion const &self) { return _repr("UnionRegion({!r}, {!r})", self); });
 }
 
@@ -73,8 +72,8 @@ template <>
 void defineClass(nb::class_<IntersectionRegion, CompoundRegion> &cls) {
     cls.attr("TYPE_CODE") = nb::int_(IntersectionRegion::TYPE_CODE);
     cls.def(nb::init<Region const &, Region const &>());
-    cls.def("__getstate__", &python::decode<IntersectionRegion>);
-    cls.def("__setstate__)", [](const IntersectionRegion &region){return python::encode(region);});
+    cls.def("__getstate__", &python::encode);
+    cls.def("__setstate__", &python::decode<IntersectionRegion, nb::bytes>);
     //cls.def(nb::pickle(&python::encode, &python::decode<IntersectionRegion>));
     cls.def("__repr__", [](CompoundRegion const &self) { return _repr("IntersectionRegion({!r}, {!r})", self); });
 }

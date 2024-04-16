@@ -27,6 +27,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/unique_ptr.h>
 
 #include "lsst/sphgeom/python.h"
 

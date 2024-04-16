@@ -118,7 +118,7 @@ void defineClass(nb::class_<Box3d> &cls) {
     cls.def("clippedTo",
             (Box3d(Box3d::*)(Box3d const &) const) & Box3d::clippedTo);
     cls.def("expandTo",
-            (Box3d & (Box3d::*)(Vector3d const &)) & Box3d::expandTo);
+            (Box3d & (Box3d::*)(Vector3d const &)) & Box3d::expandTo, nb::rv_policy::reference);
     cls.def("expandTo", (Box3d & (Box3d::*)(Box3d const &)) & Box3d::expandTo);
     cls.def("expandedTo",
             (Box3d(Box3d::*)(Vector3d const &) const) & Box3d::expandedTo);
@@ -126,20 +126,20 @@ void defineClass(nb::class_<Box3d> &cls) {
             (Box3d(Box3d::*)(Box3d const &) const) & Box3d::expandedTo);
 
     cls.def("dilateBy", (Box3d & (Box3d::*)(double)) & Box3d::dilateBy,
-            "radius"_a);
+            "radius"_a, nb::rv_policy::reference);
     cls.def("dilateBy",
             (Box3d & (Box3d::*)(double, double, double)) & Box3d::dilateBy,
-            "width"_a, "height"_a, "depth"_a);
+            "width"_a, "height"_a, "depth"_a, nb::rv_policy::reference);
     cls.def("dilatedBy", (Box3d(Box3d::*)(double) const) & Box3d::dilatedBy,
             "radius"_a);
     cls.def("dilatedBy",
             (Box3d(Box3d::*)(double, double, double) const) & Box3d::dilatedBy,
             "width"_a, "height"_a, "depth"_a);
     cls.def("erodeBy", (Box3d & (Box3d::*)(double)) & Box3d::erodeBy,
-            "radius"_a);
+            "radius"_a, nb::rv_policy::reference);
     cls.def("erodeBy",
             (Box3d & (Box3d::*)(double, double, double)) & Box3d::erodeBy,
-            "width"_a, "height"_a, "depth"_a);
+            "width"_a, "height"_a, "depth"_a, nb::rv_policy::reference);
     cls.def("erodedBy", (Box3d(Box3d::*)(double) const) & Box3d::erodedBy,
             "radius"_a);
     cls.def("erodedBy",

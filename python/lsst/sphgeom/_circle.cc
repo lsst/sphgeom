@@ -26,9 +26,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "nanobind/nanobind.h"
+#include <nanobind/nanobind.h>
 #include <nanobind/stl/tuple.h>
-#include "pybind11/numpy.h"
+
 
 #include "lsst/sphgeom/python.h"
 
@@ -43,7 +43,7 @@
 #include "lsst/sphgeom/python/utils.h"
 
 namespace nb = nanobind;
-using namespace pybind11::literals;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
@@ -114,20 +114,20 @@ void defineClass(nb::class_<Circle, Region> &cls) {
     cls.def("clippedTo",
             (Circle(Circle::*)(Circle const &) const) & Circle::clippedTo);
     cls.def("expandTo",
-            (Circle & (Circle::*)(UnitVector3d const &)) & Circle::expandTo);
+            (Circle & (Circle::*)(UnitVector3d const &)) & Circle::expandTo, nb::rv_policy::reference);
     cls.def("expandTo",
-            (Circle & (Circle::*)(Circle const &)) & Circle::expandTo);
+            (Circle & (Circle::*)(Circle const &)) & Circle::expandTo, nb::rv_policy::reference);
     cls.def("expandedTo",
             (Circle(Circle::*)(UnitVector3d const &) const) &
                     Circle::expandedTo);
     cls.def("expandedTo",
             (Circle(Circle::*)(Circle const &) const) & Circle::expandedTo);
-    cls.def("dilateBy", &Circle::dilateBy, nb::arg("radius"));
+    cls.def("dilateBy", &Circle::dilateBy, nb::arg("radius"), nb::rv_policy::reference);
     cls.def("dilatedBy", &Circle::dilatedBy, nb::arg("radius"));
-    cls.def("erodeBy", &Circle::erodeBy, nb::arg("radius"));
+    cls.def("erodeBy", &Circle::erodeBy, nb::arg("radius"), nb::rv_policy::reference);
     cls.def("erodedBy", &Circle::erodedBy, nb::arg("radius"));
     cls.def("getArea", &Circle::getArea);
-    cls.def("complement", &Circle::complement);
+    cls.def("complement", &Circle::complement, nb::rv_policy::reference);
     cls.def("complemented", &Circle::complemented);
 
     // Note that the Region interface has already been wrapped.
@@ -140,8 +140,8 @@ void defineClass(nb::class_<Circle, Region> &cls) {
         return nb::str("Circle({!r}, {!r})")
                 .format(self.getCenter(), self.getOpeningAngle());
     });
-    cls.def("__getstate__",&python::decode<Circle>);
-    cls.def("__setstate__", [](Circle &circle) { return python::encode(circle);});
+    cls.def("__getstate__", &python::encode);
+    cls.def("__setstate__", &python::decode<Circle, nb::bytes>);
 }
 
 }  // sphgeom

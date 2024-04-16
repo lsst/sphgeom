@@ -26,9 +26,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "nanobind/nanobind.h"
-#include "pybind11/stl.h"
-#include "pybind11/numpy.h"
+#include <nanobind/nanobind.h>
+
 
 #include "lsst/sphgeom/python.h"
 
@@ -43,7 +42,7 @@
 #include "lsst/sphgeom/python/utils.h"
 
 namespace nb = nanobind;
-using namespace pybind11::literals;
+using namespace nb::literals;
 
 namespace lsst {
 namespace sphgeom {
@@ -82,8 +81,8 @@ void defineClass(nb::class_<ConvexPolygon, Region> &cls) {
         return nb::str("ConvexPolygon({!r})").format(self.getVertices());
     });
     //cls.def(nb::pickle(&python::encode, &python::decode<ConvexPolygon>));
-    cls.def("__getstate__", &python::decode<ConvexPolygon>);
-    cls.def("__setstate__)", [](const ConvexPolygon &poly){return python::encode(poly);});
+    cls.def("__getstate__", &python::encode);
+    cls.def("__setstate__", &python::decode<ConvexPolygon, nb::bytes>);
 }
 
 }  // sphgeom

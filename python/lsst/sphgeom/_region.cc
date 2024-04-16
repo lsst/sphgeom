@@ -26,8 +26,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "nanobind/nanobind.h"
-#include "pybind11/numpy.h"
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/ndarray.h>
 
 #include "lsst/sphgeom/python.h"
 
@@ -56,9 +57,20 @@ void defineClass(nb::class_<Region> &cls) {
     cls.def("getBoundingCircle", &Region::getBoundingCircle);
     cls.def("contains", nb::overload_cast<UnitVector3d const &>(&Region::contains, nb::const_),
             "unitVector"_a);
-    cls.def("contains", ((bool (Region::*)(double, double, double) const)&Region::contains),
+    // vectorize
+    cls.def("contains", 
+           nb::overload_cast<double, double, double>( &Region::contains,
+	    nb::const_),
             nb::arg("x"), nb::arg("y"), nb::arg("z"));
-    cls.def("contains", ((bool (Region::*)(double, double) const)&Region::contains),
+    // vectorize
+    cls.def("contains",
+            [](Region &self, nb::ndarray<> lon,  nb::ndarray<> lat)-> std::vector<bool> {
+                std::vector<bool> result(lon.size());
+                //for(int i =0 ;i<lon.size(); ++i) {
+               //     result[i] = self.contains(lon(i), lat(i) );
+               // }
+                return result;
+            },
             nb::arg("lon"), nb::arg("lat"));
     cls.def("__contains__", nb::overload_cast<UnitVector3d const &>(&Region::contains, nb::const_),
             nb::is_operator());
@@ -66,9 +78,9 @@ void defineClass(nb::class_<Region> &cls) {
     // double-dispatch in C++, and are not needed in Python.
     cls.def("relate",
             (Relationship(Region::*)(Region const &) const) & Region::relate,
-            "region"_a);
+            nb::arg("region"));
     cls.def("encode", &python::encode);
-    cls.def_static("decode", &python::decode<Region>, "bytes"_a);
+    cls.def_static("decode", &python::decode<Region>, nb::arg("bytes"));
 }
 
 }  // sphgeom

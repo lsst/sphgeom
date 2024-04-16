@@ -26,8 +26,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "nanobind/nanobind.h"
-#include "nanobind/stl/tuple.h"
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/tuple.h>
 
 #include "lsst/sphgeom/python.h"
 
@@ -122,9 +122,9 @@ void defineClass(nb::class_<UnitVector3d> &cls) {
     // Python, and even if it were, pybind11 is currently incapable of returning
     // a picklable reference to it.
 
-    cls.def("__getstatus__", [](UnitVector3d const &self) { return std::make_tuple(self.x(), self.y(), self.z());});
-    cls.def("__setstatus__", [](std::tuple<double, double, double> const &t) {
-        return new UnitVector3d(UnitVector3d::fromNormalized(
+    cls.def("__getstate__", [](UnitVector3d const &self) { return std::make_tuple(self.x(), self.y(), self.z());});
+    cls.def("__setstate__", [](UnitVector3d &v, std::tuple<double, double, double> const &t) {
+        return new (&v) UnitVector3d(UnitVector3d::fromNormalized(
                 std::get<0>(t), std::get<1>(t), std::get<2>(t)));
     });
 }

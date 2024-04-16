@@ -26,7 +26,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "nanobind/nanobind.h"
+#include <nanobind/nanobind.h>
 
 #include "lsst/sphgeom/python.h"
 
@@ -49,8 +49,8 @@ void defineClass(nb::class_<Vector3d> &cls) {
     // Construct a Vector3d from a UnitVector3d, enabling implicit
     // conversion from UnitVector3d to Vector3d in python via
     // nb::implicitly_convertible
-    cls.def("__init__", [](UnitVector3d const &u) {
-        return new Vector3d(u.x(), u.y(), u.z());
+    cls.def("__init__", []( Vector3d *t, UnitVector3d const &u) {
+        new (t) Vector3d(u.x(), u.y(), u.z());
     });
 
     cls.def("__eq__", &Vector3d::operator==, nb::is_operator());

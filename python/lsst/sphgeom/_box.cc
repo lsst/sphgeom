@@ -26,8 +26,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "nanobind/nanobind.h"
+#include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
+#include <nanobind/stl/bind_vector.h>
+
 #include "lsst/sphgeom/python.h"
 
 #include "lsst/sphgeom/AngleInterval.h"
@@ -126,16 +128,16 @@ void defineClass(nb::class_<Box, Region> &cls) {
     cls.def("expandedTo",
             (Box(Box::*)(LonLat const &) const) & Box::expandedTo);
     cls.def("expandedTo", (Box(Box::*)(Box const &) const) & Box::expandedTo);
-    cls.def("dilateBy", (Box & (Box::*)(Angle)) & Box::dilateBy, "angle"_a);
+    cls.def("dilateBy", (Box & (Box::*)(Angle)) & Box::dilateBy, "angle"_a, nb::rv_policy::reference);
     cls.def("dilateBy", (Box & (Box::*)(Angle, Angle)) & Box::dilateBy,
-            "width"_a, "height"_a);
+            "width"_a, "height"_a, nb::rv_policy::reference);
     cls.def("dilatedBy", (Box(Box::*)(Angle) const) & Box::dilatedBy,
-            "angle"_a);
+            nb::arg("angle"));
     cls.def("dilatedBy", (Box(Box::*)(Angle, Angle) const) & Box::dilatedBy,
             "width"_a, "height"_a);
-    cls.def("erodeBy", (Box & (Box::*)(Angle)) & Box::erodeBy, "angle"_a);
+    cls.def("erodeBy", (Box & (Box::*)(Angle)) & Box::erodeBy, "angle"_a, nb::rv_policy::reference);
     cls.def("erodeBy", (Box & (Box::*)(Angle, Angle)) & Box::erodeBy, "width"_a,
-            "height"_a);
+            "height"_a, nb::rv_policy::reference);
     cls.def("erodedBy", (Box(Box::*)(Angle) const) & Box::erodedBy, "angle"_a);
     cls.def("erodedBy", (Box(Box::*)(Angle, Angle) const) & Box::erodedBy,
             "width"_a, "height"_a);
@@ -156,8 +158,8 @@ void defineClass(nb::class_<Box, Region> &cls) {
     cls.def("__repr__", [](Box const &self) {
         return nb::str("Box({!r}, {!r})").format(self.getLon(), self.getLat());
     });
-    cls.def("__getstate__", &python::decode<Box>);
-    cls.def("__setstate__)", [](const Box &box){return python::encode(box);});
+    cls.def("__getstate__", &python::encode);
+    cls.def("__setstate__", &python::decode<Box, nb::bytes>);
 }
 
 }  // sphgeom

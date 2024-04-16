@@ -26,7 +26,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "nanobind/nanobind.h"
+#include <nanobind/nanobind.h>
 
 #include "lsst/sphgeom/python.h"
 
@@ -92,8 +92,8 @@ void defineClass(nb::class_<Ellipse, Region> &cls) {
                 .format(self.getF1(), self.getF2(), self.getAlpha());
     });
     //cls.def(nb::pickle(&python::encode, &python::decode<Ellipse>));
-    cls.def("__getstate__", &python::decode<Ellipse>);
-    cls.def("__setstate__)", [](const Ellipse &ellipse){return python::encode(ellipse);});
+    cls.def("__getstate__", &python::encode);
+    cls.def("__setstate__", &python::decode<Ellipse, nb::bytes>);
 }
 
 }  // sphgeom

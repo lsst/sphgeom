@@ -32,8 +32,8 @@
 
 #include "nanobind/nanobind.h"
 #include <memory>
-//#include "relationship.h"
-
+#include "relationship.h"
+#include <typeinfo>
 namespace nb = nanobind;
 using namespace nb::literals;
 
@@ -117,11 +117,11 @@ void defineInterval(PyClass& cls) {
     cls.def("clipTo", [](Class& self, Scalar other) -> Class & {
         self.clipTo(other);
         return self;
-    });
+    }, nb::rv_policy::reference);
     cls.def("clipTo", [](Class& self, Class const& other) -> Class & {
         self.clipTo(other);
         return self;
-    });
+    }, nb::rv_policy::reference);
     cls.def("clippedTo", [](Class const& self, Scalar other) {
         Class instance = self.clippedTo(other);
         return instance;
@@ -133,11 +133,11 @@ void defineInterval(PyClass& cls) {
     cls.def("expandTo", [](Class& self, Scalar other) -> Class & {
         self.expandTo(other);
         return self;
-    });
+    }, nb::rv_policy::reference);
     cls.def("expandTo", [](Class& self, Class const& other) -> Class & {
         self.expandTo(other);
         return self;
-    });
+    }, nb::rv_policy::reference);
     cls.def("expandedTo", [](Class const& self, Scalar other) {
         Class instance = self.expandedTo(other);
         return instance;
@@ -147,10 +147,10 @@ void defineInterval(PyClass& cls) {
         return instance;
     });
 
-    cls.def("dilateBy", [](Class& self, Scalar other) -> Class & {
+    cls.def("dilateBy", [](Class& self, Scalar other) -> Class &{
         self.dilateBy(other);
         return self;
-    });
+    }, nb::rv_policy::reference);
     cls.def("dilatedBy", [](Class const& self, Scalar other) {
         Class instance = self.dilatedBy(other);
         return instance;
@@ -158,7 +158,7 @@ void defineInterval(PyClass& cls) {
     cls.def("erodeBy", [](Class& self, Scalar other) -> Class & {
         self.erodeBy(other);
         return self;
-    });
+    }, nb::rv_policy::reference);
     cls.def("erodedBy", [](Class const& self, Scalar other) {
         Class instance = self.erodedBy(other);
         return instance;

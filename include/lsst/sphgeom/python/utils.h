@@ -30,7 +30,9 @@
 #ifndef LSST_SPHGEOM_PYTHON_UTILS_H_
 #define LSST_SPHGEOM_PYTHON_UTILS_H_
 
-#include "nanobind/nanobind.h"
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/unique_ptr.h>
+#include <nanobind/stl/vector.h>
 
 #include <limits>
 #include <sstream>
@@ -72,6 +74,13 @@ std::unique_ptr<R> decode(nanobind::bytes bytes) {
     return R::decode(buffer, n);
 }
 
+template <typename R, typename B>
+void decode(R &r, B bytes) {
+    uint8_t const *buffer = reinterpret_cast<uint8_t const *>(
+            PyBytes_AsString(bytes.ptr()));
+    size_t n = static_cast<size_t>(PyBytes_Size(bytes.ptr()));
+    R::decode(r, buffer, n);
+}
 
 }  // python
 }  // sphgeom

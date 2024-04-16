@@ -33,8 +33,8 @@
 namespace lsst {
 namespace sphgeom {
 
-template <typename Pybind11Class>
-void defineClass(Pybind11Class &cls);
+template <typename NanoBindClass>
+void defineClass(NanoBindClass &cls);
 
 }  // sphgeom
 }  // lsst

@@ -26,7 +26,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "nanobind/nanobind.h"
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/string.h>
 
 #include "lsst/sphgeom/python.h"
 
