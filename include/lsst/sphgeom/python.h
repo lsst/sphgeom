@@ -30,6 +30,33 @@
 #ifndef PYTHON_LSST_SPHGEOM_SPHGEOM_H
 #define PYTHON_LSST_SPHGEOM_SPHGEOM_H
 
+#include <functional>
+#include <vector>
+#include <array>
+#include <nanobind/ndarray.h>
+#include <iostream>
+
+namespace nanobind {
+template<typename Class, typename ReturnType, typename... Args>
+auto vectorize(ReturnType(Class::*func)(Args... args) const) {
+    // Return a lambda capturing the ember function pointer
+    std::tuple<Args...> tuple;
+    constexpr auto N = std::tuple_size_v<decltype(tuple)>;
+    static_assert(std::conjunction_v<std::is_scalar<Args>...>, "All arguments must be scalar types");
+
+    return [func, tuple](Class &obj, const nanobind::ndarray<>  &a) -> ReturnType {
+        std::cout << "Arguments: ";
+        //for (int i = 0; i < N; i++) std::cout << a[i] << " ";
+        std::cout << std::endl;
+        std::array<double, N> ab;
+        //std::copy_n(a.begin(), N, ab.begin());
+        auto abc = reinterpret_cast<std::array<double, N> const *>(a.data());
+        return std::apply(
+                [func, &obj](Args... args) { return (obj.*func)(args...); }, *abc);
+    };
+};
+}
+
 namespace lsst {
 namespace sphgeom {
 

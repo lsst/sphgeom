@@ -27,7 +27,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "nanobind/nanobind.h"
-#include "pybind11/numpy.h"
 
 #include "lsst/sphgeom/python.h"
 

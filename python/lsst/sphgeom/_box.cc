@@ -106,10 +106,12 @@ void defineClass(nb::class_<Box, Region> &cls) {
     // Rewrap these base class methods since there are overloads in this subclass
     cls.def("contains",
             (bool (Box::*)(UnitVector3d const &) const) & Box::contains);
-    cls.def("contains", ((bool (Box::*)(double, double, double) const)&Box::contains),
-            nb::arg("x"), nb::arg("y"), nb::arg("z"));
-    cls.def("contains", ((bool (Box::*)(double, double) const)&Box::contains),
-            nb::arg("lon"), nb::arg("lat"));
+    auto k = nb::vectorize((bool (Box::*)(double, double, double) const)&Box::contains);
+    auto a = nb::args();
+    cls.def("contains", nb::vectorize((bool (Box::*)(double, double, double) const)&Box::contains),
+            (nb::arg("x"), nb::arg("y"), nb::arg("z")));
+    cls.def("contains", nb::vectorize((bool (Box::*)(double, double) const)&Box::contains),
+            (nb::arg("lon"), nb::arg("lat")));
     cls.def("isDisjointFrom",
             (bool (Box::*)(LonLat const &) const) & Box::isDisjointFrom);
     cls.def("isDisjointFrom",
