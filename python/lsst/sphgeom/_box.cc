@@ -109,9 +109,9 @@ void defineClass(nb::class_<Box, Region> &cls) {
     auto k = nb::vectorize((bool (Box::*)(double, double, double) const)&Box::contains);
     auto a = nb::args();
     cls.def("contains", nb::vectorize((bool (Box::*)(double, double, double) const)&Box::contains),
-            (nb::arg("x"), nb::arg("y"), nb::arg("z")));
+            nb::arg("x"), nb::arg("y"), nb::arg("z"));
     cls.def("contains", nb::vectorize((bool (Box::*)(double, double) const)&Box::contains),
-            (nb::arg("lon"), nb::arg("lat")));
+            nb::arg("lon"), nb::arg("lat"));
     cls.def("isDisjointFrom",
             (bool (Box::*)(LonLat const &) const) & Box::isDisjointFrom);
     cls.def("isDisjointFrom",

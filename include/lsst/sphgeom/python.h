@@ -35,28 +35,86 @@
 #include <array>
 #include <nanobind/ndarray.h>
 #include <iostream>
+#include <concepts>
+
 
 namespace nanobind {
+    template <std::size_t Index = 0, typename... Types, std::size_t N>
+    constexpr void write_tuple(std::array<const void *, N> &arr, std::size_t index, std::tuple<Types...> &t) {
+        if constexpr (Index < sizeof...(Types)) {
+            using ptr_type = std::remove_reference<decltype(std::get<Index>(t))>::type *;
+            std::get<Index>(t) = ((ptr_type) arr[Index])[index];
+            write_tuple<Index + 1>(arr, index, t);
+        }
+    }
+
+    using array = nanobind::ndarray<>;
+    template <typename ReturnType, typename Class, size_t Np>
+    array call(Class &obj, auto fargs, std::array<dlpack::dtype,Np>  const &dtypes, auto func, auto... args) {
+        constexpr size_t N = sizeof...(args);
+        std::array<size_t, N> ndim;
+        std::array<size_t const *, N> shapes;
+        std::array<int64_t const *, N> strides;
+        std::array<dlpack::dtype, N> dtype;
+        std::array<size_t, N> size;
+        std::array<const void *, N> data;
+        for (int i = 0; array const &a: {args...}) {
+            ndim[i] = a.ndim();
+            shapes[i] = (const size_t *) a.shape_ptr();
+            strides[i] = a.stride_ptr();
+            dtype[i] =  a.dtype();
+            size[i] = a.size();
+            data[i] = a.data();
+            ++i;
+        }
+        if(!std::equal(ndim.cbegin()+1, ndim.cbegin(), ndim.cend())) {
+            throw;
+        }
+        if(!std::equal(dtype.cbegin(), dtypes.cbegin() , dtypes.cend())) {
+            throw;
+        }
+        auto  *d = new ReturnType [size[0]];
+        nanobind::capsule owner(d, [](void *p) noexcept {
+            delete[] (float *) p;
+        });
+
+        for(int i = 0; i<size[0]; ++i) {
+          decltype(fargs) call_args{};
+          write_tuple(data, i, call_args);
+          d[i] = std::apply([&obj, func](auto... cargs) {return (obj.*func)(cargs...);}, call_args);
+        }
+        nanobind::ndarray<>result(d, ndim[0], shapes[0],
+                                  owner, strides[0],
+                                  nanobind::dtype<ReturnType>());
+        return result;
+    }
+
 template<typename Class, typename ReturnType, typename... Args>
 auto vectorize(ReturnType(Class::*func)(Args... args) const) {
     // Return a lambda capturing the ember function pointer
-    std::tuple<Args...> tuple;
-    constexpr auto N = std::tuple_size_v<decltype(tuple)>;
+    constexpr size_t N  = sizeof...(Args);
+    std::tuple<Args...> fargs;
     static_assert(std::conjunction_v<std::is_scalar<Args>...>, "All arguments must be scalar types");
-
-    return [func, tuple](Class &obj, const nanobind::ndarray<>  &a) -> ReturnType {
-        std::cout << "Arguments: ";
-        //for (int i = 0; i < N; i++) std::cout << a[i] << " ";
-        std::cout << std::endl;
-        std::array<double, N> ab;
-        //std::copy_n(a.begin(), N, ab.begin());
-        auto abc = reinterpret_cast<std::array<double, N> const *>(a.data());
-        return std::apply(
-                [func, &obj](Args... args) { return (obj.*func)(args...); }, *abc);
-    };
-};
+    std::array<dlpack::dtype, N> dtypes {nanobind::dtype<Args>()...};
+    // Not an ideal solution.
+    // The function signature does not get deducted correctly
+    // by nanobind::def when not returning a lambda function
+    // with the desired function signature.
+    if constexpr(N==1) return
+        [func, fargs, dtypes](Class &obj, array a) -> array
+        { return call<ReturnType>(obj, fargs, dtypes, func, a); };
+    if constexpr(N==2) return
+                    [func, fargs, dtypes](Class &obj,  array a, array b) -> array
+                    { return call<ReturnType>(obj, fargs, dtypes, func, a, b); };
+    if constexpr(N==3) return
+                [func, fargs,dtypes](Class &obj,  array a, array b, array c) -> array
+                { return call<ReturnType>(obj, fargs, dtypes, func, a, b, c); };
+    if constexpr(N==4) return
+                [func, fargs, dtypes](Class &obj, array a, array b, array c, array d) -> array
+                { return call<ReturnType>(obj, fargs, dtypes, func, a, b ,c, d); };
+    static_assert(true, "nanobind::vectorize called with more than 4 arguments");
+    }
 }
-
 namespace lsst {
 namespace sphgeom {
 

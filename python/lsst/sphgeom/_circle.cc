@@ -86,9 +86,9 @@ void defineClass(nb::class_<Circle, Region> &cls) {
     // Rewrap these base class methods since there are overloads in this subclass
     cls.def("contains",
             (bool (Circle::*)(UnitVector3d const &) const) & Circle::contains);
-    cls.def("contains", ((bool (Circle::*)(double, double, double) const)&Circle::contains),
+    cls.def("contains", nb::vectorize((bool (Circle::*)(double, double, double) const)&Circle::contains),
             nb::arg("x"), nb::arg("y"), nb::arg("z"));
-    cls.def("contains", ((bool (Circle::*)(double, double) const)&Circle::contains),
+    cls.def("contains", nb::vectorize((bool (Circle::*)(double, double) const)&Circle::contains),
             nb::arg("lon"), nb::arg("lat"));
 
     cls.def("isDisjointFrom",

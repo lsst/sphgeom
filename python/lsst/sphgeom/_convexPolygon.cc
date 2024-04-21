@@ -68,10 +68,10 @@ void defineClass(nb::class_<ConvexPolygon, Region> &cls) {
     cls.def("contains", nb::overload_cast<UnitVector3d const &>(&ConvexPolygon::contains, nb::const_));
     cls.def("contains", nb::overload_cast<Region const &>(&ConvexPolygon::contains, nb::const_));
     cls.def("contains",
-            ((bool (ConvexPolygon::*)(double, double, double) const)&ConvexPolygon::contains),
+            nb::vectorize((bool (ConvexPolygon::*)(double, double, double) const)&ConvexPolygon::contains),
             nb::arg("x"), nb::arg("y"), nb::arg("z"));
     cls.def("contains",
-            ((bool (ConvexPolygon::*)(double, double) const)&ConvexPolygon::contains),
+            nb::vectorize((bool (ConvexPolygon::*)(double, double) const)&ConvexPolygon::contains),
             nb::arg("lon"), nb::arg("lat"));
     cls.def("isDisjointFrom", &ConvexPolygon::isDisjointFrom);
     cls.def("intersects", &ConvexPolygon::intersects);

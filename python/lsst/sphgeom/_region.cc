@@ -58,19 +58,11 @@ void defineClass(nb::class_<Region> &cls) {
     cls.def("contains", nb::overload_cast<UnitVector3d const &>(&Region::contains, nb::const_),
             "unitVector"_a);
     // vectorize
-    cls.def("contains", 
-           nb::overload_cast<double, double, double>( &Region::contains,
-	    nb::const_),
+    cls.def("contains",
+            nb::vectorize((bool (Region::*)(double, double, double) const)&Region::contains),
             nb::arg("x"), nb::arg("y"), nb::arg("z"));
     // vectorize
-    cls.def("contains",
-            [](Region &self, nb::ndarray<> lon,  nb::ndarray<> lat)-> std::vector<bool> {
-                std::vector<bool> result(lon.size());
-                //for(int i =0 ;i<lon.size(); ++i) {
-               //     result[i] = self.contains(lon(i), lat(i) );
-               // }
-                return result;
-            },
+    cls.def("contains", nb::vectorize((bool (Region::*)(double, double) const)&Region::contains) ,
             nb::arg("lon"), nb::arg("lat"));
     cls.def("__contains__", nb::overload_cast<UnitVector3d const &>(&Region::contains, nb::const_),
             nb::is_operator());

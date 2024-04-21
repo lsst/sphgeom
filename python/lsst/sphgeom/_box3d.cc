@@ -95,7 +95,8 @@ void defineClass(nb::class_<Box3d> &cls) {
             (bool (Box3d::*)(Vector3d const &) const) & Box3d::contains);
     cls.def("contains",
             (bool (Box3d::*)(Box3d const &) const) & Box3d::contains);
-    cls.def("contains", ((bool (Box3d::*)(double, double, double) const)&Box3d::contains),
+    auto  f = nb::vectorize((bool (Box3d::*)(double, double, double) const)&Box3d::contains);
+    cls.def("contains", nb::vectorize((bool (Box3d::*)(double, double, double) const)&Box3d::contains),
             nb::arg("x"), nb::arg("y"), nb::arg("z"));
     cls.def("isDisjointFrom",
             (bool (Box3d::*)(Vector3d const &) const) & Box3d::isDisjointFrom);
