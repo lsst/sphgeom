@@ -130,9 +130,9 @@ void CompoundRegion::decode(CompoundRegion &region, uint8_t const *buffer, size_
     }
     switch (buffer[0]) {
         case UnionRegion::TYPE_CODE:
-            UnionRegion::decode(region, buffer, n);
+            UnionRegion::decode(dynamic_cast<UnionRegion &>(region), buffer, n);
         case IntersectionRegion::TYPE_CODE:
-            IntersectionRegion::decode(region, buffer, n);
+            IntersectionRegion::decode(dynamic_cast<IntersectionRegion &>(region), buffer, n);
         default:
             throw std::runtime_error("Byte string is not an encoded CompoundRegion.");
     }
