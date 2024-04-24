@@ -28,6 +28,7 @@
  */
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/vector.h>
+#include <nanobind/stl/unique_ptr.h>
 #include <nanobind/ndarray.h>
 
 #include "lsst/sphgeom/python.h"

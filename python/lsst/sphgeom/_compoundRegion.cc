@@ -54,7 +54,7 @@ void defineClass(nb::class_<CompoundRegion, Region> &cls) {
         "cloneOperand",
         [](CompoundRegion const &self, std::ptrdiff_t n) {
             return self.getOperand(python::convertIndex(2, nanobind::int_(n))).clone();
-        }, nb::rv_policy::reference
+        }// , nb::rv_policy::copy
     );
 }
 
@@ -64,7 +64,7 @@ void defineClass(nb::class_<UnionRegion, CompoundRegion> &cls) {
     cls.def(nb::init<Region const &, Region const &>());
     //cls.def(nb::pickle(&python::encode, &python::decode<UnionRegion>));
     cls.def("__getstate__", &python::encode);
-    cls.def("__setstate__", &python::decode<UnionRegion>);
+    cls.def("__setstate__", &python::decode<UnionRegion, nb::bytes>);
     cls.def("__repr__", [](CompoundRegion const &self) { return _repr("UnionRegion({!r}, {!r})", self); });
 }
 
