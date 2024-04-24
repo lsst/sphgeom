@@ -48,7 +48,7 @@ namespace nanobind {
         }
     }
 
-    using array = nanobind::ndarray<>;
+    using array = nanobind::ndarray<nanobind::numpy>;
     template <typename ReturnType, typename Class, size_t Np>
     array call(Class &obj, auto fargs, std::array<dlpack::dtype,Np>  const &dtypes, auto func, auto... args) {
         constexpr size_t N = sizeof...(args);
@@ -67,11 +67,12 @@ namespace nanobind {
             data[i] = a.data();
             ++i;
         }
-        if(!std::equal(ndim.cbegin()+1, ndim.cbegin(), ndim.cend())) {
-            throw;
+
+        if(!std::all_of(ndim.cbegin(), ndim.cend(), [&](auto x){ return x==ndim[0]; })) {
+            throw std::runtime_error("ndarray dimensions mismatch!");;
         }
-        if(!std::equal(dtype.cbegin(), dtypes.cbegin() , dtypes.cend())) {
-            throw;
+        if(!std::all_of(dtypes.cbegin(), dtypes.cend(), [&](auto x){ return x==dtypes[0]; })) {
+            throw std::runtime_error("ndarray type mismatch!");
         }
         auto  *d = new ReturnType [size[0]];
         nanobind::capsule owner(d, [](void *p) noexcept {
@@ -83,7 +84,7 @@ namespace nanobind {
           write_tuple(data, i, call_args);
           d[i] = std::apply([&obj, func](auto... cargs) {return (obj.*func)(cargs...);}, call_args);
         }
-        nanobind::ndarray<>result(d, ndim[0], shapes[0],
+        nanobind::ndarray<nanobind::numpy>result(d, ndim[0], shapes[0],
                                   owner, strides[0],
                                   nanobind::dtype<ReturnType>());
         return result;
