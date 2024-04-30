@@ -79,7 +79,7 @@ class CompoundRegionTestMixin:
         """Assert that a compound regions operands are equal to the given
         tuple of operands.
         """
-        self.assertCountEqual((region.cloneOperand(0), region.cloneOperand(1)), operands)
+        self.assertEqual((region.cloneOperand(0), region.cloneOperand(1)), operands)
 
     def assertCompoundRegionsEqual(self, a, b):
         """Assert that two compound regions are equal.
@@ -131,7 +131,6 @@ class CompoundRegionTestMixin:
         """Test that repr returns a string that can be eval'd to yield an
         equivalent instance.
         """
-        print(repr(self.instance))
         self.assertCompoundRegionsEqual(
             self.instance,
             eval(
