@@ -35,14 +35,13 @@
 #include <array>
 #include <nanobind/ndarray.h>
 #include <iostream>
-#include <concepts>
 
 
 namespace nanobind {
     template <std::size_t Index = 0, typename... Types, std::size_t N>
     constexpr void write_tuple(std::array<const void *, N> &arr, std::size_t index, std::tuple<Types...> &t) {
         if constexpr (Index < sizeof...(Types)) {
-            using ptr_type = std::remove_reference<decltype(std::get<Index>(t))>::type *;
+            using ptr_type = typename std::remove_reference<decltype(std::get<Index>(t))>::type *;
             std::get<Index>(t) = ((ptr_type) arr[Index])[index];
             write_tuple<Index + 1>(arr, index, t);
         }
@@ -58,7 +57,8 @@ namespace nanobind {
         std::array<dlpack::dtype, N> dtype;
         std::array<size_t, N> size;
         std::array<const void *, N> data;
-        for (int i = 0; array const &a: {args...}) {
+	int i = 0;
+        for (array const &a: {args...}) {
             ndim[i] = a.ndim();
             shapes[i] = (const size_t *) a.shape_ptr();
             strides[i] = a.stride_ptr();
