@@ -245,11 +245,11 @@ print("alignas(64) static uint8_t const HILBERT_LUT_3[256] = {", end="")
 for i, x in enumerate(algo2_lut):
     if i % 8 == 0:
         print("\n   ", end="")
-    print(" 0x%02x" % x, end="," if i != len(algo2_lut) - 1 else "")
+    print(f" 0x{x:02x}", end="," if i != len(algo2_lut) - 1 else "")
 print("\n}\n")
 print("alignas(64) static uint8_t const HILBERT_INVERSE_LUT_3[256] = {", end="")
 for i, x in enumerate(algo3_lut):
     if i % 8 == 0:
         print("\n   ", end="")
-    print(" 0x%02x" % x, end="," if i != len(algo3_lut) - 1 else "")
+    print(f" 0x{x:02x}", end="," if i != len(algo3_lut) - 1 else "")
 print("\n}\n")
