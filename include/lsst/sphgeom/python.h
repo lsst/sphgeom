@@ -39,11 +39,41 @@
 
 namespace nanobind {
     template <std::size_t Index = 0, typename... Types, std::size_t N>
-    constexpr void write_tuple(std::array<const void *, N> &arr, std::size_t index, std::tuple<Types...> &t) {
-        if constexpr (Index < sizeof...(Types)) {
-            using ptr_type = typename std::remove_reference<decltype(std::get<Index>(t))>::type *;
-            std::get<Index>(t) = ((ptr_type) arr[Index])[index];
-            write_tuple<Index + 1>(arr, index, t);
+    constexpr void write_tuple(std::array<const void *, N> &arr, std::array<dlpack::dtype, N> const &dtype, std::size_t index, std::tuple<Types...> &t) {
+       if constexpr (Index < sizeof...(Types)) { 
+	auto ptr  = arr[Index];
+	    switch (dlpack::dtype_code(dtype[Index].code)) {
+            case dlpack::dtype_code::UInt:
+                switch (dtype[Index].bits) {
+                    case 8:  std::get<Index>(t)= reinterpret_cast<uint8_t const *>(ptr)[index];  break;
+                    case 16: std::get<Index>(t) = reinterpret_cast<uint16_t const *>(ptr)[index];  break;
+                    case 32: std::get<Index>(t) =reinterpret_cast<uint32_t const *>(ptr)[index];  break;
+                    case 64: std::get<Index>(t) =reinterpret_cast<uint64_t const *>(ptr)[index];  break;
+		}
+                break;
+            case dlpack::dtype_code::Int:
+	         switch (dtype[Index].bits) {
+                    case 8: std::get<Index>(t) =reinterpret_cast<int8_t const *>(ptr)[index];  break;
+                    case 16: std::get<Index>(t) = reinterpret_cast<int16_t const *>(ptr)[index];  break;
+                    case 32: std::get<Index>(t)= reinterpret_cast<int32_t const *>(ptr)[index];  break;
+                    case 64: std::get<Index>(t)= reinterpret_cast<int64_t const *>(ptr)[index];  break;
+		 }	     
+                break;
+            case dlpack::dtype_code::Float:
+		switch (dtype[Index].bits) {
+                    case 32: std::get<Index>(t) =  reinterpret_cast<float const *>(ptr)[index];  break;
+                    case 64: std::get<Index>(t) =  reinterpret_cast<double const *>(ptr)[index];  break;
+		}
+                break;
+            case dlpack::dtype_code::Bool:
+                std::get<Index>(t)  = reinterpret_cast<bool const*>(ptr)[index]; break;
+            
+            case dlpack::dtype_code::Bfloat:
+            case dlpack::dtype_code::Complex:
+                throw std::runtime_error("nanobind::vectorize: unsupported dltype");
+        }
+      
+            write_tuple<Index + 1>(arr, dtype, index, t);
         }
     }
 
@@ -76,12 +106,12 @@ namespace nanobind {
         }
         auto  *d = new ReturnType [size[0]];
         nanobind::capsule owner(d, [](void *p) noexcept {
-            delete[] (float *) p;
+            delete[] (ReturnType *) p;
         });
 
         for(int i = 0; i<size[0]; ++i) {
             decltype(fargs) call_args{};
-            write_tuple(data, i, call_args);
+            write_tuple(data, dtype, i, call_args);
             d[i] = std::apply([&func](auto... cargs) {return (*func)(cargs...);}, call_args);
         }
         nanobind::ndarray<nanobind::numpy>result(d, ndim[0], shapes[0],
@@ -124,7 +154,7 @@ namespace nanobind {
 
         for(int i = 0; i<size[0]; ++i) {
           decltype(fargs) call_args{};
-          write_tuple(data, i, call_args);
+          write_tuple(data, dtype, i, call_args);
           d[i] = std::apply([&obj, func](auto... cargs) {return (obj.*func)(cargs...);}, call_args);
         }
         nanobind::ndarray<nanobind::numpy>result(d, ndim[0], shapes[0],
