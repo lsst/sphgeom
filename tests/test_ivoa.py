@@ -27,7 +27,7 @@
 
 import unittest
 
-from lsst.sphgeom import Region
+from lsst.sphgeom import Box, Circle, ConvexPolygon, LonLat, Region, UnitVector3d
 
 
 class IvoaTestCase(unittest.TestCase):
@@ -61,6 +61,31 @@ class IvoaTestCase(unittest.TestCase):
         for pos in bad_pos:
             with self.assertRaises(ValueError):
                 Region.from_ivoa_pos(pos)
+
+    def test_circle(self):
+        """Test circle construction."""
+        circle = Region.from_ivoa_pos("CIRCLE 12.0 34.0 5")
+        self.assertIsInstance(circle, Circle)
+        self.assertTrue(circle.contains(UnitVector3d(LonLat.fromDegrees(13.0, 33.0))))
+        self.assertFalse(circle.contains(UnitVector3d(LonLat.fromDegrees(12.0, 40.0))))
+
+    def test_range(self):
+        """Test range construction."""
+        box = Region.from_ivoa_pos("RANGE 1 2 5 6")
+        self.assertIsInstance(box, Box)
+        self.assertTrue(box.contains(UnitVector3d(LonLat.fromDegrees(1.5, 5.4))))
+        self.assertFalse(box.contains(UnitVector3d(LonLat.fromDegrees(4, 10))))
+
+        box = Region.from_ivoa_pos("RANGE 1 2 20 +Inf")
+        self.assertTrue(box.contains(UnitVector3d(LonLat.fromDegrees(1.7, 80))))
+        self.assertFalse(box.contains(UnitVector3d(LonLat.fromDegrees(1.7, 10))))
+
+    def test_polygon(self):
+        """Test polygon construction."""
+        poly = Region.from_ivoa_pos("POLYGON 12.0 34.0 14.0 35.0 14. 36.0 12.0 35.0")
+        self.assertIsInstance(poly, ConvexPolygon)
+        self.assertTrue(poly.contains(UnitVector3d(LonLat.fromDegrees(13, 35))))
+        self.assertFalse(poly.contains(UnitVector3d(LonLat.fromDegrees(14, 34))))
 
 
 if __name__ == "__main__":
