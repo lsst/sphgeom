@@ -56,6 +56,7 @@ class IvoaTestCase(unittest.TestCase):
             "RANGE 0 360",
             "POLYGON 0 1 2 3",
             "POLYGON 0 1 2 3 4 5 6",
+            "CONVEXPOLYGON 0 1 2 3 4 5",
         )
         for pos in bad_pos:
             with self.assertRaises(ValueError):
