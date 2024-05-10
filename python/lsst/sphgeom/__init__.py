@@ -29,6 +29,7 @@
 """lsst.sphgeom
 """
 
+from ._continue_class import *
 from ._healpixPixelization import *
 from ._sphgeom import *
 from ._sphgeom import Pixelization
