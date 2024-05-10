@@ -35,17 +35,7 @@ import math
 import sys
 import typing
 
-from ._sphgeom import (
-    Angle,
-    AngleInterval,
-    Box,
-    Circle,
-    ConvexPolygon,
-    LonLat,
-    NormalizedAngleInterval,
-    Region,
-    UnitVector3d,
-)
+from ._sphgeom import Angle, Box, Circle, ConvexPolygon, LonLat, Region, UnitVector3d
 
 # Copy and paste from lsst.utils.wrappers:
 # * INTRINSIC_SPECIAL_ATTRIBUTES
@@ -88,13 +78,23 @@ def _continueClass(cls):
     return orig
 
 
+def _inf_to_limit(value: float, min: float, max: float) -> float:
+    """Map a value to a fixed range if infinite."""
+    if not math.isinf(value):
+        return value
+    if value > 0.0:
+        return max
+    return min
+
+
 def _inf_to_lat(lat: float) -> float:
     """Map latitude +Inf to +90 and -Inf to -90 degrees."""
-    if not math.isinf(lat):
-        return lat
-    if lat > 0.0:
-        return 90.0
-    return -90.0
+    return _inf_to_limit(lat, -90.0, 90.0)
+
+
+def _inf_to_lon(lat: float) -> float:
+    """Map longitude +Inf to +360 and -Inf to 0 degrees."""
+    return _inf_to_limit(lat, 0.0, 360.0)
 
 
 @_continueClass
@@ -142,18 +142,10 @@ class Region:
                 raise ValueError(f"RANGE requires 4 numbers but got {n_floats} in '{pos}'.")
             # POS allows +Inf and -Inf in ranges. These are not allowed by
             # Box and so must be converted.
-            # If either of the longitude values are infinite, all longitudes
-            # should be included.
-            if math.isinf(coordinates[0]) or math.isinf(coordinates[1]):
-                return Box(
-                    NormalizedAngleInterval.fromDegrees(0.0, 360.0),
-                    AngleInterval.fromDegrees(_inf_to_lat(coordinates[2]), _inf_to_lat(coordinates[3])),
-                )
-            else:
-                return Box(
-                    LonLat.fromDegrees(coordinates[0], _inf_to_lat(coordinates[2])),
-                    LonLat.fromDegrees(coordinates[1], _inf_to_lat(coordinates[3])),
-                )
+            return Box(
+                LonLat.fromDegrees(_inf_to_lon(coordinates[0]), _inf_to_lat(coordinates[2])),
+                LonLat.fromDegrees(_inf_to_lon(coordinates[1]), _inf_to_lat(coordinates[3])),
+            )
 
         if shape == "POLYGON":
             if n_floats % 2 != 0:

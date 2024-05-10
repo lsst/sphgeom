@@ -80,6 +80,19 @@ class IvoaTestCase(unittest.TestCase):
         self.assertTrue(box.contains(UnitVector3d(LonLat.fromDegrees(1.7, 80))))
         self.assertFalse(box.contains(UnitVector3d(LonLat.fromDegrees(1.7, 10))))
 
+        box = Region.from_ivoa_pos("RANGE 50 +Inf 20 30")
+        self.assertTrue(box.contains(UnitVector3d(LonLat.fromDegrees(60, 25))))
+        self.assertFalse(box.contains(UnitVector3d(LonLat.fromDegrees(49, 21))))
+
+        box = Region.from_ivoa_pos("RANGE -Inf +50 20 30")
+        self.assertTrue(box.contains(UnitVector3d(LonLat.fromDegrees(40, 25))))
+        self.assertFalse(box.contains(UnitVector3d(LonLat.fromDegrees(60, 21))))
+
+        box = Region.from_ivoa_pos("RANGE -Inf +Inf 20 30")
+        self.assertTrue(box.contains(UnitVector3d(LonLat.fromDegrees(10, 25))))
+        self.assertTrue(box.contains(UnitVector3d(LonLat.fromDegrees(359, 25))))
+        self.assertFalse(box.contains(UnitVector3d(LonLat.fromDegrees(49, 19))))
+
     def test_polygon(self):
         """Test polygon construction."""
         poly = Region.from_ivoa_pos("POLYGON 12.0 34.0 14.0 35.0 14. 36.0 12.0 35.0")
