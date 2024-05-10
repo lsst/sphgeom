@@ -62,12 +62,32 @@ class IvoaTestCase(unittest.TestCase):
             with self.assertRaises(ValueError):
                 Region.from_ivoa_pos(pos)
 
+    def _split_pos(self, pos: str) -> tuple[str, list[float]]:
+        """Split POS into type and floats."""
+        region_type, *coordstr = pos.split()
+        coordinates = [float(c) for c in coordstr]
+        return region_type, coordinates
+
+    def assert_pos_equal(self, pos1: str, pos2: str):
+        """Compare two POS strings and check for equality taking into account
+        floating point differences.
+        """
+        region_type1, coords1 = self._split_pos(pos1)
+        region_type2, coords2 = self._split_pos(pos2)
+        self.assertEqual(region_type1, region_type2)
+        self.assertEqual(len(coords1), len(coords2))
+        for c1, c2 in zip(coords1, coords2):
+            self.assertAlmostEqual(c1, c2)
+
     def test_circle(self):
         """Test circle construction."""
-        circle = Region.from_ivoa_pos("CIRCLE 12.0 34.0 5")
+        pos = "CIRCLE 12.0 34.0 5"
+        circle = Region.from_ivoa_pos(pos)
         self.assertIsInstance(circle, Circle)
         self.assertTrue(circle.contains(UnitVector3d(LonLat.fromDegrees(13.0, 33.0))))
         self.assertFalse(circle.contains(UnitVector3d(LonLat.fromDegrees(12.0, 40.0))))
+
+        self.assert_pos_equal(circle.to_ivoa_pos(), pos)
 
     def test_range(self):
         """Test range construction."""

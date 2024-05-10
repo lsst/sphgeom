@@ -161,3 +161,26 @@ class Region:
             return ConvexPolygon([UnitVector3d(c) for c in vertices])
 
         raise ValueError(f"Unrecognized shape in POS string '{pos}'")
+
+    def to_ivoa_pos(self) -> str:
+        """Represent the region as an IVOA POS string.
+
+        Returns
+        -------
+        pos : `str`
+            The region in ``POS`` format.
+        """
+        raise NotImplementedError("This region can not be converted to an IVOA POS string.")
+
+
+@_continueClass
+class Circle:  # noqa: F811
+    """A circular region on the unit sphere that contains its boundary."""
+
+    def to_ivoa_pos(self) -> str:
+        # Docstring inherited.
+        center = LonLat(self.getCenter())
+        lon = center.getLon().asDegrees()
+        lat = center.getLat().asDegrees()
+        rad = self.getOpeningAngle().asDegrees()
+        return f"CIRCLE {lon} {lat} {rad}"
