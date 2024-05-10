@@ -95,30 +95,37 @@ class IvoaTestCase(unittest.TestCase):
         self.assertIsInstance(box, Box)
         self.assertTrue(box.contains(UnitVector3d(LonLat.fromDegrees(1.5, 5.4))))
         self.assertFalse(box.contains(UnitVector3d(LonLat.fromDegrees(4, 10))))
+        self.assert_pos_equal(box.to_ivoa_pos(), "RANGE 1 2 5 6")
 
         box = Region.from_ivoa_pos("RANGE 1 2 20 +Inf")
         self.assertTrue(box.contains(UnitVector3d(LonLat.fromDegrees(1.7, 80))))
         self.assertFalse(box.contains(UnitVector3d(LonLat.fromDegrees(1.7, 10))))
+        self.assert_pos_equal(box.to_ivoa_pos(), "RANGE 1 2 20 90")
 
         box = Region.from_ivoa_pos("RANGE 50 +Inf 20 30")
         self.assertTrue(box.contains(UnitVector3d(LonLat.fromDegrees(60, 25))))
         self.assertFalse(box.contains(UnitVector3d(LonLat.fromDegrees(49, 21))))
+        self.assert_pos_equal(box.to_ivoa_pos(), "RANGE 50 360 20 30")
 
         box = Region.from_ivoa_pos("RANGE -Inf +50 20 30")
         self.assertTrue(box.contains(UnitVector3d(LonLat.fromDegrees(40, 25))))
         self.assertFalse(box.contains(UnitVector3d(LonLat.fromDegrees(60, 21))))
+        self.assert_pos_equal(box.to_ivoa_pos(), "RANGE 0 50 20 30")
 
         box = Region.from_ivoa_pos("RANGE -Inf +Inf 20 30")
         self.assertTrue(box.contains(UnitVector3d(LonLat.fromDegrees(10, 25))))
         self.assertTrue(box.contains(UnitVector3d(LonLat.fromDegrees(359, 25))))
         self.assertFalse(box.contains(UnitVector3d(LonLat.fromDegrees(49, 19))))
+        self.assert_pos_equal(box.to_ivoa_pos(), "RANGE 0 360. 20 30")
 
     def test_polygon(self):
         """Test polygon construction."""
-        poly = Region.from_ivoa_pos("POLYGON 12.0 34.0 14.0 35.0 14. 36.0 12.0 35.0")
+        pos = "POLYGON 12.0 34.0 14.0 35.0 14. 36.0 12.0 35.0"
+        poly = Region.from_ivoa_pos(pos)
         self.assertIsInstance(poly, ConvexPolygon)
         self.assertTrue(poly.contains(UnitVector3d(LonLat.fromDegrees(13, 35))))
         self.assertFalse(poly.contains(UnitVector3d(LonLat.fromDegrees(14, 34))))
+        self.assert_pos_equal(poly.to_ivoa_pos(), pos)
 
 
 if __name__ == "__main__":

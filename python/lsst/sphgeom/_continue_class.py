@@ -184,3 +184,34 @@ class Circle:  # noqa: F811
         lat = center.getLat().asDegrees()
         rad = self.getOpeningAngle().asDegrees()
         return f"CIRCLE {lon} {lat} {rad}"
+
+
+@_continueClass
+class Box:  # noqa: F811
+    """A rectangle in spherical coordinate space that contains its boundary."""
+
+    def to_ivoa_pos(self) -> str:
+        # Docstring inherited.
+        lon_range = self.getLon()
+        lat_range = self.getLat()
+
+        lon1 = lon_range.getA().asDegrees()
+        lon2 = lon_range.getB().asDegrees()
+        lat1 = lat_range.getA().asDegrees()
+        lat2 = lat_range.getB().asDegrees()
+
+        # Do not attempt to map to +/- Inf -- there is no way to know if
+        # that is any better than 0. -> 360.
+        return f"RANGE {lon1} {lon2} {lat1} {lat2}"
+
+
+@_continueClass
+class ConvexPolygon:  # noqa: F811
+    """A rectangle in spherical coordinate space that contains its boundary."""
+
+    def to_ivoa_pos(self) -> str:
+        # Docstring inherited.
+        coords = (LonLat(v) for v in self.getVertices())
+        coord_strings = [f"{c.getLon().asDegrees()} {c.getLat().asDegrees()}" for c in coords]
+
+        return f"POLYGON {' '.join(coord_strings)}"
