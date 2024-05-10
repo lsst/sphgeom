@@ -62,7 +62,7 @@ class IvoaTestCase(unittest.TestCase):
             with self.assertRaises(ValueError):
                 Region.from_ivoa_pos(pos)
 
-    def _split_pos(self, pos: str) -> tuple[str, list[float]]:
+    def _split_pos(self, pos: str):
         """Split POS into type and floats."""
         region_type, *coordstr = pos.split()
         coordinates = [float(c) for c in coordstr]
