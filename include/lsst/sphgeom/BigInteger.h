@@ -36,7 +36,7 @@
 #include <stdint.h>
 #include <cstring>
 #include <stdexcept>
-
+#include <cstdint>
 
 namespace lsst {
 namespace sphgeom {
@@ -53,7 +53,7 @@ class BigInteger {
 public:
     /// This constructor creates a zero-valued integer with the given digit
     /// array.
-    BigInteger(uint32_t * digits, unsigned capacity) :
+    BigInteger(std::uint32_t * digits, unsigned capacity) :
         _digits(digits),
         _capacity(capacity),
         _size(0),
@@ -65,7 +65,7 @@ public:
             _checkCapacity(b._size);
             _sign = b._sign;
             _size = b._size;
-            std::memcpy(_digits, b._digits, sizeof(uint32_t) * b._size);
+            std::memcpy(_digits, b._digits, sizeof(std::uint32_t) * b._size);
         }
         return *this;
     }
@@ -82,26 +82,26 @@ public:
     unsigned getCapacity() const { return _capacity; }
 
     /// `getDigits` returns the underlying digit array.
-    uint32_t const * getDigits() const { return _digits; }
+    std::uint32_t const * getDigits() const { return _digits; }
 
     /// `setToZero` sets this integer to zero.
     void setToZero() { _sign = 0; _size = 0; }
 
     /// `setTo` sets this integer to the given signed 64 bit integer value.
-    void setTo(int64_t x) {
+    void setTo(std::int64_t x) {
         if (x < 0) {
-            setTo(static_cast<uint64_t>(-x));
+            setTo(static_cast<std::uint64_t>(-x));
             _sign = -1;
         } else {
-            setTo(static_cast<uint64_t>(x));
+            setTo(static_cast<std::uint64_t>(x));
         }
     }
 
     /// `setTo` sets this integer to the given unsigned 64 bit integer value.
-    void setTo(uint64_t x) {
+    void setTo(std::uint64_t x) {
         _checkCapacity(2);
-        _digits[0] = static_cast<uint32_t>(x);
-        _digits[1] = static_cast<uint32_t>(x >> 32);
+        _digits[0] = static_cast<std::uint32_t>(x);
+        _digits[1] = static_cast<std::uint32_t>(x >> 32);
         _size = (_digits[1] == 0) ? (_digits[0] != 0) : 2;
         _sign = (_size != 0);
     }
@@ -129,7 +129,7 @@ private:
         }
     }
 
-    uint32_t * _digits; // Unowned
+    std::uint32_t * _digits; // Unowned
     unsigned _capacity;
     unsigned _size;
     int _sign;

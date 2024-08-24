@@ -53,77 +53,77 @@ namespace sphgeom {
 
 /// `encodeDouble` appends an IEEE double in little-endian byte order
 /// to the end of buffer.
-inline void encodeDouble(double item, std::vector<uint8_t> & buffer) {
+inline void encodeDouble(double item, std::vector<std::uint8_t> & buffer) {
 #ifdef OPTIMIZED_LITTLE_ENDIAN
-    auto ptr = reinterpret_cast<uint8_t const *>(&item);
+    auto ptr = reinterpret_cast<std::uint8_t const *>(&item);
     buffer.insert(buffer.end(), ptr, ptr + 8);
 #else
-    union { uint64_t u; double d; };
+    union { std::uint64_t u; double d; };
     d = item;
-    buffer.push_back(static_cast<uint8_t>(u));
-    buffer.push_back(static_cast<uint8_t>(u >> 8));
-    buffer.push_back(static_cast<uint8_t>(u >> 16));
-    buffer.push_back(static_cast<uint8_t>(u >> 24));
-    buffer.push_back(static_cast<uint8_t>(u >> 32));
-    buffer.push_back(static_cast<uint8_t>(u >> 40));
-    buffer.push_back(static_cast<uint8_t>(u >> 48));
-    buffer.push_back(static_cast<uint8_t>(u >> 56));
+    buffer.push_back(static_cast<std::uint8_t>(u));
+    buffer.push_back(static_cast<std::uint8_t>(u >> 8));
+    buffer.push_back(static_cast<std::uint8_t>(u >> 16));
+    buffer.push_back(static_cast<std::uint8_t>(u >> 24));
+    buffer.push_back(static_cast<std::uint8_t>(u >> 32));
+    buffer.push_back(static_cast<std::uint8_t>(u >> 40));
+    buffer.push_back(static_cast<std::uint8_t>(u >> 48));
+    buffer.push_back(static_cast<std::uint8_t>(u >> 56));
 #endif
 }
 
 /// `decodeDouble` extracts an IEEE double from the 8 byte little-endian byte
 /// sequence in buffer.
-inline double decodeDouble(uint8_t const * buffer) {
+inline double decodeDouble(std::uint8_t const * buffer) {
 #ifdef OPTIMIZED_LITTLE_ENDIAN
     return *reinterpret_cast<double const *>(buffer);
 #else
-    union { uint64_t u; double d; };
-    u = static_cast<uint64_t>(buffer[0]) +
-        (static_cast<uint64_t>(buffer[1]) << 8) +
-        (static_cast<uint64_t>(buffer[2]) << 16) +
-        (static_cast<uint64_t>(buffer[3]) << 24) +
-        (static_cast<uint64_t>(buffer[4]) << 32) +
-        (static_cast<uint64_t>(buffer[5]) << 40) +
-        (static_cast<uint64_t>(buffer[6]) << 48) +
-        (static_cast<uint64_t>(buffer[7]) << 56);
+    union { std::uint64_t u; double d; };
+    u = static_cast<std::uint64_t>(buffer[0]) +
+        (static_cast<std::uint64_t>(buffer[1]) << 8) +
+        (static_cast<std::uint64_t>(buffer[2]) << 16) +
+        (static_cast<std::uint64_t>(buffer[3]) << 24) +
+        (static_cast<std::uint64_t>(buffer[4]) << 32) +
+        (static_cast<std::uint64_t>(buffer[5]) << 40) +
+        (static_cast<std::uint64_t>(buffer[6]) << 48) +
+        (static_cast<std::uint64_t>(buffer[7]) << 56);
     return d;
 #endif
 }
 
 /// `encodeU64` appends an uint64 in little-endian byte order
 /// to the end of buffer.
-inline void encodeU64(std::uint64_t item, std::vector<uint8_t> & buffer) {
+inline void encodeU64(std::uint64_t item, std::vector<std::uint8_t> & buffer) {
 #ifdef OPTIMIZED_LITTLE_ENDIAN
-    auto ptr = reinterpret_cast<uint8_t const *>(&item);
+    auto ptr = reinterpret_cast<std::uint8_t const *>(&item);
     buffer.insert(buffer.end(), ptr, ptr + 8);
 #else
-    union { uint64_t u; double d; };
+    union { std::uint64_t u; double d; };
     d = item;
-    buffer.push_back(static_cast<uint8_t>(u));
-    buffer.push_back(static_cast<uint8_t>(u >> 8));
-    buffer.push_back(static_cast<uint8_t>(u >> 16));
-    buffer.push_back(static_cast<uint8_t>(u >> 24));
-    buffer.push_back(static_cast<uint8_t>(u >> 32));
-    buffer.push_back(static_cast<uint8_t>(u >> 40));
-    buffer.push_back(static_cast<uint8_t>(u >> 48));
-    buffer.push_back(static_cast<uint8_t>(u >> 56));
+    buffer.push_back(static_cast<std::uint8_t>(u));
+    buffer.push_back(static_cast<std::uint8_t>(u >> 8));
+    buffer.push_back(static_cast<std::uint8_t>(u >> 16));
+    buffer.push_back(static_cast<std::uint8_t>(u >> 24));
+    buffer.push_back(static_cast<std::uint8_t>(u >> 32));
+    buffer.push_back(static_cast<std::uint8_t>(u >> 40));
+    buffer.push_back(static_cast<std::uint8_t>(u >> 48));
+    buffer.push_back(static_cast<std::uint8_t>(u >> 56));
 #endif
 }
 
 /// `decodeU64` extracts an uint64 from the 8 byte little-endian byte
 /// sequence in buffer.
-inline std::uint64_t decodeU64(uint8_t const * buffer) {
+inline std::uint64_t decodeU64(std::uint8_t const * buffer) {
 #ifdef OPTIMIZED_LITTLE_ENDIAN
-    return *reinterpret_cast<uint64_t const *>(buffer);
+    return *reinterpret_cast<std::uint64_t const *>(buffer);
 #else
-    std::uint64_t u = static_cast<uint64_t>(buffer[0]) +
-        (static_cast<uint64_t>(buffer[1]) << 8) +
-        (static_cast<uint64_t>(buffer[2]) << 16) +
-        (static_cast<uint64_t>(buffer[3]) << 24) +
-        (static_cast<uint64_t>(buffer[4]) << 32) +
-        (static_cast<uint64_t>(buffer[5]) << 40) +
-        (static_cast<uint64_t>(buffer[6]) << 48) +
-        (static_cast<uint64_t>(buffer[7]) << 56);
+    std::uint64_t u = static_cast<std::uint64_t>(buffer[0]) +
+        (static_cast<std::uint64_t>(buffer[1]) << 8) +
+        (static_cast<std::uint64_t>(buffer[2]) << 16) +
+        (static_cast<std::uint64_t>(buffer[3]) << 24) +
+        (static_cast<std::uint64_t>(buffer[4]) << 32) +
+        (static_cast<std::uint64_t>(buffer[5]) << 40) +
+        (static_cast<std::uint64_t>(buffer[6]) << 48) +
+        (static_cast<std::uint64_t>(buffer[7]) << 56);
     return u;
 #endif
 }

@@ -37,6 +37,7 @@
 #endif
 #include <cstdio>
 #include <ostream>
+#include <cstdint>
 
 #include "lsst/sphgeom/Angle.h"
 #include "lsst/sphgeom/UnitVector3d.h"
@@ -46,7 +47,7 @@ namespace lsst {
 namespace sphgeom {
 
 double Vector3d::normalize() {
-    static constexpr uint8_t UNUSED = 255;
+    static constexpr std::uint8_t UNUSED = 255;
     // Given a 3 component vector (x, y, z), this LUT provides the indexes
     // of the components in order of smallest absolute value to largest.
     // The index into the LUT must be computed as:
@@ -54,7 +55,7 @@ double Vector3d::normalize() {
     //      ((|x| > |z|) << 2) +
     //      ((|x| > |y|) << 1) +
     //       (|y| > |z|)
-    static uint8_t const COMPONENT[8][4] = {
+    static std::uint8_t const COMPONENT[8][4] = {
         {0, 1, 2, UNUSED},
         {0, 2, 1, UNUSED},
         {1, 0, 2, UNUSED},

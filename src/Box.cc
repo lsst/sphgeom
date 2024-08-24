@@ -451,9 +451,9 @@ Relationship Box::relate(Ellipse const & e) const {
     return invert(e.relate(*this));
 }
 
-std::vector<uint8_t> Box::encode() const {
-    std::vector<uint8_t> buffer;
-    uint8_t tc = TYPE_CODE;
+std::vector<std::uint8_t> Box::encode() const {
+    std::vector<std::uint8_t> buffer;
+    std::uint8_t tc = TYPE_CODE;
     buffer.reserve(ENCODED_SIZE);
     buffer.push_back(tc);
     encodeDouble(_lon.getA().asRadians(), buffer);
@@ -463,7 +463,7 @@ std::vector<uint8_t> Box::encode() const {
     return buffer;
 }
 
-std::unique_ptr<Box> Box::decode(uint8_t const * buffer, size_t n) {
+std::unique_ptr<Box> Box::decode(std::uint8_t const * buffer, size_t n) {
     if (buffer == nullptr || n != ENCODED_SIZE || *buffer != TYPE_CODE) {
         throw std::runtime_error("Byte-string is not an encoded Box");
     }

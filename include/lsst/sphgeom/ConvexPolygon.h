@@ -36,6 +36,7 @@
 
 #include <iosfwd>
 #include <vector>
+#include <cstdint>
 
 #include "Region.h"
 #include "UnitVector3d.h"
@@ -63,7 +64,7 @@ namespace sphgeom {
 /// convex hull of a point set.
 class ConvexPolygon : public Region {
 public:
-    static constexpr uint8_t TYPE_CODE = 'p';
+    static constexpr std::uint8_t TYPE_CODE = 'p';
 
     /// `convexHull` returns the convex hull of the given set of points if it
     /// exists and throws an exception otherwise. Though points are supplied
@@ -157,14 +158,14 @@ public:
     Relationship relate(ConvexPolygon const &) const override;
     Relationship relate(Ellipse const &) const override;
 
-    std::vector<uint8_t> encode() const override;
+    std::vector<std::uint8_t> encode() const override;
 
     ///@{
     /// `decode` deserializes a ConvexPolygon from a byte string produced by encode.
-    static std::unique_ptr<ConvexPolygon> decode(std::vector<uint8_t> const & s) {
+    static std::unique_ptr<ConvexPolygon> decode(std::vector<std::uint8_t> const & s) {
         return decode(s.data(), s.size());
     }
-    static std::unique_ptr<ConvexPolygon> decode(uint8_t const * buffer, size_t n);
+    static std::unique_ptr<ConvexPolygon> decode(std::uint8_t const * buffer, size_t n);
     ///@}
 
 private:

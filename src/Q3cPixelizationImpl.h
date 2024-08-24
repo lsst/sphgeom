@@ -230,7 +230,7 @@ double const FACE_SCALE[31] = {
 
 #if defined(NO_SIMD) || !defined(__x86_64__)
 
-    int faceNumber(UnitVector3d const & v, uint8_t const (&faceNumbers)[64]) {
+    int faceNumber(UnitVector3d const & v, std::uint8_t const (&faceNumbers)[64]) {
         int index = ((v.x() >  v.y()) << 5) +
                     ((v.x() > -v.y()) << 4) +
                     ((v.x() >  v.z()) << 3) +
@@ -243,7 +243,7 @@ double const FACE_SCALE[31] = {
     UnitVector3d faceToSphere(int face,
                               double u,
                               double v,
-                              uint8_t const (&faceComponents)[6][4],
+                              std::uint8_t const (&faceComponents)[6][4],
                               double const (&faceConstants)[6][4])
     {
         double p[3];
@@ -255,18 +255,18 @@ double const FACE_SCALE[31] = {
         return UnitVector3d::fromNormalized(p[0], p[1], p[2]);
     }
 
-    std::tuple<int32_t, int32_t> faceToGrid(int level, double u, double v) {
+    std::tuple<std::int32_t, std::int32_t> faceToGrid(int level, double u, double v) {
         double const gridScale = GRID_SCALE[level];
         double const stMax = ST_MAX[level];
         double s = u * gridScale + gridScale;
         double t = v * gridScale + gridScale;
         s = std::max(std::min(s, stMax), 0.0);
         t = std::max(std::min(t, stMax), 0.0);
-        return std::make_tuple(static_cast<int32_t>(s),
-                               static_cast<int32_t>(t));
+        return std::make_tuple(static_cast<std::int32_t>(s),
+                               static_cast<std::int32_t>(t));
     }
 
-    std::tuple<double, double> gridToFace(int level, int32_t s, int32_t t) {
+    std::tuple<double, double> gridToFace(int level, std::int32_t s, std::int32_t t) {
         double const faceScale = FACE_SCALE[level];
         return std::make_tuple(static_cast<double>(s) * faceScale - 1.0,
                                static_cast<double>(t) * faceScale - 1.0);
@@ -288,7 +288,7 @@ double const FACE_SCALE[31] = {
 
 #else
 
-    int faceNumber(UnitVector3d const & v, uint8_t const (&faceNumbers)[64]) {
+    int faceNumber(UnitVector3d const & v, std::uint8_t const (&faceNumbers)[64]) {
         __m128d const m00 = _mm_set_pd(0.0, -0.0);
         __m128d xx = _mm_set1_pd(v.x());
         __m128d yy = _mm_set1_pd(v.y());
@@ -303,7 +303,7 @@ double const FACE_SCALE[31] = {
 
     UnitVector3d faceToSphere(int face,
                               __m128d uv,
-                              uint8_t const (&faceComponents)[6][4],
+                              std::uint8_t const (&faceComponents)[6][4],
                               double const (&faceConstants)[6][4])
     {
         double p[3];

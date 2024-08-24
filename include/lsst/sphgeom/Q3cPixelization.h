@@ -71,7 +71,7 @@ public:
     /// index `i`.
     ///
     /// If `i` is not a valid Q3C index, a std::invalid_argument is thrown.
-    ConvexPolygon quad(uint64_t i) const;
+    ConvexPolygon quad(std::uint64_t i) const;
 
     /// `neighborhood` returns the indexes of all pixels that share a vertex
     /// with pixel `i` (including `i` itself). A Q3C pixel has 8 - k adjacent
@@ -79,15 +79,15 @@ public:
     /// vertices (0, 1, or 4).
     ///
     /// If `i` is not a valid Q3C index, a std::invalid_argument is thrown.
-    std::vector<uint64_t> neighborhood(uint64_t i) const;
+    std::vector<std::uint64_t> neighborhood(std::uint64_t i) const;
 
     RangeSet universe() const override {
-        return RangeSet(0, static_cast<uint64_t>(6) << 2 * _level);
+        return RangeSet(0, static_cast<std::uint64_t>(6) << 2 * _level);
     }
 
-    std::unique_ptr<Region> pixel(uint64_t i) const override;
+    std::unique_ptr<Region> pixel(std::uint64_t i) const override;
 
-    uint64_t index(UnitVector3d const & v) const override;
+    std::uint64_t index(UnitVector3d const & v) const override;
 
     /// `toString` converts the given Q3C index to a human readable string.
     ///
@@ -99,7 +99,7 @@ public:
     /// on F.
     ///
     /// If i is not a valid Q3C index, a std::invalid_argument is thrown.
-    std::string toString(uint64_t i) const override;
+    std::string toString(std::uint64_t i) const override;
 
 private:
     int _level;

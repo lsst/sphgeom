@@ -78,7 +78,7 @@ public:
     void operator()() {
         UnitVector3d trixel[3];
         // Loop over HTM root triangles.
-        for (uint64_t r = 0; r < 8; ++r) {
+        for (std::uint64_t r = 0; r < 8; ++r) {
             for (int v = 0; v < 3; ++v) {
                 trixel[v] = rootVertex(r, v);
             }
@@ -86,7 +86,7 @@ public:
         }
     }
 
-    void subdivide(UnitVector3d const * trixel, uint64_t index, int level) {
+    void subdivide(UnitVector3d const * trixel, std::uint64_t index, int level) {
         UnitVector3d mid[3] = {
             UnitVector3d(trixel[1] + trixel[2]),
             UnitVector3d(trixel[2] + trixel[0]),
@@ -114,7 +114,7 @@ public:
 } // unnamed namespace
 
 
-int HtmPixelization::level(uint64_t i) {
+int HtmPixelization::level(std::uint64_t i) {
     // An HTM index consists of 4 bits encoding the root triangle
     // number (8 - 15), followed by 2l bits, where each of the l bit pairs
     // encodes a child triangle number (0-3), and l is the desired level.
@@ -127,13 +127,13 @@ int HtmPixelization::level(uint64_t i) {
     return (j - 3) >> 1;
 }
 
-ConvexPolygon HtmPixelization::triangle(uint64_t i) {
+ConvexPolygon HtmPixelization::triangle(std::uint64_t i) {
     int l = level(i);
     if (l < 0 || l > MAX_LEVEL) {
         throw std::invalid_argument("Invalid HTM index");
     }
     l *= 2;
-    uint64_t r = (i >> l) & 7;
+    std::uint64_t r = (i >> l) & 7;
     UnitVector3d v0 = rootVertex(r, 0);
     UnitVector3d v1 = rootVertex(r, 1);
     UnitVector3d v2 = rootVertex(r, 2);
@@ -152,7 +152,7 @@ ConvexPolygon HtmPixelization::triangle(uint64_t i) {
     return ConvexPolygon(v0, v1, v2);
 }
 
-std::string HtmPixelization::asString(uint64_t i) {
+std::string HtmPixelization::asString(std::uint64_t i) {
     char s[MAX_LEVEL + 2];
     int l = level(i);
     if (l < 0 || l > MAX_LEVEL) {
@@ -174,9 +174,9 @@ HtmPixelization::HtmPixelization(int level) : _level(level) {
     }
 }
 
-uint64_t HtmPixelization::index(UnitVector3d const & v) const {
+std::uint64_t HtmPixelization::index(UnitVector3d const & v) const {
     // Find the root triangle containing v.
-    uint64_t r;
+    std::uint64_t r;
     if (v.z() < 0.0) {
         // v is in the southern hemisphere (root triangle 0, 1, 2, or 3).
         if (v.y() > 0.0) {
@@ -199,7 +199,7 @@ uint64_t HtmPixelization::index(UnitVector3d const & v) const {
     UnitVector3d v0 = rootVertex(r, 0);
     UnitVector3d v1 = rootVertex(r, 1);
     UnitVector3d v2 = rootVertex(r, 2);
-    uint64_t i = r + 8;
+    std::uint64_t i = r + 8;
     for (int l = 0; l < _level; ++l) {
         UnitVector3d m01 = UnitVector3d(v0 + v1);
         UnitVector3d m20 = UnitVector3d(v2 + v0);

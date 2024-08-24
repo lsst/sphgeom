@@ -58,7 +58,7 @@ inline ptrdiff_t convertIndex(ptrdiff_t len, pybind11::int_ i) {
 
 /// Encode a Region as a pybind11 bytes object
 inline pybind11::bytes encode(Region const &self) {
-    std::vector<uint8_t> bytes = self.encode();
+    std::vector<std::uint8_t> bytes = self.encode();
     return pybind11::bytes(reinterpret_cast<char const *>(bytes.data()),
                      bytes.size());
 }
@@ -66,7 +66,7 @@ inline pybind11::bytes encode(Region const &self) {
 /// Decode a Region from a pybind11 bytes object.
 template <typename R>
 std::unique_ptr<R> decode(pybind11::bytes bytes) {
-    uint8_t const *buffer = reinterpret_cast<uint8_t const *>(
+    std::uint8_t const *buffer = reinterpret_cast<std::uint8_t const *>(
             PYBIND11_BYTES_AS_STRING(bytes.ptr()));
     size_t n = static_cast<size_t>(PYBIND11_BYTES_SIZE(bytes.ptr()));
     return R::decode(buffer, n);

@@ -62,12 +62,12 @@ public:
     /// `level` returns the subdivision level of the given HTM index.
     ///
     /// If i is not a valid HTM index, -1 is returned.
-    static int level(uint64_t i);
+    static int level(std::uint64_t i);
 
     /// `triangle` returns the triangle corresponding to the given HTM index.
     ///
     /// If i is not a valid HTM index, a std::invalid_argument is thrown.
-    static ConvexPolygon triangle(uint64_t i);
+    static ConvexPolygon triangle(std::uint64_t i);
 
     /// `asString` converts the given HTM index to a human readable string.
     ///
@@ -80,7 +80,7 @@ public:
     /// of the HTM triangle-tree.
     ///
     /// If i is not a valid HTM index, a std::invalid_argument is thrown.
-    static std::string asString(uint64_t i);
+    static std::string asString(std::uint64_t i);
 
     /// This constructor creates an HTM pixelization of the sphere with
     /// the given subdivision level. If `level` ∉ [0, MAX_LEVEL],
@@ -91,17 +91,17 @@ public:
     int getLevel() const { return _level; }
 
     RangeSet universe() const override {
-        return RangeSet(static_cast<uint64_t>(8) << 2 * _level,
-                        static_cast<uint64_t>(16) << 2 * _level);
+        return RangeSet(static_cast<std::uint64_t>(8) << 2 * _level,
+                        static_cast<std::uint64_t>(16) << 2 * _level);
     }
 
-    std::unique_ptr<Region> pixel(uint64_t i) const override {
+    std::unique_ptr<Region> pixel(std::uint64_t i) const override {
         return std::unique_ptr<Region>(new ConvexPolygon(triangle(i)));
     }
 
-    uint64_t index(UnitVector3d const &) const override;
+    std::uint64_t index(UnitVector3d const &) const override;
 
-    std::string toString(uint64_t i) const override { return asString(i); }
+    std::string toString(std::uint64_t i) const override { return asString(i); }
 
 private:
     int _level;

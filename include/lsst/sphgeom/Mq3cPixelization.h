@@ -62,14 +62,14 @@ public:
     /// `level` returns the subdivision level of the given modified Q3C index.
     ///
     /// If i is not a valid modified Q3C index, -1 is returned.
-    static int level(uint64_t i);
+    static int level(std::uint64_t i);
 
     /// `quad` returns the quadrilateral corresponding to the modified Q3C
     /// pixel with index `i`.
     ///
     /// If `i` is not a valid modified Q3C index, a std::invalid_argument
     /// is thrown.
-    static ConvexPolygon quad(uint64_t i);
+    static ConvexPolygon quad(std::uint64_t i);
 
     /// `neighborhood` returns the indexes of all pixels that share a vertex
     /// with pixel `i` (including `i` itself). A Q3C pixel has 8 - k adjacent
@@ -78,7 +78,7 @@ public:
     ///
     /// If `i` is not a valid modified Q3C index, a std::invalid_argument
     /// is thrown.
-    static std::vector<uint64_t> neighborhood(uint64_t i);
+    static std::vector<std::uint64_t> neighborhood(std::uint64_t i);
 
     /// `toString` converts the given modified-Q3C index to a human readable
     /// string.
@@ -92,7 +92,7 @@ public:
     ///
     /// If i is not a valid modified-Q3C index, a std::invalid_argument is
     /// thrown.
-    static std::string asString(uint64_t i);
+    static std::string asString(std::uint64_t i);
 
     /// This constructor creates a modified Q3C pixelization of the sphere
     /// with the given subdivision level. If `level` ∉ [0, MAX_LEVEL],
@@ -103,15 +103,15 @@ public:
     int getLevel() const { return _level; }
 
     RangeSet universe() const override {
-        return RangeSet(static_cast<uint64_t>(10) << 2 * _level,
-                        static_cast<uint64_t>(16) << 2 * _level);
+        return RangeSet(static_cast<std::uint64_t>(10) << 2 * _level,
+                        static_cast<std::uint64_t>(16) << 2 * _level);
     }
 
-    std::unique_ptr<Region> pixel(uint64_t i) const override;
+    std::unique_ptr<Region> pixel(std::uint64_t i) const override;
 
-    uint64_t index(UnitVector3d const & v) const override;
+    std::uint64_t index(UnitVector3d const & v) const override;
 
-    std::string toString(uint64_t i) const override { return asString(i); }
+    std::string toString(std::uint64_t i) const override { return asString(i); }
 
 private:
     int _level;
