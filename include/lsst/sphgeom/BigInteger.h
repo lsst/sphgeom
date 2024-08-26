@@ -33,7 +33,6 @@
 /// \file
 /// \brief This file declares a class for arbitrary precision integers.
 
-#include <stdint.h>
 #include <cstring>
 #include <stdexcept>
 #include <cstdint>

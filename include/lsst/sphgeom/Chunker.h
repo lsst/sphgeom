@@ -34,7 +34,6 @@
 /// \brief This file declares a class for partitioning the sky into chunks
 ///        and sub-chunks.
 
-#include <stdint.h>
 #include <vector>
 #include <cstdint>
 

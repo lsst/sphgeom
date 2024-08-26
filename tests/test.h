@@ -33,7 +33,7 @@
 /// \file
 /// \brief This file defines a simple header-only unit testing framework.
 
-#include <stdint.h>
+#include <cstdint>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -234,19 +234,17 @@ struct DefaultTestFixture {};
 // for the details.
 [[gnu::unused]] static bool lomontCompare3(double a,
                                            double b,
-                                           int64_t maxDiff)
+                                           std::int64_t maxDiff)
 {
-    union { double d; int64_t i; } bits;
+    union { double d; std::int64_t i; } bits;
     bits.d = a;
-    int64_t ai = bits.i;
+    std::int64_t ai = bits.i;
     bits.d = b;
-    int64_t bi = bits.i;
-    //int64_t ai = *reinterpret_cast<int64_t*>(&a);
-    //int64_t bi = *reinterpret_cast<int64_t*>(&b);
-    int64_t test = static_cast<int64_t>(static_cast<uint64_t>(ai ^ bi) >> 63) - 1;
-    int64_t diff = (((0x8000000000000000 - ai) & (~test)) | (ai & test)) - bi;
-    int64_t v1 = maxDiff + diff;
-    int64_t v2 = maxDiff - diff;
+    std::int64_t bi = bits.i;
+    std::int64_t test = static_cast<std::int64_t>(static_cast<std::uint64_t>(ai ^ bi) >> 63) - 1;
+    std::int64_t diff = (((0x8000000000000000 - ai) & (~test)) | (ai & test)) - bi;
+    std::int64_t v1 = maxDiff + diff;
+    std::int64_t v2 = maxDiff - diff;
     return (v1 | v2) >= 0;
 }
 
