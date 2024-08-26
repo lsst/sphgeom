@@ -36,6 +36,7 @@
 
 #include <stdint.h>
 #include <vector>
+#include <cstdint>
 
 #include "Angle.h"
 #include "Box.h"
