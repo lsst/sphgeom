@@ -35,6 +35,7 @@
 ///        regions on the unit sphere.
 
 #include <iosfwd>
+#include <cstdint>
 
 #include "Region.h"
 #include "UnitVector3d.h"
@@ -52,7 +53,7 @@ namespace sphgeom {
 /// angles.
 class Circle : public Region {
 public:
-    static constexpr uint8_t TYPE_CODE = 'c';
+    static constexpr std::uint8_t TYPE_CODE = 'c';
 
     static Circle empty() { return Circle(); }
 
@@ -251,14 +252,14 @@ public:
     Relationship relate(ConvexPolygon const &) const override;
     Relationship relate(Ellipse const &) const override;
 
-    std::vector<uint8_t> encode() const override;
+    std::vector<std::uint8_t> encode() const override;
 
     ///@{
     /// `decode` deserializes a Circle from a byte string produced by encode.
-    static std::unique_ptr<Circle> decode(std::vector<uint8_t> const & s) {
+    static std::unique_ptr<Circle> decode(std::vector<std::uint8_t> const & s) {
         return decode(s.data(), s.size());
     }
-    static std::unique_ptr<Circle> decode(uint8_t const * buffer, size_t n);
+    static std::unique_ptr<Circle> decode(std::uint8_t const * buffer, size_t n);
     ///@}
 
 private:

@@ -37,6 +37,7 @@
 #include <iosfwd>
 #include <iterator>
 #include <array>
+#include <cstdint>
 
 #include "Region.h"
 #include "UnitVector3d.h"
@@ -82,10 +83,10 @@ public:
     ///@{
     /// `decode` deserializes a CompoundRegion from a byte string produced by
     /// encode.
-    static std::unique_ptr<CompoundRegion> decode(std::vector<uint8_t> const &s) {
+    static std::unique_ptr<CompoundRegion> decode(std::vector<std::uint8_t> const &s) {
         return decode(s.data(), s.size());
     }
-    static std::unique_ptr<CompoundRegion> decode(uint8_t const *buffer, size_t n);
+    static std::unique_ptr<CompoundRegion> decode(std::uint8_t const *buffer, size_t n);
     ///@}
 
 protected:
@@ -107,7 +108,7 @@ private:
 /// nested operand regions and combining the results.
 class UnionRegion : public CompoundRegion {
 public:
-    static constexpr uint8_t TYPE_CODE = 'u';
+    static constexpr std::uint8_t TYPE_CODE = 'u';
 
     using CompoundRegion::CompoundRegion;
 
@@ -119,15 +120,15 @@ public:
     using Region::contains;
     bool contains(UnitVector3d const &v) const override;
     Relationship relate(Region const &r) const override;
-    std::vector<uint8_t> encode() const override { return _encode(TYPE_CODE); }
+    std::vector<std::uint8_t> encode() const override { return _encode(TYPE_CODE); }
 
     ///@{
     /// `decode` deserializes a UnionRegion from a byte string produced by
     /// encode.
-    static std::unique_ptr<UnionRegion> decode(std::vector<uint8_t> const &s) {
+    static std::unique_ptr<UnionRegion> decode(std::vector<std::uint8_t> const &s) {
         return decode(s.data(), s.size());
     }
-    static std::unique_ptr<UnionRegion> decode(uint8_t const *buffer, size_t n) {
+    static std::unique_ptr<UnionRegion> decode(std::uint8_t const *buffer, size_t n) {
         return std::make_unique<UnionRegion>(_decode(TYPE_CODE, buffer, n));
     }
     ///@}
@@ -140,7 +141,7 @@ public:
 /// its nested operand regions and combining the results.
 class IntersectionRegion : public CompoundRegion {
 public:
-    static constexpr uint8_t TYPE_CODE = 'i';
+    static constexpr std::uint8_t TYPE_CODE = 'i';
 
     using CompoundRegion::CompoundRegion;
 
@@ -152,15 +153,15 @@ public:
     using Region::contains;
     bool contains(UnitVector3d const &v) const override;
     Relationship relate(Region const &r) const override;
-    std::vector<uint8_t> encode() const override { return _encode(TYPE_CODE); }
+    std::vector<std::uint8_t> encode() const override { return _encode(TYPE_CODE); }
 
     ///@{
     /// `decode` deserializes a IntersetionRegion from a byte string produced
     /// by encode.
-    static std::unique_ptr<IntersectionRegion> decode(std::vector<uint8_t> const &s) {
+    static std::unique_ptr<IntersectionRegion> decode(std::vector<std::uint8_t> const &s) {
         return decode(s.data(), s.size());
     }
-    static std::unique_ptr<IntersectionRegion> decode(uint8_t const *buffer, size_t n) {
+    static std::unique_ptr<IntersectionRegion> decode(std::uint8_t const *buffer, size_t n) {
         return std::make_unique<IntersectionRegion>(_decode(TYPE_CODE, buffer, n));
     }
     ///@}

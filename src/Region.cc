@@ -52,11 +52,11 @@ bool Region::contains(double lon, double lat) const {
     return contains(UnitVector3d(LonLat::fromRadians(lon, lat)));
 }
 
-std::unique_ptr<Region> Region::decode(uint8_t const * buffer, size_t n) {
+std::unique_ptr<Region> Region::decode(std::uint8_t const * buffer, size_t n) {
     if (buffer == nullptr || n == 0) {
         throw std::runtime_error("Byte-string is not an encoded Region");
     }
-    uint8_t type = *buffer;
+    std::uint8_t type = *buffer;
     if (type == Box::TYPE_CODE) {
         return Box::decode(buffer, n);
     } else if (type == Circle::TYPE_CODE) {

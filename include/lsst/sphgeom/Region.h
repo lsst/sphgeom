@@ -35,6 +35,7 @@
 
 #include <memory>
 #include <vector>
+#include <cstdint>
 
 #include "Relationship.h"
 
@@ -137,15 +138,15 @@ public:
 
     /// `encode` serializes this region into an opaque byte string. Byte strings
     /// emitted by encode can be deserialized with decode.
-    virtual std::vector<uint8_t> encode() const = 0;
+    virtual std::vector<std::uint8_t> encode() const = 0;
 
     ///@{
     /// `decode` deserializes a Region from a byte string produced by encode.
-    static std::unique_ptr<Region> decode(std::vector<uint8_t> const & s) {
+    static std::unique_ptr<Region> decode(std::vector<std::uint8_t> const & s) {
         return decode(s.data(), s.size());
     }
 
-    static std::unique_ptr<Region> decode(uint8_t const * buffer, size_t n);
+    static std::unique_ptr<Region> decode(std::uint8_t const * buffer, size_t n);
     ///@}
 };
 

@@ -124,7 +124,7 @@ std::array<std::unique_ptr<Region>, 2> CompoundRegion::_decode(
     return result;
 }
 
-std::unique_ptr<CompoundRegion> CompoundRegion::decode(uint8_t const *buffer, size_t n) {
+std::unique_ptr<CompoundRegion> CompoundRegion::decode(std::uint8_t const *buffer, size_t n) {
     if (n == 0) {
         throw std::runtime_error("Encoded CompoundRegion is truncated.");
     }

@@ -50,9 +50,9 @@ namespace {
 // See commentary in Q3cPixelizationImpl.h for an explanation of
 // these lookup tables.
 
-constexpr uint8_t UNUSED = 255;
+constexpr std::uint8_t UNUSED = 255;
 
-alignas(64) uint8_t const FACE_NUM[64] = {
+alignas(64) std::uint8_t const FACE_NUM[64] = {
          4,      4,      4,      4, UNUSED,      3, UNUSED, UNUSED,
     UNUSED, UNUSED,      0, UNUSED, UNUSED, UNUSED, UNUSED, UNUSED,
     UNUSED, UNUSED, UNUSED,      2, UNUSED,      3, UNUSED,      2,
@@ -63,7 +63,7 @@ alignas(64) uint8_t const FACE_NUM[64] = {
     UNUSED, UNUSED,      0, UNUSED,      1,      1,      1,      1
 };
 
-uint8_t const FACE_COMP[6][4] = {
+std::uint8_t const FACE_COMP[6][4] = {
     {0, 1, 2, UNUSED}, {1, 2, 0, UNUSED}, {2, 0, 1, UNUSED},
     {0, 1, 2, UNUSED}, {1, 2, 0, UNUSED}, {2, 0, 1, UNUSED}
 };
@@ -83,15 +83,15 @@ constexpr double DILATION = 1.0e-15;
 // `wrapIndex` returns the modified-Q3C index for grid coordinates (face, s, t)
 // at the given level. Both s and t may underflow or overflow by 1, i.e. wrap
 // to an adjacent face.
-uint64_t wrapIndex(int level,
+std::uint64_t wrapIndex(int level,
                    int face,
-                   uint32_t s,
-                   uint32_t t)
+                   std::uint32_t s,
+                   std::uint32_t t)
 {
-    uint32_t const stMax = (static_cast<uint32_t>(1) << level) - 1;
+    std::uint32_t const stMax = (static_cast<std::uint32_t>(1) << level) - 1;
     // Wrap until no more underflow or overflow is detected.
     while (true) {
-        if (s == static_cast<uint32_t>(-1)) {
+        if (s == static_cast<std::uint32_t>(-1)) {
             face = (face + 4) % 6;
             s = stMax - t;
             t = stMax;
@@ -101,7 +101,7 @@ uint64_t wrapIndex(int level,
             s = t;
             t = 0;
             continue;
-        } else if (t == static_cast<uint32_t>(-1)) {
+        } else if (t == static_cast<std::uint32_t>(-1)) {
             face = (face + 5) % 6;
             t = s;
             s = stMax;
@@ -114,13 +114,13 @@ uint64_t wrapIndex(int level,
         }
         break;
     }
-    return (static_cast<uint64_t>(face + 10) << (2 * level)) |
+    return (static_cast<std::uint64_t>(face + 10) << (2 * level)) |
            hilbertIndex(s, t, level);
 }
 
-int findNeighborhood(int level, uint64_t i, uint64_t * dst) {
+int findNeighborhood(int level, std::uint64_t i, std::uint64_t * dst) {
     int const face = static_cast<int>(i >> (2 * level)) - 10;
-    uint32_t s, t;
+    std::uint32_t s, t;
     std::tie(s, t) = hilbertIndexInverse(i, level);
     dst[0] = wrapIndex(level, face, s - 1, t - 1);
     dst[1] = wrapIndex(level, face, s    , t - 1);
@@ -136,14 +136,14 @@ int findNeighborhood(int level, uint64_t i, uint64_t * dst) {
 }
 
 #if defined(NO_SIMD) || !defined(__x86_64__)
-    void makeQuad(uint64_t i, int level, UnitVector3d * verts) {
+    void makeQuad(std::uint64_t i, int level, UnitVector3d * verts) {
         int const face = static_cast<int>(i >> (2 * level)) - 10;
         double const faceScale = FACE_SCALE[level];
         double u0, v0;
-        uint32_t s, t;
+        std::uint32_t s, t;
         std::tie(s, t) = hilbertIndexInverse(i, level);
         std::tie(u0, v0) = gridToFace(
-            level, static_cast<int32_t>(s), static_cast<int32_t>(t));
+            level, static_cast<std::int32_t>(s), static_cast<std::int32_t>(t));
         double u1 = (u0 + faceScale) + DILATION;
         double v1 = (v0 + faceScale) + DILATION;
         u0 -= DILATION;
@@ -163,7 +163,7 @@ int findNeighborhood(int level, uint64_t i, uint64_t * dst) {
         }
     }
 #else
-    void makeQuad(uint64_t i, int level, UnitVector3d * verts) {
+    void makeQuad(std::uint64_t i, int level, UnitVector3d * verts) {
         int const face = static_cast<int>(i >> (2 * level)) - 10;
         __m128d faceScale = _mm_set1_pd(FACE_SCALE[level]);
         __m128d dilation = _mm_set1_pd(DILATION);
@@ -221,16 +221,16 @@ public:
     void operator()() {
         UnitVector3d pixel[4];
         // Loop over cube faces
-        for (uint64_t f = 10; f < 16; ++f) {
+        for (std::uint64_t f = 10; f < 16; ++f) {
             makeQuad(f, 0, pixel);
             visit(pixel, f, 0);
         }
     }
 
-    void subdivide(UnitVector3d const *, uint64_t i, int level) {
+    void subdivide(UnitVector3d const *, std::uint64_t i, int level) {
         UnitVector3d pixel[4];
         ++level;
-        for (uint64_t c = i * 4; c != i * 4 + 4; ++c) {
+        for (std::uint64_t c = i * 4; c != i * 4 + 4; ++c) {
             makeQuad(c, level, pixel);
             visit(pixel, c, level);
         }
@@ -240,7 +240,7 @@ public:
 } // unnamed namespace
 
 
-int Mq3cPixelization::level(uint64_t i) {
+int Mq3cPixelization::level(std::uint64_t i) {
     // A modified Q3C index consists of 4 bits encoding the root cube face
     // (10 - 15), followed by 2l bits, where each of the l bit pairs encodes
     // a child index (0-3), and l is the desired level.
@@ -254,7 +254,7 @@ int Mq3cPixelization::level(uint64_t i) {
     return (j - 3) >> 1;
 }
 
-ConvexPolygon Mq3cPixelization::quad(uint64_t i) {
+ConvexPolygon Mq3cPixelization::quad(std::uint64_t i) {
     int l = level(i);
     if (l < 0 || l > MAX_LEVEL) {
         throw std::invalid_argument("Invalid modified-Q3C index");
@@ -264,17 +264,17 @@ ConvexPolygon Mq3cPixelization::quad(uint64_t i) {
     return ConvexPolygon(verts[0], verts[1], verts[2], verts[3]);
 }
 
-std::vector<uint64_t> Mq3cPixelization::neighborhood(uint64_t i) {
+std::vector<std::uint64_t> Mq3cPixelization::neighborhood(std::uint64_t i) {
     int l = level(i);
     if (l < 0 || l > MAX_LEVEL) {
         throw std::invalid_argument("Invalid modified-Q3C index");
     }
-    uint64_t indexes[9];
+    std::uint64_t indexes[9];
     int n = findNeighborhood(l, i, indexes);
-    return std::vector<uint64_t>(indexes, indexes + n);
+    return std::vector<std::uint64_t>(indexes, indexes + n);
 }
 
-std::string Mq3cPixelization::asString(uint64_t i) {
+std::string Mq3cPixelization::asString(std::uint64_t i) {
     static char const FACE_NORM[6][2] = {
         {'-', 'Z'}, {'+', 'X'}, {'+', 'Y'},
         {'+', 'Z'}, {'-', 'X'}, {'-', 'Y'},
@@ -303,8 +303,8 @@ Mq3cPixelization::Mq3cPixelization(int level) : _level{level} {
     }
 }
 
-std::unique_ptr<Region> Mq3cPixelization::pixel(uint64_t i) const {
-    uint64_t f = i >> (2 * _level);
+std::unique_ptr<Region> Mq3cPixelization::pixel(std::uint64_t i) const {
+    std::uint64_t f = i >> (2 * _level);
     if (f < 10 || f > 15) {
         throw std::invalid_argument("Invalid modified-Q3C index");
     }
@@ -315,20 +315,20 @@ std::unique_ptr<Region> Mq3cPixelization::pixel(uint64_t i) const {
 }
 
 #if defined(NO_SIMD) || !defined(__x86_64__)
-    uint64_t Mq3cPixelization::index(UnitVector3d const & p) const {
+    std::uint64_t Mq3cPixelization::index(UnitVector3d const & p) const {
         int face = faceNumber(p, FACE_NUM);
         double w = std::fabs(p(FACE_COMP[face][2]));
         double u = (p(FACE_COMP[face][0]) / w) * FACE_CONST[face][0];
         double v = (p(FACE_COMP[face][1]) / w) * FACE_CONST[face][1];
         std::tie(u, v) = atanApprox(u, v);
-        std::tuple<int32_t, int32_t> g = faceToGrid(_level, u, v);
-        uint64_t h = hilbertIndex(static_cast<uint32_t>(std::get<0>(g)),
-                                  static_cast<uint32_t>(std::get<1>(g)),
+        std::tuple<std::int32_t, std::int32_t> g = faceToGrid(_level, u, v);
+        std::uint64_t h = hilbertIndex(static_cast<std::uint32_t>(std::get<0>(g)),
+                                  static_cast<std::uint32_t>(std::get<1>(g)),
                                   _level);
-        return (static_cast<uint64_t>(face + 10) << (2 * _level)) | h;
+        return (static_cast<std::uint64_t>(face + 10) << (2 * _level)) | h;
     }
 #else
-    uint64_t Mq3cPixelization::index(UnitVector3d const & p) const {
+    std::uint64_t Mq3cPixelization::index(UnitVector3d const & p) const {
         int face = faceNumber(p, FACE_NUM);
         __m128d ww = _mm_set1_pd(p(FACE_COMP[face][2]));
         __m128d uv = _mm_set_pd(p(FACE_COMP[face][1]), p(FACE_COMP[face][0]));
@@ -337,8 +337,8 @@ std::unique_ptr<Region> Mq3cPixelization::pixel(uint64_t i) const {
             _mm_set_pd(FACE_CONST[face][1], FACE_CONST[face][0])
         );
         __m128i st = faceToGrid(_level, atanApprox(uv));
-        uint64_t h = hilbertIndex(st, _level);
-        return (static_cast<uint64_t>(face + 10) << (2 * _level)) | h;
+        std::uint64_t h = hilbertIndex(st, _level);
+        return (static_cast<std::uint64_t>(face + 10) << (2 * _level)) | h;
     }
 #endif
 

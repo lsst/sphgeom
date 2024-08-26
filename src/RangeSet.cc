@@ -46,19 +46,19 @@ namespace {
 inline ptrdiff_t roundUpToEven(ptrdiff_t i) { return i + (i & 1); }
 
 
-// `RangeIter` is a stride-2 iterator over uint64_t values
+// `RangeIter` is a stride-2 iterator over std::uint64_t values
 // in an underlying array.
 struct RangeIter {
 
     // For std::iterator_traits
     using difference_type = ptrdiff_t;
-    using value_type = uint64_t;
-    using pointer = uint64_t *;
-    using reference = uint64_t &;
+    using value_type = std::uint64_t;
+    using pointer = std::uint64_t *;
+    using reference = std::uint64_t &;
     using iterator_category = std::random_access_iterator_tag;
 
     RangeIter() = default;
-    explicit RangeIter(uint64_t * p) : ptr{p} {}
+    explicit RangeIter(std::uint64_t * p) : ptr{p} {}
 
     friend void swap(RangeIter & a, RangeIter & b) { std::swap(a.ptr, b.ptr); }
 
@@ -88,27 +88,27 @@ struct RangeIter {
     bool operator>=(RangeIter const & i) const { return ptr >= i.ptr; }
 
     // Dereferencing
-    uint64_t & operator*() const { return *ptr; }
-    uint64_t * operator->() const { return ptr; }
-    uint64_t & operator[](ptrdiff_t n) const { return ptr[2 * n]; }
+    std::uint64_t & operator*() const { return *ptr; }
+    std::uint64_t * operator->() const { return ptr; }
+    std::uint64_t & operator[](ptrdiff_t n) const { return ptr[2 * n]; }
 
-    uint64_t * ptr = nullptr;
+    std::uint64_t * ptr = nullptr;
 };
 
 } // unnamed namespace
 
 
-RangeSet::RangeSet(std::initializer_list<uint64_t> list) :
+RangeSet::RangeSet(std::initializer_list<std::uint64_t> list) :
     RangeSet(list.begin(), list.end())
 {}
 
-RangeSet::RangeSet(std::initializer_list<std::pair<uint64_t, uint64_t>> list) {
+RangeSet::RangeSet(std::initializer_list<std::pair<std::uint64_t, std::uint64_t>> list) {
     for (auto t: list) {
         insert(std::get<0>(t), std::get<1>(t));
     }
 }
 
-void RangeSet::insert(uint64_t first, uint64_t last) {
+void RangeSet::insert(std::uint64_t first, std::uint64_t last) {
     if (first == last) {
         fill();
     } else {
@@ -125,7 +125,7 @@ void RangeSet::insert(uint64_t first, uint64_t last) {
     }
 }
 
-void RangeSet::erase(uint64_t first, uint64_t last) {
+void RangeSet::erase(std::uint64_t first, std::uint64_t last) {
     // To erase [first, last), insert it into the complement of this set,
     // then complement the result. The complements are performed in the
     // constructor and destructor of a local object, so that the second
@@ -196,10 +196,10 @@ RangeSet RangeSet::symmetricDifference(RangeSet const & s) const {
             // the main loop. Then, 1 is subtracted from all other values prior
             // to comparison, yielding the proper ordering (since subtracting
             // 1 from a trailing zero bookend results in 2^64 - 1).
-            uint64_t const * a = _begin();
-            uint64_t const * aend = _end();
-            uint64_t const * b = s._begin();
-            uint64_t const * bend = s._end();
+            std::uint64_t const * a = _begin();
+            std::uint64_t const * aend = _end();
+            std::uint64_t const * b = s._begin();
+            std::uint64_t const * bend = s._end();
             int astate = (*a == 0);
             int bstate = (*b == 0);
             a += astate;
@@ -214,13 +214,13 @@ RangeSet RangeSet::symmetricDifference(RangeSet const & s) const {
             result._offset = (state == 0);
             // Merge lists until one or both are exhausted.
             while (a != aend && b != bend) {
-                uint64_t av = *a - 1;
-                uint64_t bv = *b - 1;
+                std::uint64_t av = *a - 1;
+                std::uint64_t bv = *b - 1;
                 // The pointer(s) yielding the minimal value will be
                 // incremented.
                 bool ainc = (av <= bv);
                 bool binc = (bv <= av);
-                uint64_t minval = ainc ? av : bv;
+                std::uint64_t minval = ainc ? av : bv;
                 astate ^= ainc;
                 bstate ^= binc;
                 // Output the minimum value if the output state changes.
@@ -245,7 +245,7 @@ RangeSet RangeSet::symmetricDifference(RangeSet const & s) const {
     return result;
 }
 
-bool RangeSet::intersects(uint64_t first, uint64_t last) const {
+bool RangeSet::intersects(std::uint64_t first, std::uint64_t last) const {
     if (empty()) {
         return false;
     }
@@ -253,10 +253,10 @@ bool RangeSet::intersects(uint64_t first, uint64_t last) const {
         return true;
     }
     if (first <= last - 1) {
-        uint64_t r[2] = {first, last};
+        std::uint64_t r[2] = {first, last};
         return _intersectsOne(r, _begin(), _end());
     }
-    uint64_t r[4] = {0, last, first, 0};
+    std::uint64_t r[4] = {0, last, first, 0};
     return _intersectsOne(r, _begin(), _end()) ||
            _intersectsOne(r + 2, _begin(), _end());
 }
@@ -268,7 +268,7 @@ bool RangeSet::intersects(RangeSet const & s) const {
     return _intersects(_begin(), _end(), s._begin(), s._end());
 }
 
-bool RangeSet::contains(uint64_t first, uint64_t last) const {
+bool RangeSet::contains(std::uint64_t first, std::uint64_t last) const {
     if (full()) {
         return true;
     }
@@ -276,10 +276,10 @@ bool RangeSet::contains(uint64_t first, uint64_t last) const {
         return false;
     }
     if (first <= last - 1) {
-        uint64_t r[2] = {first, last};
+        std::uint64_t r[2] = {first, last};
         return !_intersectsOne(r, _beginc(), _endc());
     }
-    uint64_t r[4] = {0, last, first, 0};
+    std::uint64_t r[4] = {0, last, first, 0};
     return !_intersectsOne(r, _beginc(), _endc()) &&
            !_intersectsOne(r + 2, _beginc(), _endc());
 }
@@ -291,28 +291,28 @@ bool RangeSet::contains(RangeSet const & s) const {
     return !_intersects(_beginc(), _endc(), s._begin(), s._end());
 }
 
-bool RangeSet::isWithin(uint64_t first, uint64_t last) const {
+bool RangeSet::isWithin(std::uint64_t first, std::uint64_t last) const {
     if (empty() || first == last) {
         return true;
     }
     if (last <= first - 1) {
-        uint64_t r[2] = {last, first};
+        std::uint64_t r[2] = {last, first};
         return !_intersectsOne(r, _begin(), _end());
     }
-    uint64_t r[4] = {0, first, last, 0};
+    std::uint64_t r[4] = {0, first, last, 0};
     return !_intersectsOne(r, _begin(), _end()) &&
            !_intersectsOne(r + 2, _begin(), _end());
 }
 
-uint64_t RangeSet::cardinality() const {
-    uint64_t sz = 0;
+std::uint64_t RangeSet::cardinality() const {
+    std::uint64_t sz = 0;
     for (auto r = _begin(), e = _end(); r != e; r += 2) {
         sz += r[1] - r[0];
     }
     return sz;
 }
 
-RangeSet & RangeSet::simplify(uint32_t n) {
+RangeSet & RangeSet::simplify(std::uint32_t n) {
     if (empty() || n == 0) {
         return *this;
     } else if (n >= 64) {
@@ -322,13 +322,13 @@ RangeSet & RangeSet::simplify(uint32_t n) {
     // Compute m, the integer with n LSBs set to 1. Then, (x & ~m) is x
     // rounded down to the nearest multiple of 2^n, and (x + m) & ~m is
     // x rounded up to the nearest multiple of 2^n.
-    uint64_t const m = (static_cast<uint64_t>(1) << n) - 1;
-    uint64_t * r = const_cast<uint64_t *>(_begin());
-    uint64_t * rend = const_cast<uint64_t *>(_end());
-    uint64_t * out = r;
+    std::uint64_t const m = (static_cast<std::uint64_t>(1) << n) - 1;
+    std::uint64_t * r = const_cast<std::uint64_t *>(_begin());
+    std::uint64_t * rend = const_cast<std::uint64_t *>(_end());
+    std::uint64_t * out = r;
     // Expand the first range.
-    uint64_t first = r[0] & ~m;
-    uint64_t last = (r[1] + m) & ~m;
+    std::uint64_t first = r[0] & ~m;
+    std::uint64_t last = (r[1] + m) & ~m;
     if (r[0] != 0 && first == 0) {
         // The expanded first range now contains the leading bookend.
         _offset = false;
@@ -338,8 +338,8 @@ RangeSet & RangeSet::simplify(uint32_t n) {
     out[1] = last;
     // Expand the remaining ranges.
     for (r += 2; last != 0 && r != rend; r += 2) {
-        uint64_t u = r[0] & ~m;
-        uint64_t v = (r[1] + m) & ~m;
+        std::uint64_t u = r[0] & ~m;
+        std::uint64_t v = (r[1] + m) & ~m;
         if (u > last) {
             out += 2;
             out[0] = u;
@@ -358,18 +358,18 @@ RangeSet & RangeSet::simplify(uint32_t n) {
     return *this;
 }
 
-RangeSet & RangeSet::scale(uint64_t i) {
+RangeSet & RangeSet::scale(std::uint64_t i) {
     if (empty() || i == 1) {
         return *this;
     } else if (i == 0) {
         clear();
         return *this;
     }
-    uint64_t overflowThreshold = static_cast<uint64_t>(-1) / i;
+    std::uint64_t overflowThreshold = static_cast<std::uint64_t>(-1) / i;
     auto r = _ranges.begin();
     auto rend = _ranges.end();
     for (; r < rend; ++r) {
-        uint64_t value = *r;
+        std::uint64_t value = *r;
         if (value > overflowThreshold) {
             *r = 0;
             ++r;
@@ -398,17 +398,17 @@ bool RangeSet::isValid() const {
     return true;
 }
 
-void RangeSet::_insert(uint64_t first, uint64_t last) {
+void RangeSet::_insert(std::uint64_t first, std::uint64_t last) {
     // First, check if this set is empty, or if [first, last) extends
     // or comes after the last range in this set.
     //
     // It is assumed that first <= last - 1; that is, first and last
     // do not correspond to a full range, or one that wraps.
-    uint64_t * r = const_cast<uint64_t *>(_begin());
-    uint64_t * rend = const_cast<uint64_t *>(_end());
+    std::uint64_t * r = const_cast<std::uint64_t *>(_begin());
+    std::uint64_t * rend = const_cast<std::uint64_t *>(_end());
     if (r == rend) {
         // This set is empty.
-        uint64_t array[4] = {0, first, last, 0};
+        std::uint64_t array[4] = {0, first, last, 0};
         _ranges.assign(array + (first == 0), array + (4 - (last == 0)));
         _offset = (first != 0);
     } else if (first >= rend[-2]) {
@@ -431,15 +431,15 @@ void RangeSet::_insert(uint64_t first, uint64_t last) {
     } else {
         // Find a, the first range with end point a[1] >= first, and b,
         // the first range with beginning point b[0] > last.
-        uint64_t * a;
-        uint64_t * b;
+        std::uint64_t * a;
+        std::uint64_t * b;
         if (first == 0) {
             a = r;
         } else {
             // Subtract one from values before comparisons so that the
             // trailing zero bookend is ordered properly.
             a = std::lower_bound(RangeIter(r + 1), RangeIter(rend + 1), first,
-                                 [](uint64_t u, uint64_t v) {
+                                 [](std::uint64_t u, std::uint64_t v) {
                                      return u - 1 < v - 1;
                                  }).ptr - 1;
         }
@@ -483,10 +483,10 @@ void RangeSet::_insert(uint64_t first, uint64_t last) {
 
 /// `_intersectOne` stores the intersection of the single range pointed
 /// to by `a` and the ranges pointed to by `b` in `v`.
-void RangeSet::_intersectOne(std::vector<uint64_t> & v,
-                             uint64_t const * a,
-                             uint64_t const * b,
-                             uint64_t const * bend)
+void RangeSet::_intersectOne(std::vector<std::uint64_t> & v,
+                             std::uint64_t const * a,
+                             std::uint64_t const * b,
+                             std::uint64_t const * bend)
 {
     // The range B = [b[0], bend[-1]) contains all the ranges
     // [b[0], b[1]), ... , [bend[-2], bend[-1]). If [a[0], a[1])
@@ -500,7 +500,7 @@ void RangeSet::_intersectOne(std::vector<uint64_t> & v,
     }
     if (b + 2 == bend) {
         // Output the intersection of the ranges pointed to by a and b.
-        uint64_t u = std::max(a[0], b[0]);
+        std::uint64_t u = std::max(a[0], b[0]);
         if (u != 0) {
             v.push_back(u);
         }
@@ -512,7 +512,7 @@ void RangeSet::_intersectOne(std::vector<uint64_t> & v,
     } else {
         // Divide and conquer - split the list of ranges pointed
         // to by b in half and recurse.
-        uint64_t const * bmid = b + roundUpToEven((bend - b) >> 1);
+        std::uint64_t const * bmid = b + roundUpToEven((bend - b) >> 1);
         _intersectOne(v, a, b, bmid);
         _intersectOne(v, a, bmid, bend);
     }
@@ -520,11 +520,11 @@ void RangeSet::_intersectOne(std::vector<uint64_t> & v,
 
 /// `_intersect` stores the intersection of the ranges pointed to by `a`
 /// and the ranges pointed to by `b` in `v`.
-void RangeSet::_intersect(std::vector<uint64_t> & v,
-                          uint64_t const * a,
-                          uint64_t const * aend,
-                          uint64_t const * b,
-                          uint64_t const * bend)
+void RangeSet::_intersect(std::vector<std::uint64_t> & v,
+                          std::uint64_t const * a,
+                          std::uint64_t const * aend,
+                          std::uint64_t const * b,
+                          std::uint64_t const * bend)
 {
     // The range A = [a[0], aend[-1]) contains all the ranges
     // [a[0], a[1]), ... , [aend[-2], aend[-1]), and similarly,
@@ -548,8 +548,8 @@ void RangeSet::_intersect(std::vector<uint64_t> & v,
         //
         // Note that the order of the recursive calls matters -
         // output must be generated in sorted order.
-        uint64_t const * amid = a + roundUpToEven((aend - a) >> 1);
-        uint64_t const * bmid = b + roundUpToEven((bend - b) >> 1);
+        std::uint64_t const * amid = a + roundUpToEven((aend - a) >> 1);
+        std::uint64_t const * bmid = b + roundUpToEven((bend - b) >> 1);
         _intersect(v, a, amid, b, bmid);
         _intersect(v, a, amid, bmid, bend);
         _intersect(v, amid, aend, b, bmid);
@@ -557,10 +557,10 @@ void RangeSet::_intersect(std::vector<uint64_t> & v,
     }
 }
 
-void RangeSet::_intersect(uint64_t const * a,
-                          uint64_t const * aend,
-                          uint64_t const * b,
-                          uint64_t const * bend)
+void RangeSet::_intersect(std::uint64_t const * a,
+                          std::uint64_t const * aend,
+                          std::uint64_t const * b,
+                          std::uint64_t const * bend)
 {
     if (a == aend || b == bend) {
         clear();
@@ -580,9 +580,9 @@ void RangeSet::_intersect(uint64_t const * a,
 
 /// `_intersectsOne` checks if the single range pointed to by `a` intersects
 /// any of the ranges pointed to by `b`.
-bool RangeSet::_intersectsOne(uint64_t const * a,
-                              uint64_t const * b,
-                              uint64_t const * bend)
+bool RangeSet::_intersectsOne(std::uint64_t const * a,
+                              std::uint64_t const * b,
+                              std::uint64_t const * bend)
 {
     // See the comments in _intersectOne for an explanation.
     if (a[0] > bend[-1] - 1 || a[1] - 1 < b[0]) {
@@ -591,16 +591,16 @@ bool RangeSet::_intersectsOne(uint64_t const * a,
     if (b + 2 == bend || a[0] <= b[0] || a[1] - 1 >= bend[-1] - 1) {
         return true;
     }
-    uint64_t const * bmid = b + roundUpToEven((bend - b) >> 1);
+    std::uint64_t const * bmid = b + roundUpToEven((bend - b) >> 1);
     return _intersectsOne(a, b, bmid) || _intersectsOne(a, bmid, bend);
 }
 
 /// `_intersects` checks if any of the ranges pointed to by `a` intersect
 /// any of the ranges pointed to by `b`.
-bool RangeSet::_intersects(uint64_t const * a,
-                           uint64_t const * aend,
-                           uint64_t const * b,
-                           uint64_t const * bend)
+bool RangeSet::_intersects(std::uint64_t const * a,
+                           std::uint64_t const * aend,
+                           std::uint64_t const * b,
+                           std::uint64_t const * bend)
 {
     // See the comments in _intersect for an explanation.
     if (a + 2 == aend) {
@@ -612,8 +612,8 @@ bool RangeSet::_intersects(uint64_t const * a,
     if (a[0] > bend[-1] - 1 || aend[-1] - 1 < b[0]) {
         return false;
     }
-    uint64_t const * amid = a + roundUpToEven((aend - a) >> 1);
-    uint64_t const * bmid = b + roundUpToEven((bend - b) >> 1);
+    std::uint64_t const * amid = a + roundUpToEven((aend - a) >> 1);
+    std::uint64_t const * bmid = b + roundUpToEven((bend - b) >> 1);
     return _intersects(a, amid, b, bmid) ||
            _intersects(a, amid, bmid, bend) ||
            _intersects(amid, aend, b, bmid) ||

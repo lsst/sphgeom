@@ -98,13 +98,13 @@ public:
     /// assigned to exactly one pixel by the pixelization.
     ///
     /// If i is not a valid pixel index, a std::invalid_argument is thrown.
-    virtual std::unique_ptr<Region> pixel(uint64_t i) const = 0;
+    virtual std::unique_ptr<Region> pixel(std::uint64_t i) const = 0;
 
     /// `index` computes the index of the pixel for v.
-    virtual uint64_t index(UnitVector3d const & v) const = 0;
+    virtual std::uint64_t index(UnitVector3d const & v) const = 0;
 
     /// `toString` converts the given pixel index to a human-readable string.
-    virtual std::string toString(uint64_t i) const = 0;
+    virtual std::string toString(std::uint64_t i) const = 0;
 
     /// `envelope` returns the indexes of the pixels intersecting the
     /// spherical region r.

@@ -343,9 +343,9 @@ Relationship Ellipse::relate(Ellipse const & e) const {
     return getBoundingCircle().relate(e.getBoundingCircle()) & DISJOINT;
 }
 
-std::vector<uint8_t> Ellipse::encode() const {
-    std::vector<uint8_t> buffer;
-    uint8_t tc = TYPE_CODE;
+std::vector<std::uint8_t> Ellipse::encode() const {
+    std::vector<std::uint8_t> buffer;
+    std::uint8_t tc = TYPE_CODE;
     buffer.reserve(ENCODED_SIZE);
     buffer.push_back(tc);
     for (int r = 0; r < 3; ++r) {
@@ -361,7 +361,7 @@ std::vector<uint8_t> Ellipse::encode() const {
     return buffer;
 }
 
-std::unique_ptr<Ellipse> Ellipse::decode(uint8_t const * buffer, size_t n) {
+std::unique_ptr<Ellipse> Ellipse::decode(std::uint8_t const * buffer, size_t n) {
     if (buffer == nullptr || n != ENCODED_SIZE || buffer[0] != TYPE_CODE) {
         throw std::runtime_error("Byte-string is not an encoded Ellipse");
     }

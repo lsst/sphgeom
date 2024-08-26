@@ -352,9 +352,9 @@ Relationship ConvexPolygon::relate(Ellipse const & e) const {
     return detail::relate(_vertices.begin(), _vertices.end(), e);
 }
 
-std::vector<uint8_t> ConvexPolygon::encode() const {
-    std::vector<uint8_t> buffer;
-    uint8_t tc = TYPE_CODE;
+std::vector<std::uint8_t> ConvexPolygon::encode() const {
+    std::vector<std::uint8_t> buffer;
+    std::uint8_t tc = TYPE_CODE;
     buffer.reserve(1 + 24 * _vertices.size());
     buffer.push_back(tc);
     for (UnitVector3d const & v: _vertices) {
@@ -365,7 +365,7 @@ std::vector<uint8_t> ConvexPolygon::encode() const {
     return buffer;
 }
 
-std::unique_ptr<ConvexPolygon> ConvexPolygon::decode(uint8_t const * buffer,
+std::unique_ptr<ConvexPolygon> ConvexPolygon::decode(std::uint8_t const * buffer,
                                                      size_t n)
 {
     if (buffer == nullptr || *buffer != TYPE_CODE ||

@@ -35,6 +35,7 @@
 ///        longitude/latitude angle boxes on the unit sphere.
 
 #include <iosfwd>
+#include <cstdint>
 
 #include "AngleInterval.h"
 #include "LonLat.h"
@@ -60,7 +61,7 @@ namespace sphgeom {
 /// - Box::allLongitudes().contains(b.getLon())
 class Box : public Region {
 public:
-    static constexpr uint8_t TYPE_CODE = 'b';
+    static constexpr std::uint8_t TYPE_CODE = 'b';
 
     // Factory functions
     static Box fromDegrees(double lon1, double lat1, double lon2, double lat2) {
@@ -340,14 +341,14 @@ public:
     Relationship relate(ConvexPolygon const &) const override;
     Relationship relate(Ellipse const &) const override;
 
-    std::vector<uint8_t> encode() const override;
+    std::vector<std::uint8_t> encode() const override;
 
     ///@{
     /// `decode` deserializes a Box from a byte string produced by encode.
-    static std::unique_ptr<Box> decode(std::vector<uint8_t> const & s) {
+    static std::unique_ptr<Box> decode(std::vector<std::uint8_t> const & s) {
         return decode(s.data(), s.size());
     }
-    static std::unique_ptr<Box> decode(uint8_t const * buffer, size_t n);
+    static std::unique_ptr<Box> decode(std::uint8_t const * buffer, size_t n);
     ///@}
 
 private:

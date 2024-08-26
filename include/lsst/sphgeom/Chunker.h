@@ -34,8 +34,8 @@
 /// \brief This file declares a class for partitioning the sky into chunks
 ///        and sub-chunks.
 
-#include <stdint.h>
 #include <vector>
+#include <cstdint>
 
 #include "Angle.h"
 #include "Box.h"
@@ -48,8 +48,8 @@ namespace sphgeom {
 ///
 /// TODO(smm): implement a more memory efficient representation than this.
 struct SubChunks {
-    int32_t chunkId;
-    std::vector<int32_t> subChunkIds;
+    std::int32_t chunkId;
+    std::vector<std::int32_t> subChunkIds;
 
     SubChunks() : chunkId(-1) {}
 
@@ -72,8 +72,8 @@ struct SubChunks {
 /// subchunks.
 class Chunker {
 public:
-    Chunker(int32_t numStripes,
-            int32_t numSubStripesPerStripe);
+    Chunker(std::int32_t numStripes,
+            std::int32_t numSubStripesPerStripe);
 
     bool operator==(Chunker const & c) const {
         return _numStripes == c._numStripes &&
@@ -87,19 +87,19 @@ public:
 
     /// `getNumStripes` returns the number of fixed-height latitude intervals
     /// in the sky subdivision.
-    int32_t getNumStripes() const {
+    std::int32_t getNumStripes() const {
         return _numStripes;
     }
 
     /// `getNumSubStripesPerStripe` returns the number of fixed-height latitude
     /// sub-intervals in each stripe.
-    int32_t getNumSubStripesPerStripe() const {
+    std::int32_t getNumSubStripesPerStripe() const {
         return _numSubStripesPerStripe;
     }
 
     /// `getChunksIntersecting` returns all the chunks that potentially
     /// intersect the given region.
-    std::vector<int32_t> getChunksIntersecting(Region const & r) const;
+    std::vector<std::int32_t> getChunksIntersecting(Region const & r) const;
 
     /// `getSubChunksIntersecting` returns all the sub-chunks that potentially
     /// intersect the given region.
@@ -107,33 +107,33 @@ public:
 
     /// `getAllChunks` returns the complete set of chunk IDs for the unit
     /// sphere.
-    std::vector<int32_t> getAllChunks() const;
+    std::vector<std::int32_t> getAllChunks() const;
 
     /// `getAllSubChunks` returns the complete set of sub-chunk IDs
     /// for the given chunk.
-    std::vector<int32_t> getAllSubChunks(int32_t chunkId) const;
+    std::vector<std::int32_t> getAllSubChunks(std::int32_t chunkId) const;
 
     /// Return 'true' if the specified chunk number is valid
-    bool valid(int32_t chunkId) const;
+    bool valid(std::int32_t chunkId) const;
 
-    Box getChunkBoundingBox(int32_t stripe, int32_t chunk) const;
-    Box getSubChunkBoundingBox(int32_t subStripe, int32_t subChunk) const;
+    Box getChunkBoundingBox(std::int32_t stripe, std::int32_t chunk) const;
+    Box getSubChunkBoundingBox(std::int32_t subStripe, std::int32_t subChunk) const;
 
     /// Return the stripe for the specified chunkId
-    int32_t getStripe(int32_t chunkId) const {
+    std::int32_t getStripe(std::int32_t chunkId) const {
         return chunkId / (2 * _numStripes);
     }
 
     /// Return the chunk for the given chunkId and stripe
-    int32_t getChunk(int32_t chunkId, int32_t stripe) const {
+    std::int32_t getChunk(std::int32_t chunkId, std::int32_t stripe) const {
         return chunkId - stripe*2*_numStripes;
     }
 
 private:
     struct Stripe {
         Angle chunkWidth;
-        int32_t numChunksPerStripe;
-        int32_t numSubChunksPerChunk;
+        std::int32_t numChunksPerStripe;
+        std::int32_t numSubChunksPerChunk;
 
         Stripe() :
             chunkWidth(0),
@@ -144,19 +144,19 @@ private:
 
     struct SubStripe {
         Angle subChunkWidth;
-        int32_t numSubChunksPerChunk;
+        std::int32_t numSubChunksPerChunk;
 
         SubStripe() : subChunkWidth(), numSubChunksPerChunk(0) {}
     };
 
-    int32_t _getChunkId(int32_t stripe, int32_t chunk) const {
+    std::int32_t _getChunkId(std::int32_t stripe, std::int32_t chunk) const {
         return stripe * 2 * _numStripes + chunk;
     }
 
-    int32_t _getSubChunkId(int32_t stripe, int32_t subStripe,
-                           int32_t chunk, int32_t subChunk) const {
-        int32_t y = subStripe - stripe * _numSubStripesPerStripe;
-        int32_t x = subChunk -
+    std::int32_t _getSubChunkId(std::int32_t stripe, std::int32_t subStripe,
+                           std::int32_t chunk, std::int32_t subChunk) const {
+        std::int32_t y = subStripe - stripe * _numSubStripesPerStripe;
+        std::int32_t x = subChunk -
                     chunk * _subStripes[subStripe].numSubChunksPerChunk;
         return y * _maxSubChunksPerSubStripeChunk + x;
     }
@@ -164,15 +164,15 @@ private:
     void _getSubChunks(std::vector<SubChunks> & subChunks,
                        Region const & r,
                        NormalizedAngleInterval const & lon,
-                       int32_t stripe,
-                       int32_t chunk,
-                       int32_t minSS,
-                       int32_t maxSS) const;
+                       std::int32_t stripe,
+                       std::int32_t chunk,
+                       std::int32_t minSS,
+                       std::int32_t maxSS) const;
 
-    int32_t _numStripes;
-    int32_t _numSubStripesPerStripe;
-    int32_t _numSubStripes;
-    int32_t _maxSubChunksPerSubStripeChunk;
+    std::int32_t _numStripes;
+    std::int32_t _numSubStripesPerStripe;
+    std::int32_t _numSubStripes;
+    std::int32_t _maxSubChunksPerSubStripeChunk;
     Angle _subStripeHeight;
     std::vector<Stripe> _stripes;
     std::vector<SubStripe> _subStripes;

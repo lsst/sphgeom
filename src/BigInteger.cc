@@ -43,29 +43,29 @@ namespace {
 // `_add` computes the sum of the digits in m1 and m2 and stores the result in
 // m, which may equal either m1 or m2. It returns the number of digits in the
 // sum.
-unsigned _add(uint32_t * const m,
-              uint32_t const * const m1,
-              uint32_t const * const m2,
+unsigned _add(std::uint32_t * const m,
+              std::uint32_t const * const m1,
+              std::uint32_t const * const m2,
               unsigned const size1,
               unsigned const size2)
 {
-    uint64_t sum = 0;
+    std::uint64_t sum = 0;
     unsigned i = 0;
     unsigned const size = std::min(size1, size2);
     for (; i < size; ++i) {
-        sum = static_cast<uint64_t>(m1[i]) + (sum >> 32) +
-              static_cast<uint64_t>(m2[i]);
-        m[i] = static_cast<uint32_t>(sum);
+        sum = static_cast<std::uint64_t>(m1[i]) + (sum >> 32) +
+              static_cast<std::uint64_t>(m2[i]);
+        m[i] = static_cast<std::uint32_t>(sum);
     }
     for (; i < size1; ++i) {
-        sum = static_cast<uint64_t>(m1[i]) + (sum >> 32);
-        m[i] = static_cast<uint32_t>(sum);
+        sum = static_cast<std::uint64_t>(m1[i]) + (sum >> 32);
+        m[i] = static_cast<std::uint32_t>(sum);
     }
     for (; i < size2; ++i) {
-        sum = static_cast<uint64_t>(m2[i]) + (sum >> 32);
-        m[i] = static_cast<uint32_t>(sum);
+        sum = static_cast<std::uint64_t>(m2[i]) + (sum >> 32);
+        m[i] = static_cast<std::uint32_t>(sum);
     }
-    uint32_t carry = static_cast<uint32_t>(sum >> 32);
+    std::uint32_t carry = static_cast<std::uint32_t>(sum >> 32);
     if (carry != 0) {
         m[i] = carry;
         ++i;
@@ -76,13 +76,13 @@ unsigned _add(uint32_t * const m,
 // `_sub` computes the difference of the digits in m1 and m2 and stores the
 // result in m, which may equal either m1 or m2. It assumes that the difference
 // is non-negative, and returns the the number of digits in the difference.
-unsigned _sub(uint32_t * const m,
-              uint32_t const * const m1,
-              uint32_t const * const m2,
+unsigned _sub(std::uint32_t * const m,
+              std::uint32_t const * const m1,
+              std::uint32_t const * const m2,
               unsigned const size1,
               unsigned const size2)
 {
-    int64_t diff = 0;
+    std::int64_t diff = 0;
     unsigned i = 0;
     // Note that right shifting a negative integer is implementation defined
     // (not undefined) behavior. Here we assume arithmetic right shifts for
@@ -91,14 +91,14 @@ unsigned _sub(uint32_t * const m,
     // TODO(smm): check for this at build time, and provide an alternate
     //            implementation when this assumption does not hold.
     for (; i < size2; ++i) {
-        diff = static_cast<int64_t>(m1[i]) + (diff >> 32) -
-               static_cast<int64_t>(m2[i]);
-        m[i] = static_cast<uint32_t>(diff);
+        diff = static_cast<std::int64_t>(m1[i]) + (diff >> 32) -
+               static_cast<std::int64_t>(m2[i]);
+        m[i] = static_cast<std::uint32_t>(diff);
     }
     // Borrow from the remaining digits in m1 while necessary.
     for (; diff < 0; ++i) {
-        diff = static_cast<int64_t>(m1[i]) - 1;
-        m[i] = static_cast<uint32_t>(diff);
+        diff = static_cast<std::int64_t>(m1[i]) - 1;
+        m[i] = static_cast<std::uint32_t>(diff);
     }
     // If we subtracted anything from the most significant digit in m1, strip
     // any leading zeroes that may have been introduced.
@@ -116,9 +116,9 @@ unsigned _sub(uint32_t * const m,
 // `_mul` computes the product of m1 and m2 and stores the result in m,
 // which may equal either m1 or m2. It assumes that m1 has at least as many
 // digits as m2, and returns the the number of digits in the product.
-unsigned _mul(uint32_t * const m,
-              uint32_t const * const m1,
-              uint32_t const * const m2,
+unsigned _mul(std::uint32_t * const m,
+              std::uint32_t const * const m1,
+              std::uint32_t const * const m2,
               unsigned const size1,
               unsigned const size2)
 {
@@ -134,21 +134,21 @@ unsigned _mul(uint32_t * const m,
         m[i] = 0;
     }
     for (unsigned i = size1; i > 0; --i) {
-        uint64_t digit = m1[i - 1];
-        uint64_t carry = static_cast<uint64_t>(m2[0]) * digit;
+        std::uint64_t digit = m1[i - 1];
+        std::uint64_t carry = static_cast<std::uint64_t>(m2[0]) * digit;
         unsigned j = 1;
-        m[i - 1] = static_cast<uint32_t>(carry);
+        m[i - 1] = static_cast<std::uint32_t>(carry);
         carry >>= 32;
         for (; j < size2; ++j) {
-            carry = static_cast<uint64_t>(m2[j]) * digit +
-                    static_cast<uint64_t>(m[i + j - 1]) +
+            carry = static_cast<std::uint64_t>(m2[j]) * digit +
+                    static_cast<std::uint64_t>(m[i + j - 1]) +
                     carry;
-            m[i + j - 1] = static_cast<uint32_t>(carry);
+            m[i + j - 1] = static_cast<std::uint32_t>(carry);
             carry >>= 32;
         }
         for (; carry != 0; ++j) {
-            carry += static_cast<uint64_t>(m[i + j - 1]);
-            m[i + j - 1] = static_cast<uint32_t>(carry);
+            carry += static_cast<std::uint64_t>(m[i + j - 1]);
+            m[i + j - 1] = static_cast<std::uint32_t>(carry);
             carry >>= 32;
         }
     }
@@ -239,7 +239,7 @@ BigInteger & BigInteger::multiplyPow2(unsigned n) {
         }
         _size = size;
     } else {
-        uint32_t low, high = 0;
+        std::uint32_t low, high = 0;
         for (unsigned i = _size; i != 0; --i, high = low) {
             low = _digits[i - 1];
             _digits[i + z] = (high << s) | (low >> (32 - s));

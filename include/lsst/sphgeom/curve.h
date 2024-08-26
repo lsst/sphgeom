@@ -52,10 +52,10 @@
 /// a single 64 bit integer constant (0x8d3ec79a6b5021f4). The implementation
 /// then looks like:
 ///
-///     inline uint64_t hilbertIndex(uint32_t x, uint32_t y, uint32_t m) {
-///         uint64_t const z = mortonIndex(x, y);
-///         uint64_t h = 0;
-///         uint64_t i = 0;
+///     inline std::uint64_t hilbertIndex(std::uint32_t x, std::uint32_t y, std::uint32_t m) {
+///         std::uint64_t const z = mortonIndex(x, y);
+///         std::uint64_t h = 0;
+///         std::uint64_t i = 0;
 ///         for (m = 2 * m; m != 0;) {
 ///             m -= 2;
 ///             i = (i & 0xc) | ((z >> m) & 3);
@@ -102,14 +102,14 @@ namespace sphgeom {
 /// > Using de Bruijn Sequences to Index a 1 in a Computer Word
 /// > C. E. Leiserson, H. Prokop, and K. H. Randall.
 /// > http://supertech.csail.mit.edu/papers/debruijn.pdf
-inline uint8_t log2(uint64_t x) {
-    alignas(64) static uint8_t const PERFECT_HASH_TABLE[64] = {
+inline std::uint8_t log2(std::uint64_t x) {
+    alignas(64) static std::uint8_t const PERFECT_HASH_TABLE[64] = {
          0,  1,  2,  7,  3, 13,  8, 19,  4, 25, 14, 28,  9, 34, 20, 40,
          5, 17, 26, 38, 15, 46, 29, 48, 10, 31, 35, 54, 21, 50, 41, 57,
         63,  6, 12, 18, 24, 27, 33, 39, 16, 37, 45, 47, 30, 53, 49, 56,
         62, 11, 23, 32, 36, 44, 52, 55, 61, 22, 43, 51, 60, 42, 59, 58
     };
-    uint64_t const DE_BRUIJN_SEQUENCE = UINT64_C(0x0218a392cd3d5dbf);
+    std::uint64_t const DE_BRUIJN_SEQUENCE = UINT64_C(0x0218a392cd3d5dbf);
     // First ensure that all bits below the MSB are set.
     x |= (x >> 1);
     x |= (x >> 2);
@@ -129,13 +129,13 @@ inline uint8_t log2(uint64_t x) {
     return PERFECT_HASH_TABLE[(DE_BRUIJN_SEQUENCE * x) >> 58];
 }
 
-inline uint8_t log2(uint32_t x) {
+inline std::uint8_t log2(std::uint32_t x) {
     // See https://graphics.stanford.edu/~seander/bithacks.html#IntegerLogDeBruijn
-    alignas(32) static uint8_t const PERFECT_HASH_TABLE[32] = {
+    alignas(32) static std::uint8_t const PERFECT_HASH_TABLE[32] = {
         0,  9,  1, 10, 13, 21,  2, 29, 11, 14, 16, 18, 22, 25, 3, 30,
         8, 12, 20, 28, 15, 17, 24,  7, 19, 27, 23,  6, 26,  5, 4, 31
     };
-    uint32_t const DE_BRUIJN_SEQUENCE = UINT32_C(0x07c4acdd);
+    std::uint32_t const DE_BRUIJN_SEQUENCE = UINT32_C(0x07c4acdd);
     x |= (x >> 1);
     x |= (x >> 2);
     x |= (x >> 4);
@@ -152,11 +152,11 @@ inline uint8_t log2(uint32_t x) {
 /// order function. See https://en.wikipedia.org/wiki/Z-order_curve
 /// for more information.
 #if defined(NO_SIMD) || !defined(__x86_64__)
-    inline uint64_t mortonIndex(uint32_t x, uint32_t y) {
+    inline std::uint64_t mortonIndex(std::uint32_t x, std::uint32_t y) {
         // This is just a 64-bit extension of:
         // http://graphics.stanford.edu/~seander/bithacks.html#InterleaveBMN
-        uint64_t b = y;
-        uint64_t a = x;
+        std::uint64_t b = y;
+        std::uint64_t a = x;
         b = (b | (b << 16)) & UINT64_C(0x0000ffff0000ffff);
         a = (a | (a << 16)) & UINT64_C(0x0000ffff0000ffff);
         b = (b | (b << 8)) & UINT64_C(0x00ff00ff00ff00ff);
@@ -170,7 +170,7 @@ inline uint8_t log2(uint32_t x) {
         return a | (b << 1);
     }
 #else
-    inline uint64_t mortonIndex(__m128i xy) {
+    inline std::uint64_t mortonIndex(__m128i xy) {
         xy = _mm_and_si128(_mm_or_si128(xy, _mm_slli_epi64(xy, 16)),
                            _mm_set1_epi32(0x0000ffff));
         xy = _mm_and_si128(_mm_or_si128(xy, _mm_slli_epi64(xy, 8)),
@@ -183,12 +183,12 @@ inline uint8_t log2(uint32_t x) {
                            _mm_set1_epi32(0x55555555));
         __m128i y = _mm_unpackhi_epi64(xy, _mm_setzero_si128());
         __m128i r = _mm_or_si128(xy, _mm_slli_epi64(y, 1));
-        return static_cast<uint64_t>(_mm_cvtsi128_si64(r));
+        return static_cast<std::uint64_t>(_mm_cvtsi128_si64(r));
     }
 
-    inline uint64_t mortonIndex(uint32_t x, uint32_t y) {
-        __m128i xy = _mm_set_epi64x(static_cast<int64_t>(y),
-                                    static_cast<int64_t>(x));
+    inline std::uint64_t mortonIndex(std::uint32_t x, std::uint32_t y) {
+        __m128i xy = _mm_set_epi64x(static_cast<std::int64_t>(y),
+                                    static_cast<std::int64_t>(x));
         return mortonIndex(xy);
     }
 #endif
@@ -199,9 +199,9 @@ inline uint8_t log2(uint32_t x) {
 /// tuple, and the 32 odd bits in the second. This is the inverse of
 /// mortonIndex().
 #if defined(NO_SIMD) || !defined(__x86_64__)
-    inline std::tuple<uint32_t, uint32_t> mortonIndexInverse(uint64_t z) {
-        uint64_t x = z & UINT64_C(0x5555555555555555);
-        uint64_t y = (z >> 1) & UINT64_C(0x5555555555555555);
+    inline std::tuple<std::uint32_t, std::uint32_t> mortonIndexInverse(std::uint64_t z) {
+        std::uint64_t x = z & UINT64_C(0x5555555555555555);
+        std::uint64_t y = (z >> 1) & UINT64_C(0x5555555555555555);
         x = (x | (x >> 1)) & UINT64_C(0x3333333333333333);
         y = (y | (y >> 1)) & UINT64_C(0x3333333333333333);
         x = (x | (x >> 2)) & UINT64_C(0x0f0f0f0f0f0f0f0f);
@@ -210,13 +210,13 @@ inline uint8_t log2(uint32_t x) {
         y = (y | (y >> 4)) & UINT64_C(0x00ff00ff00ff00ff);
         x = (x | (x >> 8)) & UINT64_C(0x0000ffff0000ffff);
         y = (y | (y >> 8)) & UINT64_C(0x0000ffff0000ffff);
-        return std::make_tuple(static_cast<uint32_t>(x | (x >> 16)),
-                               static_cast<uint32_t>(y | (y >> 16)));
+        return std::make_tuple(static_cast<std::uint32_t>(x | (x >> 16)),
+                               static_cast<std::uint32_t>(y | (y >> 16)));
     }
 #else
-    inline __m128i mortonIndexInverseSimd(uint64_t z) {
-        __m128i xy = _mm_set_epi64x(static_cast<int64_t>(z >> 1),
-                                    static_cast<int64_t>(z));
+    inline __m128i mortonIndexInverseSimd(std::uint64_t z) {
+        __m128i xy = _mm_set_epi64x(static_cast<std::int64_t>(z >> 1),
+                                    static_cast<std::int64_t>(z));
         xy = _mm_and_si128(xy, _mm_set1_epi32(0x55555555));
         xy = _mm_and_si128(_mm_or_si128(xy, _mm_srli_epi64(xy, 1)),
                            _mm_set1_epi32(0x33333333));
@@ -230,18 +230,18 @@ inline uint8_t log2(uint32_t x) {
         return xy;
     }
 
-    inline std::tuple<uint32_t, uint32_t> mortonIndexInverse(uint64_t z) {
+    inline std::tuple<std::uint32_t, std::uint32_t> mortonIndexInverse(std::uint64_t z) {
         __m128i xy = mortonIndexInverseSimd(z);
-        uint64_t r = _mm_cvtsi128_si64(_mm_shuffle_epi32(xy, 8));
-        return std::make_tuple(static_cast<uint32_t>(r & 0xffffffff),
-                               static_cast<uint32_t>(r >> 32));
+        std::uint64_t r = _mm_cvtsi128_si64(_mm_shuffle_epi32(xy, 8));
+        return std::make_tuple(static_cast<std::uint32_t>(r & 0xffffffff),
+                               static_cast<std::uint32_t>(r >> 32));
     }
 #endif
 
 /// `mortonToHilbert` converts the 2m-bit Morton index z to the
 /// corresponding Hilbert index.
-inline uint64_t mortonToHilbert(uint64_t z, int m) {
-    alignas(64) static uint8_t const HILBERT_LUT_3[256] = {
+inline std::uint64_t mortonToHilbert(std::uint64_t z, int m) {
+    alignas(64) static std::uint8_t const HILBERT_LUT_3[256] = {
         0x40, 0xc3, 0x01, 0x02, 0x04, 0x45, 0x87, 0x46,
         0x8e, 0x8d, 0x4f, 0xcc, 0x08, 0x49, 0x8b, 0x4a,
         0xfa, 0x3b, 0xf9, 0xb8, 0x7c, 0xff, 0x3d, 0x3e,
@@ -275,18 +275,18 @@ inline uint64_t mortonToHilbert(uint64_t z, int m) {
         0x8a, 0x89, 0x4b, 0xc8, 0x86, 0x85, 0x47, 0xc4,
         0x0c, 0x4d, 0x8f, 0x4e, 0xc2, 0x03, 0xc1, 0x80
     };
-    uint64_t h = 0;
-    uint64_t i = 0;
+    std::uint64_t h = 0;
+    std::uint64_t i = 0;
     for (m = 2 * m; m >= 6;) {
         m -= 6;
-        uint8_t j = HILBERT_LUT_3[i | ((z >> m) & 0x3f)];
+        std::uint8_t j = HILBERT_LUT_3[i | ((z >> m) & 0x3f)];
         h = (h << 6) | (j & 0x3f);
         i = j & 0xc0;
     }
     if (m != 0) {
         // m = 2 or 4
         int r = 6 - m;
-        uint8_t j = HILBERT_LUT_3[i | ((z << r) & 0x3f)];
+        std::uint8_t j = HILBERT_LUT_3[i | ((z << r) & 0x3f)];
         h = (h << m) | ((j & 0x3f) >> r);
     }
     return h;
@@ -294,8 +294,8 @@ inline uint64_t mortonToHilbert(uint64_t z, int m) {
 
 /// `hilbertToMorton` converts the 2m-bit Hilbert index h to the
 /// corresponding Morton index.
-inline uint64_t hilbertToMorton(uint64_t h, int m) {
-    alignas(64) static uint8_t const HILBERT_INVERSE_LUT_3[256] = {
+inline std::uint64_t hilbertToMorton(std::uint64_t h, int m) {
+    alignas(64) static std::uint8_t const HILBERT_INVERSE_LUT_3[256] = {
         0x40, 0x02, 0x03, 0xc1, 0x04, 0x45, 0x47, 0x86,
         0x0c, 0x4d, 0x4f, 0x8e, 0xcb, 0x89, 0x88, 0x4a,
         0x20, 0x61, 0x63, 0xa2, 0x68, 0x2a, 0x2b, 0xe9,
@@ -329,18 +329,18 @@ inline uint64_t hilbertToMorton(uint64_t h, int m) {
         0x10, 0x51, 0x53, 0x92, 0x58, 0x1a, 0x1b, 0xd9,
         0x5c, 0x1e, 0x1f, 0xdd, 0x97, 0xd6, 0xd4, 0x15
     };
-    uint64_t z = 0;
-    uint64_t i = 0;
+    std::uint64_t z = 0;
+    std::uint64_t i = 0;
     for (m = 2 * m; m >= 6;) {
         m -= 6;
-        uint8_t j = HILBERT_INVERSE_LUT_3[i | ((h >> m) & 0x3f)];
+        std::uint8_t j = HILBERT_INVERSE_LUT_3[i | ((h >> m) & 0x3f)];
         z = (z << 6) | (j & 0x3f);
         i = j & 0xc0;
     }
     if (m != 0) {
         // m = 2 or 4
         int r = 6 - m;
-        uint8_t j = HILBERT_INVERSE_LUT_3[i | ((h << r) & 0x3f)];
+        std::uint8_t j = HILBERT_INVERSE_LUT_3[i | ((h << r) & 0x3f)];
         z = (z << m) | ((j & 0x3f) >> r);
     }
     return z;
@@ -353,24 +353,24 @@ inline uint64_t hilbertToMorton(uint64_t h, int m) {
 /// times as long as computing its Morton index on an Intel Core i7-3820QM
 /// CPU. With Xcode 7.3 and -O3, latency is ~19ns per call at a CPU
 /// frequency of 3.5 GHz.
-inline uint64_t hilbertIndex(uint32_t x, uint32_t y, int m) {
+inline std::uint64_t hilbertIndex(std::uint32_t x, std::uint32_t y, int m) {
     return mortonToHilbert(mortonIndex(x, y), m);
 }
 
 #if !defined(NO_SIMD) && defined(__x86_64__)
-    inline uint64_t hilbertIndex(__m128i xy, int m) {
+    inline std::uint64_t hilbertIndex(__m128i xy, int m) {
         return mortonToHilbert(mortonIndex(xy), m);
     }
 #endif
 
 /// `hilbertIndexInverse` returns the point (x, y) with Hilbert index h,
 /// where x and y are m bit integers.
-inline std::tuple<uint32_t, uint32_t> hilbertIndexInverse(uint64_t h, int m) {
+inline std::tuple<std::uint32_t, std::uint32_t> hilbertIndexInverse(std::uint64_t h, int m) {
     return mortonIndexInverse(hilbertToMorton(h, m));
 }
 
 #if !defined(NO_SIMD) && defined(__x86_64__)
-    inline __m128i hilbertIndexInverseSimd(uint64_t h, int m) {
+    inline __m128i hilbertIndexInverseSimd(std::uint64_t h, int m) {
         return mortonIndexInverseSimd(hilbertToMorton(h, m));
     }
 #endif

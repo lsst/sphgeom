@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - uses: actions/checkout@v4
@@ -27,6 +27,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
           cache-dependency-path: "setup.cfg"
+          allow-prereleases: true
 
       - name: Build and install
         run: |
@@ -73,7 +74,7 @@ jobs:
     needs: [build_and_test]
     if: startsWith(github.ref, 'refs/tags/')
     env:
-      CIBW_BUILD: "cp3{8,9,10,11,12}-{manylinux_x86_64,manylinux_aarch64,macosx_arm64,macosx_x86_64}"
+      CIBW_BUILD: "cp3{8,9,10,11,12,13}-{manylinux_x86_64,manylinux_aarch64,macosx_arm64,macosx_x86_64}"
       CIBW_ARCHS_MACOS: "x86_64 arm64"
       # use line below to enable aarch64 builds
       # CIBW_ARCHS_LINUX: "auto aarch64"
