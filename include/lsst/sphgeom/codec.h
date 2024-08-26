@@ -47,6 +47,7 @@
 ///        decoding primitive types to/from byte strings.
 
 #include <vector>
+#include <cstdint>
 
 namespace lsst {
 namespace sphgeom {
