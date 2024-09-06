@@ -26,7 +26,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import pickle
-import sys
 import unittest
 
 from lsst.sphgeom import RangeSet
@@ -90,13 +89,8 @@ class RangeSetTestCase(unittest.TestCase):
 
     def testString(self):
         s = RangeSet(1, 10)
-        if sys.version_info[0] >= 3:
-            self.assertEqual(str(s), "[(1, 10)]")
-            self.assertEqual(repr(s), "RangeSet([(1, 10)])")
-        else:
-            # pybind11 maps C++ integers to Python long instances in Python 2.
-            self.assertEqual(str(s), "[(1L, 10L)]")
-            self.assertEqual(repr(s), "RangeSet([(1L, 10L)])")
+        self.assertEqual(str(s), "[(1, 10)]")
+        self.assertEqual(repr(s), "RangeSet([(1, 10)])")
         self.assertEqual(s, eval(repr(s), {"RangeSet": RangeSet}))
 
     def testPickle(self):
