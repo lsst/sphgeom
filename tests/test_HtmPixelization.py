@@ -34,7 +34,7 @@ except ImportError:
 
 import unittest
 
-from lsst.sphgeom import Angle, Circle, ConvexPolygon, HtmPixelization, RangeSet, UnitVector3d
+from lsst.sphgeom import Angle, Circle, ConvexPolygon, HtmPixelization, RangeSet, UnionRegion, UnitVector3d
 
 
 class HtmPixelizationTestCase(unittest.TestCase):
@@ -70,13 +70,24 @@ class HtmPixelizationTestCase(unittest.TestCase):
     def test_envelope_and_interior(self):
         pixelization = HtmPixelization(3)
         c = Circle(UnitVector3d(1, 1, 1), Angle.fromDegrees(0.1))
-        rs = pixelization.envelope(c)
-        self.assertTrue(rs == RangeSet(0x3FF))
+        rs1 = pixelization.envelope(c)
+        self.assertEqual(rs1, RangeSet(0x3FF))
         rs = pixelization.envelope(c, 1)
-        self.assertTrue(rs == RangeSet(0x3FF))
+        self.assertEqual(rs, RangeSet(0x3FF))
         self.assertTrue(rs.isWithin(pixelization.universe()))
         rs = pixelization.interior(c)
         self.assertTrue(rs.empty())
+
+        # Create a second region for a union.
+        s3 = UnitVector3d(1.0, -1.0, 1.0)  # Center of S3
+        c2 = Circle(s3, 1e-8)
+        rs2 = pixelization.envelope(c2)
+        self.assertEqual(rs2.ranges(), [(831, 832)])
+
+        # Try again with a union.
+        union = UnionRegion(c, c2)
+        rsu = pixelization.envelope(union)
+        self.assertEqual(rsu, rs1 | rs2)
 
     def test_index_to_string(self):
         strings = ["S0", "S1", "S2", "S3", "N0", "N1", "N2", "N3"]
