@@ -89,6 +89,12 @@ class HtmPixelizationTestCase(unittest.TestCase):
         rsu = pixelization.envelope(union)
         self.assertEqual(rsu, rs1 | rs2)
 
+        # Check that nested unions also work.
+        c3 = Circle(s3, 2e-8)
+        union2 = UnionRegion(union, c3)
+        rsu2 = pixelization.envelope(union2)
+        self.assertEqual(rsu2, rsu2 | rsu)
+
     def test_index_to_string(self):
         strings = ["S0", "S1", "S2", "S3", "N0", "N1", "N2", "N3"]
         for i in range(8, 16):
