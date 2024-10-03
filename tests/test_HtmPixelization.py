@@ -34,7 +34,16 @@ except ImportError:
 
 import unittest
 
-from lsst.sphgeom import Angle, Circle, ConvexPolygon, HtmPixelization, RangeSet, UnionRegion, UnitVector3d
+from lsst.sphgeom import (
+    Angle,
+    Circle,
+    ConvexPolygon,
+    HtmPixelization,
+    IntersectionRegion,
+    RangeSet,
+    UnionRegion,
+    UnitVector3d,
+)
 
 
 class HtmPixelizationTestCase(unittest.TestCase):
@@ -94,6 +103,21 @@ class HtmPixelizationTestCase(unittest.TestCase):
         union2 = UnionRegion(union, c3)
         rsu2 = pixelization.envelope(union2)
         self.assertEqual(rsu2, rsu2 | rsu)
+
+        # CHeck with intersection
+        c4 = Circle(UnitVector3d(1.0, 1.0, 2.0), 1)
+        c5 = Circle(UnitVector3d(1.0, 1.0, 2.5), 0.5)
+        rs4 = pixelization.envelope(c4)
+        rs5 = pixelization.envelope(c5)
+        intersection = IntersectionRegion(c4, c5)
+        rsi = pixelization.envelope(intersection)
+        self.assertEqual(rsi, rs4 & rs5)
+
+        # Check that nested intersection also work.
+        c6 = Circle(UnitVector3d(1.0, 1.0, 2.0), 2)
+        intersection2 = IntersectionRegion(intersection, c6)
+        rsi2 = pixelization.envelope(intersection2)
+        self.assertEqual(rsi2, rsi2 & rsi)
 
     def test_index_to_string(self):
         strings = ["S0", "S1", "S2", "S3", "N0", "N1", "N2", "N3"]
