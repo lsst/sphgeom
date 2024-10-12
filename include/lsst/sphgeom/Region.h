@@ -86,7 +86,7 @@ class UnitVector3d;
 /// Region types outside of this library.
 class Region {
 public:
-    virtual ~Region() {}
+    virtual ~Region() = default;
 
     /// `clone` returns a deep copy of this region.
     virtual std::unique_ptr<Region> clone() const = 0;
@@ -147,6 +147,10 @@ public:
     }
 
     static std::unique_ptr<Region> decode(std::uint8_t const * buffer, size_t n);
+    ///@}
+
+    /// `flatten` flattens a nested Region to a list of regions.
+    static void flatten(Region const &region, std::vector<std::unique_ptr<Region>> &result);
     ///@}
 };
 

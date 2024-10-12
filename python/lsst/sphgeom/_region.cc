@@ -27,6 +27,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "pybind11/pybind11.h"
+#include "pybind11/stl.h"
 #include "pybind11/numpy.h"
 
 #include "lsst/sphgeom/python.h"
@@ -69,6 +70,11 @@ void defineClass(py::class_<Region, std::unique_ptr<Region>> &cls) {
             "region"_a);
     cls.def("encode", &python::encode);
     cls.def_static("decode", &python::decode<Region>, "bytes"_a);
+    cls.def_static("flatten", [](Region const &region) {
+        std::vector<std::unique_ptr<Region>> result;
+        Region::flatten(region, result);
+        return result;
+    }, "region"_a);
 }
 
 }  // sphgeom
