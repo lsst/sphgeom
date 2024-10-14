@@ -75,6 +75,7 @@ void defineClass(py::class_<Region, std::unique_ptr<Region>> &cls) {
         Region::flatten(region, result);
         return result;
     }, "region"_a);
+    cls.def_static("getRegions", Region::getRegions, "region"_a);
 }
 
 }  // sphgeom

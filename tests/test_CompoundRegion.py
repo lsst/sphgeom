@@ -208,9 +208,17 @@ class IntersectionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
         b2 = Box.fromDegrees(135, 15, 135, 30)
         u1 = UnionRegion(c1, b1)
         u2 = UnionRegion(c2, b2)
-        c = UnionRegion(u1, u2)
-        d = Region.flatten(c)
-        self.assertEqual(d, [c1, b1, c2, b2])
+        i1 = IntersectionRegion(c1, b1)
+        i2 = IntersectionRegion(c2, b2)
+        ur = UnionRegion(u1, u2)
+        ir = IntersectionRegion(i1, i2)
+        d1 = Region.flatten(ur)
+        d2 = Region.flatten(ir)
+        self.assertEqual(d1, [c1, b1, c2, b2])
+        self.assertEqual(d2, [c1, b1, c2, b2])
+        self.assertEqual(Region.getRegions(c1), [c1])
+        self.assertEqual(Region.getRegions(Region.getRegions(ir)[0]), [c1, b1])
+        self.assertEqual(Region.getRegions(Region.getRegions(ir)[1]), [c2, b2])
 
 
 if __name__ == "__main__":
