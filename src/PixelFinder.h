@@ -177,7 +177,7 @@ RangeSet findPixels(Region const & r, size_t maxRanges, int level) {
         auto rs1 = findPixels<Finder, InteriorOnly>(region1, maxRanges, level);
         auto rs2 = findPixels<Finder, InteriorOnly>(region2, maxRanges, level);
         s = rs1.join(rs2);
-    }else if (auto intersection_region = dynamic_cast<IntersectionRegion const *>(&r)) {
+    } else if (auto intersection_region = dynamic_cast<IntersectionRegion const *>(&r)) {
         Region const &region1 = intersection_region->getOperand(0);
         Region const &region2 = intersection_region->getOperand(1);
         auto rs1 = findPixels<Finder, InteriorOnly>(region1, maxRanges, level);

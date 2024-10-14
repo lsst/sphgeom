@@ -88,7 +88,6 @@ public:
     }
     static std::unique_ptr<CompoundRegion> decode(std::uint8_t const *buffer, size_t n);
     ///@}
-    static void flatten(Region const &region, std::vector<std::unique_ptr<Region>> &result);
 
 protected:
 

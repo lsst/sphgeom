@@ -149,8 +149,8 @@ public:
     static std::unique_ptr<Region> decode(std::uint8_t const * buffer, size_t n);
     ///@}
 
-    /// `flatten` flattens a nested Region to a list of regions.
-    static void flatten(Region const &region, std::vector<std::unique_ptr<Region>> &result);
+    /// `getRegions` returns a vector of Region.
+    static std::vector<std::unique_ptr<Region>> getRegions(Region const &region);
     ///@}
 };
 

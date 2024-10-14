@@ -104,7 +104,7 @@ class HtmPixelizationTestCase(unittest.TestCase):
         rsu2 = pixelization.envelope(union2)
         self.assertEqual(rsu2, rsu2 | rsu)
 
-        # CHeck with intersection
+        # Check with intersection
         c4 = Circle(UnitVector3d(1.0, 1.0, 2.0), 1)
         c5 = Circle(UnitVector3d(1.0, 1.0, 2.5), 0.5)
         rs4 = pixelization.envelope(c4)
