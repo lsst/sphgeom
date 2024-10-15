@@ -201,6 +201,23 @@ class IntersectionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
         self.assertEqual(self.box.relate(self.instance), CONTAINS)
         self.assertEqual(self.faraway.relate(self.instance), DISJOINT)
 
+    def testGetRegion(self):
+        c1 = Circle(UnitVector3d(0.0, 0.0, 1.0), 1.0)
+        c2 = Circle(UnitVector3d(1.0, 0.0, 1.0), 2.0)
+        b1 = Box.fromDegrees(90, 0, 180, 45)
+        b2 = Box.fromDegrees(135, 15, 135, 30)
+        u1 = UnionRegion(c1, b1)
+        u2 = UnionRegion(c2, b2)
+        i1 = IntersectionRegion(c1, b1)
+        i2 = IntersectionRegion(c2, b2)
+        ur = UnionRegion(u1, u2)
+        ir = IntersectionRegion(i1, i2)
+        self.assertEqual(Region.getRegions(c1), [c1])
+        self.assertEqual(Region.getRegions(Region.getRegions(ir)[0]), [c1, b1])
+        self.assertEqual(Region.getRegions(Region.getRegions(ir)[1]), [c2, b2])
+        self.assertEqual(Region.getRegions(Region.getRegions(ur)[0]), [c1, b1])
+        self.assertEqual(Region.getRegions(Region.getRegions(ur)[1]), [c2, b2])
+
 
 if __name__ == "__main__":
     unittest.main()
