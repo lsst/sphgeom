@@ -114,6 +114,32 @@ class HealpixPixelizationTestCase(unittest.TestCase):
         )
         self._check_envelope(h, circle, [98, 99, 104, 105])
 
+    def test_envelope_missing_neighbors(self):
+        """Test envelope, with a pixel with missing neighbors.
+
+        Testing DM-47043.
+        """
+        h = HealpixPixelization(0)
+        h_highres = HealpixPixelization(4)
+
+        self.assertEqual(h._nside_highres, h_highres._nside)
+
+        # Find a pixel with a missing neighbor at high res.
+        n = hpg.neighbors(h_highres._nside, np.arange(hpg.nside_to_npixel(h_highres._nside)))
+        ind = np.argmin(n)
+        self.assertEqual(n.ravel()[ind], -1)
+
+        # This is the pixel with a bad (-1) neighbor.
+        badpix = ind // 8
+        ra, dec = hpg.pixel_to_angle(h_highres._nside, badpix)
+
+        box = Box(
+            point1=LonLat.fromDegrees(ra - 0.1, dec - 0.1),
+            point2=LonLat.fromDegrees(ra + 0.1, dec + 0.1),
+        )
+
+        self._check_envelope(h, box, [0, 1, 5])
+
     def _check_envelope(self, pixelization, region, check_pixels):
         """Check the envelope from a region.
 
