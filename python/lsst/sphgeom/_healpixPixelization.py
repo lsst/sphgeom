@@ -89,9 +89,9 @@ class HealpixPixelization(PixelizationABC):
 
         # Dilate the high resolution pixels by one to ensure that the full
         # region is completely covered at high resolution.
-        neighbors = hpg.neighbors(self._nside_highres, pixels_highres)
+        neighbors = hpg.neighbors(self._nside_highres, pixels_highres).ravel()
         # Shift back to the original resolution and uniquify
-        pixels = np.unique(np.right_shift(neighbors.ravel(), self._bit_shift))
+        pixels = np.unique(np.right_shift(neighbors[neighbors >= 0], self._bit_shift))
 
         return RangeSet(pixels)
 
