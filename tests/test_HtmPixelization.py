@@ -34,7 +34,16 @@ except ImportError:
 
 import unittest
 
-from lsst.sphgeom import Angle, Circle, ConvexPolygon, HtmPixelization, RangeSet, UnitVector3d
+from lsst.sphgeom import (
+    Angle,
+    Circle,
+    ConvexPolygon,
+    HtmPixelization,
+    IntersectionRegion,
+    RangeSet,
+    UnionRegion,
+    UnitVector3d,
+)
 
 
 class HtmPixelizationTestCase(unittest.TestCase):
@@ -70,13 +79,45 @@ class HtmPixelizationTestCase(unittest.TestCase):
     def test_envelope_and_interior(self):
         pixelization = HtmPixelization(3)
         c = Circle(UnitVector3d(1, 1, 1), Angle.fromDegrees(0.1))
-        rs = pixelization.envelope(c)
-        self.assertTrue(rs == RangeSet(0x3FF))
+        rs1 = pixelization.envelope(c)
+        self.assertEqual(rs1, RangeSet(0x3FF))
         rs = pixelization.envelope(c, 1)
-        self.assertTrue(rs == RangeSet(0x3FF))
+        self.assertEqual(rs, RangeSet(0x3FF))
         self.assertTrue(rs.isWithin(pixelization.universe()))
         rs = pixelization.interior(c)
         self.assertTrue(rs.empty())
+
+        # Create a second region for a union.
+        s3 = UnitVector3d(1.0, -1.0, 1.0)  # Center of S3
+        c2 = Circle(s3, 1e-8)
+        rs2 = pixelization.envelope(c2)
+        self.assertEqual(rs2.ranges(), [(831, 832)])
+
+        # Try again with a union.
+        union = UnionRegion(c, c2)
+        rsu = pixelization.envelope(union)
+        self.assertEqual(rsu, rs1 | rs2)
+
+        # Check that nested unions also work.
+        c3 = Circle(s3, 2e-8)
+        union2 = UnionRegion(union, c3)
+        rsu2 = pixelization.envelope(union2)
+        self.assertEqual(rsu2, rsu2 | rsu)
+
+        # Check with intersection
+        c4 = Circle(UnitVector3d(1.0, 1.0, 2.0), 1)
+        c5 = Circle(UnitVector3d(1.0, 1.0, 2.5), 0.5)
+        rs4 = pixelization.envelope(c4)
+        rs5 = pixelization.envelope(c5)
+        intersection = IntersectionRegion(c4, c5)
+        rsi = pixelization.envelope(intersection)
+        self.assertEqual(rsi, rs4 & rs5)
+
+        # Check that nested intersection also work.
+        c6 = Circle(UnitVector3d(1.0, 1.0, 2.0), 2)
+        intersection2 = IntersectionRegion(intersection, c6)
+        rsi2 = pixelization.envelope(intersection2)
+        self.assertEqual(rsi2, rsi2 & rsi)
 
     def test_index_to_string(self):
         strings = ["S0", "S1", "S2", "S3", "N0", "N1", "N2", "N3"]

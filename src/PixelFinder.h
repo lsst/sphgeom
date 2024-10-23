@@ -34,9 +34,10 @@
 /// \brief This file provides a base class for pixel finders.
 
 #include "lsst/sphgeom/RangeSet.h"
-
+#include "lsst/sphgeom/CompoundRegion.h"
 #include "ConvexPolygonImpl.h"
 
+#include <typeinfo>
 
 namespace lsst {
 namespace sphgeom {
@@ -156,23 +157,34 @@ template <
 >
 RangeSet findPixels(Region const & r, size_t maxRanges, int level) {
     RangeSet s;
-    Circle const * c = nullptr;
-    Ellipse const * e = nullptr;
-    Box const * b = nullptr;
-    if ((c = dynamic_cast<Circle const *>(&r))) {
-        Finder<Circle, InteriorOnly> find(s, *c, level, maxRanges);
+    if (auto circle = dynamic_cast<Circle const *>(&r)) {
+        Finder<Circle, InteriorOnly> find(s, *circle, level, maxRanges);
         find();
-    } else if ((e = dynamic_cast<Ellipse const *>(&r))) {
+    } else if (auto ellipse = dynamic_cast<Ellipse const *>(&r)) {
         Finder<Circle, InteriorOnly> find(
-            s, e->getBoundingCircle(), level, maxRanges);
+            s, ellipse->getBoundingCircle(), level, maxRanges);
         find();
-    } else if ((b = dynamic_cast<Box const *>(&r))) {
-        Finder<Box, InteriorOnly> find(s, *b, level, maxRanges);
+    } else if (auto box = dynamic_cast<Box const *>(&r)) {
+        Finder<Box, InteriorOnly> find(s, *box, level, maxRanges);
         find();
-    } else {
+    } else if (auto polygon = dynamic_cast<ConvexPolygon const *>(&r)) {
         Finder<ConvexPolygon, InteriorOnly> find(
-            s, dynamic_cast<ConvexPolygon const &>(r), level, maxRanges);
+                s, *polygon, level, maxRanges);
         find();
+    } else if (auto union_region = dynamic_cast<UnionRegion const *>(&r)) {
+        Region const &region1 = union_region->getOperand(0);
+        Region const &region2 = union_region->getOperand(1);
+        auto rs1 = findPixels<Finder, InteriorOnly>(region1, maxRanges, level);
+        auto rs2 = findPixels<Finder, InteriorOnly>(region2, maxRanges, level);
+        s = rs1.join(rs2);
+    } else if (auto intersection_region = dynamic_cast<IntersectionRegion const *>(&r)) {
+        Region const &region1 = intersection_region->getOperand(0);
+        Region const &region2 = intersection_region->getOperand(1);
+        auto rs1 = findPixels<Finder, InteriorOnly>(region1, maxRanges, level);
+        auto rs2 = findPixels<Finder, InteriorOnly>(region2, maxRanges, level);
+        s = rs1.intersection(rs2);
+    } else {
+        throw std::runtime_error(std::string("PixelFinder: Unsupported type ") + typeid(r).name());
     }
     return s;
 }
