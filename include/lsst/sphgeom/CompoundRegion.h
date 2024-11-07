@@ -36,7 +36,7 @@
 
 #include <iosfwd>
 #include <iterator>
-#include <array>
+#include <vector>
 #include <cstdint>
 
 #include "Region.h"
@@ -55,9 +55,8 @@ class Ellipse;
 class CompoundRegion : public Region {
 public:
     //@{
-    /// Construct by copying or taking ownership of operands.
-    CompoundRegion(Region const &first, Region const &second);
-    explicit CompoundRegion(std::array<std::unique_ptr<Region>, 2> operands) noexcept;
+    /// Construct by taking ownership of operands.
+    explicit CompoundRegion(std::vector<std::unique_ptr<Region>> operands) noexcept;
     //@}
 
     CompoundRegion(CompoundRegion const &);
@@ -67,6 +66,9 @@ public:
     // to guarantee memory safety for operand accessors in Python.
     CompoundRegion &operator=(CompoundRegion const &) = delete;
     CompoundRegion &operator=(CompoundRegion &&) = delete;
+
+    // Return number of operands
+    size_t nOperands() const { return _operands.size(); }
 
     // Return references to the operands.
     Region const & getOperand(std::size_t n) const {
@@ -95,11 +97,14 @@ protected:
     std::vector<std::uint8_t> _encode(std::uint8_t tc) const;
 
     // Implementation helper for decode().
-    static std::array<std::unique_ptr<Region>, 2> _decode(
+    static std::vector<std::unique_ptr<Region>> _decode(
         std::uint8_t tc, std::uint8_t const *buffer, std::size_t nBytes);
 
+    // Provide read access to all operands for quick iteration.
+    std::vector<std::unique_ptr<Region>> const& operands() const { return _operands; }
+
 private:
-    std::array<std::unique_ptr<Region>, 2> _operands;
+    std::vector<std::unique_ptr<Region>> _operands;
 };
 
 /// UnionRegion is a lazy point-set union of its operands.
