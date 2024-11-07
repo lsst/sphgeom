@@ -79,7 +79,8 @@ class CompoundRegionTestMixin:
         """Assert that a compound regions operands are equal to the given
         tuple of operands.
         """
-        self.assertCountEqual((region.cloneOperand(0), region.cloneOperand(1)), operands)
+        regions = tuple(region.cloneOperand(i) for i in range(region.nOperands()))
+        self.assertCountEqual(regions, operands)
 
     def assertCompoundRegionsEqual(self, a, b):
         """Assert that two compound regions are equal.
@@ -89,8 +90,9 @@ class CompoundRegionTestMixin:
         to its operands.  But the concrete operands (circle and box) we use in
         these tests do implement equality comparison.
         """
+        operands = tuple(b.cloneOperand(i) for i in range(b.nOperands()))
         self.assertEqual(type(a), type(b))
-        self.assertOperandsEqual(a, (b.cloneOperand(0), b.cloneOperand(1)))
+        self.assertOperandsEqual(a, operands)
 
     def testSetUp(self):
         """Test that the points and operand regions being tested have the

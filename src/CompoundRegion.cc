@@ -61,28 +61,38 @@ std::uint64_t consumeDecodeU64(std::uint8_t const *&buffer, std::uint8_t const *
 template <typename F>
 auto getUnionBounds(UnionRegion const &compound, F func) {
     auto bounds = func(compound.getOperand(0));
-    bounds.expandTo(func(compound.getOperand(1)));
+    for (unsigned i = 1; i < compound.nOperands(); ++ i) {
+        bounds.expandTo(func(compound.getOperand(i)));
+    }
     return bounds;
 }
 
 template <typename F>
 auto getIntersectionBounds(IntersectionRegion const &compound, F func) {
     auto bounds = func(compound.getOperand(0));
-    bounds.clipTo(func(compound.getOperand(1)));
+    for (unsigned i = 1; i < compound.nOperands(); ++ i) {
+        bounds.clipTo(func(compound.getOperand(i)));
+    }
     return bounds;
 }
 
 }  // namespace
 
-CompoundRegion::CompoundRegion(Region const &first, Region const &second)
-        : _operands{first.clone(), second.clone()} {}
-
-CompoundRegion::CompoundRegion(
-    std::array<std::unique_ptr<Region>, 2> operands) noexcept
-        : _operands(std::move(operands)) {}
+CompoundRegion::CompoundRegion(std::vector<std::unique_ptr<Region>> operands) noexcept
+        : _operands(std::move(operands))
+{
+    if (_operands.empty()) {
+        throw std::invalid_argument("CompoundRegion requires non-empty region list.");
+    }
+}
 
 CompoundRegion::CompoundRegion(CompoundRegion const &other)
-        : _operands{other.getOperand(0).clone(), other.getOperand(1).clone()} {}
+        : _operands()
+{
+    for (auto&& operand: other._operands) {
+        _operands.emplace_back(operand->clone());
+    }
+}
 
 Relationship CompoundRegion::relate(Box const &b) const { return relate(static_cast<Region const &>(b)); }
 Relationship CompoundRegion::relate(Circle const &c) const { return relate(static_cast<Region const &>(c)); }
@@ -92,16 +102,15 @@ Relationship CompoundRegion::relate(Ellipse const &e) const { return relate(stat
 std::vector<std::uint8_t> CompoundRegion::_encode(std::uint8_t tc) const {
     std::vector<std::uint8_t> buffer;
     buffer.push_back(tc);
-    auto buffer1 = getOperand(0).encode();
-    encodeU64(buffer1.size(), buffer);
-    buffer.insert(buffer.end(), buffer1.begin(), buffer1.end());
-    auto buffer2 = getOperand(1).encode();
-    encodeU64(buffer2.size(), buffer);
-    buffer.insert(buffer.end(), buffer2.begin(), buffer2.end());
+    for (auto&& operand: _operands) {
+        auto operand_buffer = operand->encode();
+        encodeU64(operand_buffer.size(), buffer);
+        buffer.insert(buffer.end(), operand_buffer.begin(), operand_buffer.end());
+    }
     return buffer;
 }
 
-std::array<std::unique_ptr<Region>, 2> CompoundRegion::_decode(
+std::vector<std::unique_ptr<Region>> CompoundRegion::_decode(
     std::uint8_t tc, std::uint8_t const *buffer, std::size_t nBytes) {
     std::uint8_t const *end = buffer + nBytes;
     if (nBytes == 0) {
@@ -111,15 +120,14 @@ std::array<std::unique_ptr<Region>, 2> CompoundRegion::_decode(
         throw std::runtime_error("Byte string is not an encoded CompoundRegion.");
     }
     ++buffer;
-    std::array<std::unique_ptr<Region>, 2> result;
-    std::uint64_t nBytes1 = consumeDecodeU64(buffer, end);
-    result[0] = Region::decode(buffer, nBytes1);
-    buffer += nBytes1;
-    std::uint64_t nBytes2 = consumeDecodeU64(buffer, end);
-    result[1] = Region::decode(buffer, nBytes2);
-    buffer += nBytes2;
-    if (buffer != end) {
-        throw std::runtime_error("Encoded CompoundRegion is has unexpected additional bytes.");
+    std::vector<std::unique_ptr<Region>> result;
+    while (buffer != end) {
+        std::uint64_t nBytes = consumeDecodeU64(buffer, end);
+        if (buffer + nBytes > end) {
+            throw std::runtime_error("Encoded CompoundRegion is truncated.");
+        }
+        result.push_back(Region::decode(buffer, nBytes));
+        buffer += nBytes;
     }
     return result;
 }
@@ -151,21 +159,43 @@ Circle UnionRegion::getBoundingCircle() const {
 }
 
 bool UnionRegion::contains(UnitVector3d const &v) const {
-    return getOperand(0).contains(v) || getOperand(1).contains(v);
+    for (auto&& operand: operands()) {
+        if (operand->contains(v)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 Relationship UnionRegion::relate(Region const &rhs) const {
-    auto r1 = getOperand(0).relate(rhs);
-    auto r2 = getOperand(1).relate(rhs);
-    return
-        // Both operands must be disjoint with the given region for the union
+    auto result = DISJOINT | WITHIN;
+    // When result becomes CONTAINS we can stop checking.
+    auto const stop = CONTAINS;
+    for (auto&& operand: operands()) {
+        auto rel = operand->relate(rhs);
+        // All operands must be disjoint with the given region for the union
         // to be disjoint with it.
-        ((r1 & DISJOINT) & (r2 & DISJOINT))
-        // Both operands must be within the given region for the union to be
+        if ((rel & DISJOINT) != DISJOINT) {
+            result &= ~DISJOINT;
+        }
+        // All operands must be within the given region for the union to be
         // within it.
-        | ((r1 & WITHIN) & (r2 & WITHIN))
-        // If either operand contains the given region, the union contains it.
-        | ((r1 & CONTAINS) | (r2 & CONTAINS));
+        if ((rel & WITHIN) != WITHIN) {
+            result &= ~WITHIN;
+        }
+        // If any operand contains the given region, the union contains it.
+        // NOTE: The logic here is incomplete there may be cases when union
+        // of regions can fully contain a region even though individual regions
+        // do not contain it.
+        if ((rel & CONTAINS) == CONTAINS) {
+            result |= CONTAINS;
+        }
+        if (result == stop) {
+            break;
+        }
+    }
+
+    return result;
 }
 
 Box IntersectionRegion::getBoundingBox() const {
@@ -181,22 +211,45 @@ Circle IntersectionRegion::getBoundingCircle() const {
 }
 
 bool IntersectionRegion::contains(UnitVector3d const &v) const {
-    return getOperand(0).contains(v) && getOperand(1).contains(v);
+    for (auto&& operand: operands()) {
+        if (not operand->contains(v)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 Relationship IntersectionRegion::relate(Region const &rhs) const {
-    auto r1 = getOperand(0).relate(rhs);
-    auto r2 = getOperand(1).relate(rhs);
-    return
-        // Both operands must contain the given region for the intersection to
+    auto result = CONTAINS;
+    // When result becomes DISJOINT | WITHIN we can stop checking.
+    auto const stop = DISJOINT | WITHIN;
+    for (auto&& operand: operands()) {
+        auto rel = operand->relate(rhs);
+        // All operands must contain the given region for the intersection to
         // contain it.
-        ((r1 & CONTAINS) & (r2 & CONTAINS))
-        // If either operand is disjoint with the given region, the
+        if ((rel & CONTAINS) != CONTAINS) {
+            result &= ~CONTAINS;
+        }
+        // If any operand is disjoint with the given region, the
         // intersection is disjoint with it.
-        | ((r1 & DISJOINT) | (r2 & DISJOINT))
-        // If either operand is within the given region, the intersection is
+        // NOTE: there may be cases when intersection is disjoint even though
+        // not all operands are disjoint.
+        if ((rel & DISJOINT) == DISJOINT) {
+            result |= DISJOINT;
+        }
+        // If any operand is within the given region, the intersection is
         // within it.
-        | ((r1 & WITHIN) | (r2 & WITHIN));
+        // NOTE: There may be cases when intersectiuon is within the region
+        // even though not all operand are within.
+        if ((rel & WITHIN) == WITHIN) {
+            result |= WITHIN;
+        }
+        if (result == stop) {
+            break;
+        }
+    }
+
+    return result;
 }
 
 }  // namespace sphgeom

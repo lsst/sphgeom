@@ -41,20 +41,42 @@ namespace sphgeom {
 
 namespace {
 
-py::str _repr(const char *format, CompoundRegion const &self) {
-    py::object first = py::cast(self.getOperand(0), py::return_value_policy::reference);
-    py::object second = py::cast(self.getOperand(1), py::return_value_policy::reference);
-    return py::str(format).format(first, second);
+py::str _repr(const char *class_name, CompoundRegion const &self) {
+    std::string format = class_name;
+    format += "(";
+    py::tuple operands(self.nOperands());
+    for (unsigned i = 0; i != self.nOperands(); i++) {
+        py::object operand = py::cast(self.getOperand(i), py::return_value_policy::reference);
+        operands[i] = operand;
+        if (i != 0) {
+            format += ", ";
+        }
+        format += "{!r}";
+    }
+    format += ")";
+    return py::str(format).format(*operands);
+}
+
+template <typename _CompoundRegion>
+std::unique_ptr<_CompoundRegion> _args_factory(const py::args& args) {
+    std::vector<std::unique_ptr<Region>> operands;
+    for (auto&& item: args) {
+        Region* region = item.cast<Region*>();
+        operands.emplace_back(region->clone());
+    }
+    return std::make_unique<_CompoundRegion>(std::move(operands));
 }
 
 }  // namespace
 
 template <>
 void defineClass(py::class_<CompoundRegion, std::unique_ptr<CompoundRegion>, Region> &cls) {
+    cls.def("nOperands", &CompoundRegion::nOperands);
     cls.def(
         "cloneOperand",
         [](CompoundRegion const &self, std::ptrdiff_t n) {
-            return self.getOperand(python::convertIndex(2, n)).clone();
+            int nOperands = self.nOperands();
+            return self.getOperand(python::convertIndex(nOperands, n)).clone();
         }
     );
 }
@@ -62,17 +84,17 @@ void defineClass(py::class_<CompoundRegion, std::unique_ptr<CompoundRegion>, Reg
 template <>
 void defineClass(py::class_<UnionRegion, std::unique_ptr<UnionRegion>, CompoundRegion> &cls) {
     cls.attr("TYPE_CODE") = py::int_(UnionRegion::TYPE_CODE);
-    cls.def(py::init<Region const &, Region const &>());
+    cls.def(py::init(&_args_factory<UnionRegion>));
     cls.def(py::pickle(&python::encode, &python::decode<UnionRegion>));
-    cls.def("__repr__", [](CompoundRegion const &self) { return _repr("UnionRegion({!r}, {!r})", self); });
+    cls.def("__repr__", [](CompoundRegion const &self) { return _repr("UnionRegion", self); });
 }
 
 template <>
 void defineClass(py::class_<IntersectionRegion, std::unique_ptr<IntersectionRegion>, CompoundRegion> &cls) {
     cls.attr("TYPE_CODE") = py::int_(IntersectionRegion::TYPE_CODE);
-    cls.def(py::init<Region const &, Region const &>());
+    cls.def(py::init(&_args_factory<IntersectionRegion>));
     cls.def(py::pickle(&python::encode, &python::decode<IntersectionRegion>));
-    cls.def("__repr__", [](CompoundRegion const &self) { return _repr("IntersectionRegion({!r}, {!r})", self); });
+    cls.def("__repr__", [](CompoundRegion const &self) { return _repr("IntersectionRegion", self); });
 }
 
 }  // namespace sphgeom

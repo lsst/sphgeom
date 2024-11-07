@@ -76,12 +76,11 @@ std::unique_ptr<Region> Region::decode(std::uint8_t const * buffer, size_t n) {
 std::vector<std::unique_ptr<Region>> Region::getRegions(Region const &region) {
     std::vector<std::unique_ptr<Region>> result;
     if (auto union_region = dynamic_cast<UnionRegion const *>(&region)) {
-        for(int i = 0; i < 2; ++i) {
+        for(unsigned i = 0; i < union_region->nOperands(); ++i) {
             result.emplace_back(union_region->getOperand(i).clone());
         }
     } else if(auto intersection_region = dynamic_cast<IntersectionRegion const *>(&region)) {
-        for(int i = 0; i < 2; ++i) {
-            intersection_region->getOperand(i);
+        for(unsigned i = 0; i < intersection_region->nOperands(); ++i) {
             result.emplace_back(intersection_region->getOperand(i).clone());
         }
     } else {
