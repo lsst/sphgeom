@@ -119,12 +119,18 @@ public:
 
     // Region interface.
     std::unique_ptr<Region> clone() const override { return std::make_unique<UnionRegion>(*this); }
+    bool isEmpty() const override;
     Box getBoundingBox() const override;
     Box3d getBoundingBox3d() const override;
     Circle getBoundingCircle() const override;
     using Region::contains;
     bool contains(UnitVector3d const &v) const override;
     Relationship relate(Region const &r) const override;
+    TriState overlaps(Region const& other) const override;
+    TriState overlaps(Box const &) const override;
+    TriState overlaps(Circle const &) const override;
+    TriState overlaps(ConvexPolygon const &) const override;
+    TriState overlaps(Ellipse const &) const override;
     std::vector<std::uint8_t> encode() const override { return _encode(TYPE_CODE); }
 
     ///@{
@@ -152,12 +158,18 @@ public:
 
     // Region interface.
     std::unique_ptr<Region> clone() const override { return std::make_unique<IntersectionRegion>(*this); }
+    bool isEmpty() const override;
     Box getBoundingBox() const override;
     Box3d getBoundingBox3d() const override;
     Circle getBoundingCircle() const override;
     using Region::contains;
     bool contains(UnitVector3d const &v) const override;
     Relationship relate(Region const &r) const override;
+    TriState overlaps(Region const& other) const override;
+    TriState overlaps(Box const &) const override;
+    TriState overlaps(Circle const &) const override;
+    TriState overlaps(ConvexPolygon const &) const override;
+    TriState overlaps(Ellipse const &) const override;
     std::vector<std::uint8_t> encode() const override { return _encode(TYPE_CODE); }
 
     ///@{

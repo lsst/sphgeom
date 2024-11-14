@@ -95,7 +95,6 @@ void defineClass(py::class_<Box, std::unique_ptr<Box>, Region> &cls) {
 
     cls.def("getLon", &Box::getLon);
     cls.def("getLat", &Box::getLat);
-    cls.def("isEmpty", &Box::isEmpty);
     cls.def("isFull", &Box::isFull);
     cls.def("getCenter", &Box::getCenter);
     cls.def("getWidth", &Box::getWidth);
