@@ -343,6 +343,30 @@ Relationship Ellipse::relate(Ellipse const & e) const {
     return getBoundingCircle().relate(e.getBoundingCircle()) & DISJOINT;
 }
 
+TriState Ellipse::overlaps(Box const &b) const {
+    // `relate` uses bounding circle approximation which is not exact and can
+    // only reliably return DISJOINT and WITHIN.
+    return _relationship_to_overlaps(relate(b));
+}
+
+TriState Ellipse::overlaps(Circle const &c) const {
+    // `relate` uses bounding circle approximation which is not exact and can
+    // only reliably return DISJOINT and WITHIN.
+    return _relationship_to_overlaps(relate(c));
+}
+
+TriState Ellipse::overlaps(ConvexPolygon const &p) const {
+    // `relate` uses bounding circle approximation which is not exact and can
+    // only reliably return DISJOINT and WITHIN.
+    return _relationship_to_overlaps(relate(p));
+}
+
+TriState Ellipse::overlaps(Ellipse const &e) const {
+    // `relate` uses bounding circle approximation which is not exact and can
+    // only reliably return DISJOINT and WITHIN.
+    return _relationship_to_overlaps(relate(e));
+}
+
 std::vector<std::uint8_t> Ellipse::encode() const {
     std::vector<std::uint8_t> buffer;
     std::uint8_t tc = TYPE_CODE;

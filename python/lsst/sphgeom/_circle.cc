@@ -75,7 +75,6 @@ void defineClass(py::class_<Circle, std::unique_ptr<Circle>, Region> &cls) {
             (bool (Circle::*)(UnitVector3d const &) const) & Circle::contains,
             py::is_operator());
 
-    cls.def("isEmpty", &Circle::isEmpty);
     cls.def("isFull", &Circle::isFull);
     cls.def("getCenter", &Circle::getCenter);
     cls.def("getSquaredChordLength", &Circle::getSquaredChordLength);

@@ -41,6 +41,7 @@
 #include "lsst/sphgeom/UnitVector3d.h"
 
 #include "lsst/sphgeom/python/relationship.h"
+#include "lsst/sphgeom/python/tristate.h"
 #include "lsst/sphgeom/python/utils.h"
 
 namespace py = pybind11;
@@ -52,6 +53,7 @@ namespace sphgeom {
 template <>
 void defineClass(py::class_<Region, std::unique_ptr<Region>> &cls) {
     cls.def("clone", &Region::clone);
+    cls.def("isEmpty", &Region::isEmpty);
     cls.def("getBoundingBox", &Region::getBoundingBox);
     cls.def("getBoundingBox3d", &Region::getBoundingBox3d);
     cls.def("getBoundingCircle", &Region::getBoundingCircle);
@@ -67,6 +69,9 @@ void defineClass(py::class_<Region, std::unique_ptr<Region>> &cls) {
     // double-dispatch in C++, and are not needed in Python.
     cls.def("relate",
             (Relationship(Region::*)(Region const &) const) & Region::relate,
+            "region"_a);
+    cls.def("overlaps",
+            (TriState(Region::*)(Region const &) const)&Region::overlaps,
             "region"_a);
     cls.def("encode", &python::encode);
     cls.def_static("decode", &python::decode<Region>, "bytes"_a);

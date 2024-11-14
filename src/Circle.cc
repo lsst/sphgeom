@@ -336,6 +336,25 @@ Relationship Circle::relate(Ellipse const & e) const {
     return invert(e.relate(*this));
 }
 
+TriState Circle::overlaps(Box const & b) const {
+    // Box-Circle relations are implemented by Box.
+    return b.overlaps(*this);
+}
+
+TriState Circle::overlaps(Circle const & c) const {
+    return TriState(not this->isDisjointFrom(c));
+}
+
+TriState Circle::overlaps(ConvexPolygon const & p) const {
+    // ConvexPolygon-Circle relations are implemented by ConvexPolygon.
+    return p.overlaps(*this);
+}
+
+TriState Circle::overlaps(Ellipse const & e) const {
+    // Ellipse-Circle relations are implemented by Ellipse.
+    return e.overlaps(*this);
+}
+
 std::vector<std::uint8_t> Circle::encode() const {
     std::vector<std::uint8_t> buffer;
     std::uint8_t tc = TYPE_CODE;

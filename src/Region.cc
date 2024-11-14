@@ -52,6 +52,20 @@ bool Region::contains(double lon, double lat) const {
     return contains(UnitVector3d(LonLat::fromRadians(lon, lat)));
 }
 
+TriState
+Region::overlaps(Region const& other) const {
+    // Default implementation just uses `relate`, and it returns unknown state
+    // more frequently, subclasses will want to implement better tests.
+    auto r = this->relate(other);
+    if ((r & DISJOINT).any()) {
+        return TriState(false);
+    } else if ((r & (CONTAINS | WITHIN)).any()) {
+        return TriState(true);
+    } else {
+        return TriState();
+    }
+}
+
 std::unique_ptr<Region> Region::decode(std::uint8_t const * buffer, size_t n) {
     if (buffer == nullptr || n == 0) {
         throw std::runtime_error("Byte-string is not an encoded Region");
