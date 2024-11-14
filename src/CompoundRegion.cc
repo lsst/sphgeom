@@ -198,6 +198,16 @@ Relationship UnionRegion::relate(Region const &rhs) const {
     return result;
 }
 
+bool UnionRegion::isDisjoint(Region const &rhs) const {
+    // Union is disjoint if all operands are disjoint.
+    for (auto&& operand: operands()) {
+        if (not operand->isDisjoint(rhs)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 Box IntersectionRegion::getBoundingBox() const {
     return getIntersectionBounds(*this, [](Region const &r) { return r.getBoundingBox(); });
 }
@@ -250,6 +260,17 @@ Relationship IntersectionRegion::relate(Region const &rhs) const {
     }
 
     return result;
+}
+
+bool IntersectionRegion::isDisjoint(Region const &rhs) const {
+    // Intersection is disjoint if any operand is disjoint.
+    for (auto&& operand: operands()) {
+        if (operand->isDisjoint(rhs)) {
+            return true;
+        }
+    }
+    // False means it may overlap.
+    return false;
 }
 
 }  // namespace sphgeom

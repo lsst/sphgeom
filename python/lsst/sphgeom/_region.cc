@@ -68,6 +68,7 @@ void defineClass(py::class_<Region, std::unique_ptr<Region>> &cls) {
     cls.def("relate",
             (Relationship(Region::*)(Region const &) const) & Region::relate,
             "region"_a);
+    cls.def("isDisjoint", &Region::isDisjoint, "region"_a);
     cls.def("encode", &python::encode);
     cls.def_static("decode", &python::decode<Region>, "bytes"_a);
     cls.def_static("getRegions", Region::getRegions, "region"_a);

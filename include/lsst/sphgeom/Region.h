@@ -136,6 +136,25 @@ public:
     virtual Relationship relate(Ellipse const &) const = 0;
     ///@}
 
+    ///@{
+    /// `disjoint` tests whether this region is disjoint from other region.
+    /// This method returns a subset of information returned from `relate`,
+    /// the reason for its existence is that in same cases it may be
+    /// implemented more efficiently.
+    ///
+    /// The meaning of the returned value is the same as for `relate` metod -
+    /// `true` means that regions are definitely disjoint, and `false` means
+    /// that regions may overlap.
+    ///
+    /// Note that some subclasses implement `isDisjointFrom` method for
+    /// specific region types which return exact answer.
+    virtual bool isDisjoint(Region const& other) const {
+        // Default implementation just uses `relate`.
+        auto r = this->relate(other);
+        return (r & DISJOINT) == DISJOINT;
+    }
+    ///@}
+
     /// `encode` serializes this region into an opaque byte string. Byte strings
     /// emitted by encode can be deserialized with decode.
     virtual std::vector<std::uint8_t> encode() const = 0;

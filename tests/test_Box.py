@@ -109,10 +109,12 @@ class BoxTestCase(unittest.TestCase):
         self.assertTrue(b3.contains(u))
         b4 = Box.fromDegrees(200, 10, 300, 20)
         self.assertTrue(b1.isDisjointFrom(b4))
+        self.assertTrue(b1.isDisjoint(b4))
         r = b1.relate(LonLat.fromDegrees(135, 10))
         self.assertEqual(r, CONTAINS)
         r = b4.relate(b1)
         self.assertEqual(r, DISJOINT)
+        self.assertTrue(b4.isDisjoint(b1))
 
     def test_vectorized_contains(self):
         b = Box.fromDegrees(200, 10, 300, 20)

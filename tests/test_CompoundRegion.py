@@ -179,6 +179,15 @@ class UnionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
         self.assertEqual(self.box.relate(self.instance), WITHIN)
         self.assertEqual(self.faraway.relate(self.instance), DISJOINT)
 
+    def testIsDisjoint(self):
+        """Test region-region relationship checks."""
+        self.assertFalse(self.instance.isDisjoint(self.circle))
+        self.assertFalse(self.instance.isDisjoint(self.box))
+        self.assertTrue(self.instance.isDisjoint(self.faraway))
+        self.assertFalse(self.circle.isDisjoint(self.instance))
+        self.assertFalse(self.box.isDisjoint(self.instance))
+        self.assertTrue(self.faraway.isDisjoint(self.instance))
+
 
 class IntersectionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
     """Test intersection region."""
@@ -202,6 +211,15 @@ class IntersectionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
         self.assertEqual(self.circle.relate(self.instance), CONTAINS)
         self.assertEqual(self.box.relate(self.instance), CONTAINS)
         self.assertEqual(self.faraway.relate(self.instance), DISJOINT)
+
+    def testIsDisjoint(self):
+        """Test region-region relationship checks."""
+        self.assertFalse(self.instance.isDisjoint(self.box))
+        self.assertFalse(self.instance.isDisjoint(self.circle))
+        self.assertTrue(self.instance.isDisjoint(self.faraway))
+        self.assertFalse(self.circle.isDisjoint(self.instance))
+        self.assertFalse(self.box.isDisjoint(self.instance))
+        self.assertTrue(self.faraway.isDisjoint(self.instance))
 
     def testGetRegion(self):
         c1 = Circle(UnitVector3d(0.0, 0.0, 1.0), 1.0)

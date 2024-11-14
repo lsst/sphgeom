@@ -125,6 +125,7 @@ public:
     using Region::contains;
     bool contains(UnitVector3d const &v) const override;
     Relationship relate(Region const &r) const override;
+    bool isDisjoint(Region const& other) const override;
     std::vector<std::uint8_t> encode() const override { return _encode(TYPE_CODE); }
 
     ///@{
@@ -158,6 +159,7 @@ public:
     using Region::contains;
     bool contains(UnitVector3d const &v) const override;
     Relationship relate(Region const &r) const override;
+    bool isDisjoint(Region const& other) const override;
     std::vector<std::uint8_t> encode() const override { return _encode(TYPE_CODE); }
 
     ///@{
