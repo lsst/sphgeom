@@ -223,7 +223,7 @@ public:
 
     bool operator!=(Ellipse const & e) const { return !(*this == e); }
 
-    bool isEmpty() const { return Angle(0.5 * PI) + _a < _gamma; }
+    bool isEmpty() const override { return Angle(0.5 * PI) + _a < _gamma; }
 
     bool isFull() const { return Angle(0.5 * PI) - _a <= _gamma; }
 
@@ -302,6 +302,14 @@ public:
     Relationship relate(Circle const &) const override;
     Relationship relate(ConvexPolygon const &) const override;
     Relationship relate(Ellipse const &) const override;
+
+    TriState overlaps(Region const& other) const override {
+        return other.overlaps(*this);
+    }
+    TriState overlaps(Box const &) const override;
+    TriState overlaps(Circle const &) const override;
+    TriState overlaps(ConvexPolygon const &) const override;
+    TriState overlaps(Ellipse const &) const override;
 
     std::vector<std::uint8_t> encode() const override;
 

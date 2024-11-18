@@ -68,13 +68,13 @@ class ConvexPolygonTestCase(unittest.TestCase):
         self.assertTrue(p.isWithin(boundingCircle))
         self.assertTrue(p.intersects(boundingCircle))
         self.assertFalse(p.isDisjointFrom(boundingCircle))
-        self.assertFalse(p.isDisjoint(boundingCircle))
+        self.assertEqual(p.overlaps(boundingCircle), True)
         self.assertFalse(p.contains(boundingCircle))
         tinyCircle = Circle(boundingCircle.getCenter())
         self.assertFalse(p.isWithin(tinyCircle))
         self.assertTrue(p.intersects(tinyCircle))
         self.assertFalse(p.isDisjointFrom(tinyCircle))
-        self.assertFalse(p.isDisjoint(tinyCircle))
+        self.assertEqual(p.overlaps(tinyCircle), True)
         self.assertTrue(p.contains(tinyCircle))
 
     def test_vectorized_contains(self):

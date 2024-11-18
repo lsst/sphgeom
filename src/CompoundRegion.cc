@@ -81,9 +81,6 @@ auto getIntersectionBounds(IntersectionRegion const &compound, F func) {
 CompoundRegion::CompoundRegion(std::vector<std::unique_ptr<Region>> operands) noexcept
         : _operands(std::move(operands))
 {
-    if (_operands.empty()) {
-        throw std::invalid_argument("CompoundRegion requires non-empty region list.");
-    }
 }
 
 CompoundRegion::CompoundRegion(CompoundRegion const &other)
@@ -146,6 +143,16 @@ std::unique_ptr<CompoundRegion> CompoundRegion::decode(std::uint8_t const *buffe
     }
 }
 
+bool UnionRegion::isEmpty() const {
+    // It can be empty when there are no operands or all operands are empty.
+    for (auto&& operand: operands()) {
+        if (not operand->isEmpty()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 Box UnionRegion::getBoundingBox() const {
     return getUnionBounds(*this, [](Region const &r) { return r.getBoundingBox(); });
 }
@@ -198,14 +205,66 @@ Relationship UnionRegion::relate(Region const &rhs) const {
     return result;
 }
 
-bool UnionRegion::isDisjoint(Region const &rhs) const {
-    // Union is disjoint if all operands are disjoint.
+TriState UnionRegion::overlaps(Region const& other) const {
+    // Union overlaps if any operand overlaps, and disjoint when all are
+    // disjoint. Empty union is disjoint with anyhting.
+    if (empty()) {
+        return TriState(false);
+    }
     for (auto&& operand: operands()) {
-        if (not operand->isDisjoint(rhs)) {
-            return false;
+        auto state = operand->overlaps(other);
+        if (state == true) {
+            // Definitely overlap.
+            return TriState(true);
+        } if (not state.known()) {
+            // May or may not overlap.
+            return TriState();
         }
     }
-    return true;
+    // None overlaps.
+    return TriState(false);
+}
+
+TriState UnionRegion::overlaps(Box const &b) const {
+    return overlaps(static_cast<Region const&>(b));
+}
+
+TriState UnionRegion::overlaps(Circle const &c) const {
+    return overlaps(static_cast<Region const&>(c));
+}
+
+TriState UnionRegion::overlaps(ConvexPolygon const &p) const {
+    return overlaps(static_cast<Region const&>(p));
+}
+
+TriState UnionRegion::overlaps(Ellipse const &e) const {
+    return overlaps(static_cast<Region const&>(e));
+}
+
+bool IntersectionRegion::isEmpty() const {
+    // Intersection is harder to decide - the only clear case is when there are
+    // no operands, which we declare to be equivalent to full sphere. Other
+    // clear case is when all operands are empty.
+    if (empty()) {
+        return false;
+    }
+    if (std::all_of(
+        operands().begin(), operands().end(), [](auto const& operand) { return operand->isEmpty(); }
+    )) {
+        return true;
+    }
+    // Another test is for when any operand is disjoint with any other operands.
+    auto begin = operands().begin();
+    auto const end = operands().end();
+    for (auto op1 = begin; op1 != end; ++ op1) {
+        for (auto op2 = op1 + 1; op2 != end; ++ op2) {
+            if ((*op1)->overlaps(**op2) == false) {
+                return true;
+            }
+        }
+    }
+    // Still may be empty but hard to guess.
+    return false;
 }
 
 Box IntersectionRegion::getBoundingBox() const {
@@ -262,15 +321,41 @@ Relationship IntersectionRegion::relate(Region const &rhs) const {
     return result;
 }
 
-bool IntersectionRegion::isDisjoint(Region const &rhs) const {
-    // Intersection is disjoint if any operand is disjoint.
+TriState IntersectionRegion::overlaps(Region const& other) const {
+    // Intersection case is harder, difficult to guess "definitely overlaps"
+    // without building actual overlap region. It is easier to check for
+    // disjoint - if any operand is disjoint then intersection is disjoint too.
+    if (empty()) {
+        // Empty intersection is equivalent to whole sphere, so it should
+        // overlap anything, but there is case of empty regions that overlap
+        // nothing.
+        return TriState(not other.isEmpty());
+    }
+
     for (auto&& operand: operands()) {
-        if (operand->isDisjoint(rhs)) {
-            return true;
+        auto state = operand->overlaps(other);
+        if (state == false) {
+            return TriState(false);
         }
     }
-    // False means it may overlap.
-    return false;
+    // Not disjoint, but may or may not overlap.
+    return TriState();
+}
+
+TriState IntersectionRegion::overlaps(Box const &b) const {
+    return overlaps(static_cast<Region const&>(b));
+}
+
+TriState IntersectionRegion::overlaps(Circle const &c) const {
+    return overlaps(static_cast<Region const&>(c));
+}
+
+TriState IntersectionRegion::overlaps(ConvexPolygon const &p) const {
+    return overlaps(static_cast<Region const&>(p));
+}
+
+TriState IntersectionRegion::overlaps(Ellipse const &e) const {
+    return overlaps(static_cast<Region const&>(e));
 }
 
 }  // namespace sphgeom

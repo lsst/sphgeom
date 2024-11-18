@@ -38,6 +38,7 @@
 #include <cstdint>
 
 #include "Relationship.h"
+#include "TriState.h"
 
 
 namespace lsst {
@@ -100,6 +101,9 @@ public:
     /// `getBoundingCircle` returns a bounding-circle for this region.
     virtual Circle getBoundingCircle() const = 0;
 
+    /// `isEmpty` returns true when a region does not contain any points.
+    virtual bool isEmpty() const = 0;
+
     /// `contains` tests whether the given unit vector is inside this region.
     virtual bool contains(UnitVector3d const &) const = 0;
 
@@ -137,22 +141,15 @@ public:
     ///@}
 
     ///@{
-    /// `disjoint` tests whether this region is disjoint from other region.
-    /// This method returns a subset of information returned from `relate`,
-    /// the reason for its existence is that in same cases it may be
-    /// implemented more efficiently.
-    ///
-    /// The meaning of the returned value is the same as for `relate` metod -
-    /// `true` means that regions are definitely disjoint, and `false` means
-    /// that regions may overlap.
-    ///
-    /// Note that some subclasses implement `isDisjointFrom` method for
-    /// specific region types which return exact answer.
-    virtual bool isDisjoint(Region const& other) const {
-        // Default implementation just uses `relate`.
-        auto r = this->relate(other);
-        return (r & DISJOINT) == DISJOINT;
-    }
+    /// `overlaps` tests whether two regions overlap. This method returns
+    /// a `TriState` object, when the value is `true` it means that regions
+    /// definitely overlap, `false` means they are definitely disjont, and
+    /// unknown state means that they may or may not overlap.
+    virtual TriState overlaps(Region const& other) const = 0;
+    virtual TriState overlaps(Box const &) const = 0;
+    virtual TriState overlaps(Circle const &) const = 0;
+    virtual TriState overlaps(ConvexPolygon const &) const = 0;
+    virtual TriState overlaps(Ellipse const &) const = 0;
     ///@}
 
     /// `encode` serializes this region into an opaque byte string. Byte strings
@@ -171,6 +168,24 @@ public:
     /// `getRegions` returns a vector of Region.
     static std::vector<std::unique_ptr<Region>> getRegions(Region const &region);
     ///@}
+
+protected:
+
+    // Default transformation of the region Relationship as returned from
+    // `relate` to TriState. Can be used when specific region class cannot
+    // compute more precise overlap relation.
+    static TriState _relationship_to_overlaps(Relationship r) {
+        // `relate` returns exact relation when specific bit is set, if it is
+        // not then relation may be true or not.
+        if ((r & DISJOINT) == DISJOINT) {
+            return TriState(false);
+        }
+        if ((r & (WITHIN | CONTAINS)).any()) {
+            return TriState(true);
+        }
+        return TriState();
+    }
+
 };
 
 }} // namespace lsst::sphgeom

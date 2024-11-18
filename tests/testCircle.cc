@@ -86,6 +86,11 @@ void checkProperties(Circle const & c) {
     }
 }
 
+void checkRelations(Circle const& circle1, Circle const& circle2, Relationship rel, bool overlaps) {
+    CHECK(circle1.relate(circle2) == rel);
+    CHECK(circle1.overlaps(circle2) == overlaps);
+}
+
 TEST_CASE(Stream) {
     Circle c(UnitVector3d::X(), 0.0001220703125);
     std::stringstream ss;
@@ -323,10 +328,10 @@ TEST_CASE(PointRelations) {
 TEST_CASE(CircleRelations) {
     UnitVector3d x = UnitVector3d::X();
     UnitVector3d y = UnitVector3d::Y();
-    CHECK(Circle(x, 1).relate(Circle(-x, 1)) == DISJOINT);
-    CHECK(Circle(x, 2).relate(Circle(x, 1)) == CONTAINS);
-    CHECK(Circle(x, 1).relate(Circle(x, 2)) == WITHIN);
-    CHECK(Circle(x, 1).relate(Circle(y, 1)) == INTERSECTS);
+    checkRelations(Circle(x, 1), Circle(-x, 1), DISJOINT, false);
+    checkRelations(Circle(x, 2), Circle(x, 1), CONTAINS, true);
+    checkRelations(Circle(x, 1), Circle(x, 2), WITHIN, true);
+    checkRelations(Circle(x, 1), Circle(y, 1), INTERSECTS, true);
 }
 
 TEST_CASE(Box3dBounds1) {

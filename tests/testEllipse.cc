@@ -126,6 +126,7 @@ TEST_CASE(EmptyEllipse) {
     // and be disjoint from itself. However, the ellipse-ellipse relation
     // test is currently very inexact.
     CHECK(e.relate(e) == DISJOINT);
+    CHECK(e.overlaps(e) == false);
     // The bounding box and circle for an empty ellipse should be empty.
     CHECK(e.getBoundingBox().isEmpty());
     CHECK(e.getBoundingCircle().isEmpty());
@@ -148,7 +149,9 @@ TEST_CASE(FullEllipse) {
     // and intersect itself. However, the ellipse-ellipse relation
     // test is currently very inexact.
     CHECK(e.relate(e) == INTERSECTS);
+    CHECK(not e.overlaps(e).known());
     CHECK(e.relate(Circle(UnitVector3d::X())) == INTERSECTS);
+    CHECK(not e.overlaps(Circle(UnitVector3d::X())).known());
     // Check constructor arguments that should produce full ellipses.
     CHECK(Ellipse(UnitVector3d::X(), Angle(PI)).isFull());
     CHECK(Ellipse(UnitVector3d::X(), UnitVector3d::Y(), Angle(PI)).isFull());

@@ -69,6 +69,11 @@ void checkProperties(Box const & b) {
     }
 }
 
+void checkRelations(Region const& box, Region const& circle, Relationship rel, bool overlaps) {
+    CHECK(box.relate(circle) == rel);
+    CHECK(box.overlaps(circle) == overlaps);
+}
+
 TEST_CASE(Stream) {
     Box b(LonLat::fromRadians(1, 0), Angle(1), Angle(1));
     std::stringstream ss;
@@ -172,60 +177,40 @@ TEST_CASE(Center) {
 }
 
 TEST_CASE(BoxCircleRelations1) {
-    CHECK(Box::empty().relate(Circle::empty()) ==
-          (CONTAINS | DISJOINT | WITHIN));
-    CHECK(Box::empty().relate(Circle::full()) ==
-          (DISJOINT | WITHIN));
-    CHECK(Box::full().relate(Circle::empty()) ==
-          (CONTAINS | DISJOINT));
-    CHECK(Box::full().relate(Circle::full()) ==
-          (CONTAINS | WITHIN));
-    CHECK(Box::full().relate(Circle(UnitVector3d::X(), Angle(1))) == CONTAINS);
-    CHECK(Box::fromDegrees(0, 0, 0, 0).relate(Circle::full()) == WITHIN);
+    checkRelations(Box::empty(), Circle::empty(), (CONTAINS | DISJOINT | WITHIN), false);
+    checkRelations(Box::empty(), Circle::full(), (DISJOINT | WITHIN), false);
+    checkRelations(Box::full(), Circle::empty(), (CONTAINS | DISJOINT), false);
+    checkRelations(Box::full(), Circle::full(), (CONTAINS | WITHIN), true);
+    checkRelations(Box::full(), Circle(UnitVector3d::X(), Angle(1)), CONTAINS, true);
+    checkRelations(Box::fromDegrees(0, 0, 0, 0), Circle::full(), WITHIN, true);
 }
 
 TEST_CASE(BoxCircleRelations2) {
     UnitVector3d x = UnitVector3d::X();
-    CHECK(Box::fromDegrees(-10, -10, 10, 10).relate(Circle(-x, Angle(1))) ==
-          DISJOINT);
-    CHECK(Box::fromRadians(-3, -1, 3, 1).relate(Circle(-x, Angle(0.1))) ==
-          DISJOINT);
+    checkRelations(Box::fromDegrees(-10, -10, 10, 10), Circle(-x, Angle(1)), DISJOINT, false);
+    checkRelations(Box::fromRadians(-3, -1, 3, 1), Circle(-x, Angle(0.1)), DISJOINT, false);
 }
 
 TEST_CASE(BoxCircleRelations3) {
     UnitVector3d x = UnitVector3d::X();
-    CHECK(Box::fromRadians(-1, -1, 1, 1)
-            .relate(Circle(-x, Angle(PI - 0.5))) ==
-          INTERSECTS);
-    CHECK(Box::fromRadians(-1, -1, 1, 1)
-            .relate(Circle(UnitVector3d(Angle(1), Angle(0)), Angle(0.5))) ==
-          INTERSECTS);
-    CHECK(Box::fromRadians(-1, -1, 1, 1)
-            .relate(Circle(UnitVector3d(Angle(-1.5), Angle(0)), Angle(1))) ==
-          INTERSECTS);
-    CHECK(Box::fromRadians(-1, -1, 1, 1)
-            .relate(Circle(UnitVector3d(Angle(-1), Angle(1)), Angle(0.1))) ==
-          INTERSECTS);
-    CHECK(Box::fromRadians(-0.5, -0.5, 0, 0)
-            .relate(Circle(UnitVector3d(1, 1, 1), 0.8452994616207485)) ==
-          INTERSECTS);
-    CHECK(Box::fromRadians(-1, -0.5, 1, 0.5)
-            .relate(Circle(-x, Angle(PI - 0.6))) ==
-          INTERSECTS);
-    CHECK(Box::fromRadians(-0.5, -0.5, 0.5, 0.5)
-            .relate(Circle(-x, Angle(PI - 0.6))) ==
-          INTERSECTS);
-    CHECK(Box::fromRadians(-1, -0.5, 1, 0.5)
-            .relate(Circle(x, Angle(0.6))) ==
-          INTERSECTS);
+    checkRelations(Box::fromRadians(-1, -1, 1, 1), Circle(-x, Angle(PI - 0.5)), INTERSECTS, true);
+    checkRelations(Box::fromRadians(-1, -1, 1, 1), Circle(UnitVector3d(Angle(1), Angle(0)), Angle(0.5)),
+                   INTERSECTS, true);
+    checkRelations(Box::fromRadians(-1, -1, 1, 1), Circle(UnitVector3d(Angle(-1.5), Angle(0)), Angle(1)),
+                   INTERSECTS, true);
+    checkRelations(Box::fromRadians(-1, -1, 1, 1), Circle(UnitVector3d(Angle(-1), Angle(1)), Angle(0.1)),
+                   INTERSECTS, true);
+    checkRelations(Box::fromRadians(-0.5, -0.5, 0, 0), Circle(UnitVector3d(1, 1, 1), 0.8452994616207485),
+                   INTERSECTS, true);
+    checkRelations(Box::fromRadians(-1, -0.5, 1, 0.5), Circle(-x, Angle(PI - 0.6)), INTERSECTS, true);
+    checkRelations(Box::fromRadians(-0.5, -0.5, 0.5, 0.5), Circle(-x, Angle(PI - 0.6)), INTERSECTS, true);
+    checkRelations(Box::fromRadians(-1, -0.5, 1, 0.5), Circle(x, Angle(0.6)), INTERSECTS, true);
 }
 
 TEST_CASE(BoxCircleRelations4) {
     UnitVector3d x = UnitVector3d::X();
-    CHECK(Box::fromRadians(-1, -1, 1, 1).relate(Circle(x, Angle(0.5))) ==
-          CONTAINS);
-    CHECK(Box::fromRadians(-0.5, -0.5, 0.5, 0.5).relate(Circle(x, Angle(1))) ==
-          WITHIN);
+    checkRelations(Box::fromRadians(-1, -1, 1, 1), Circle(x, Angle(0.5)), CONTAINS, true);
+    checkRelations(Box::fromRadians(-0.5, -0.5, 0.5, 0.5), Circle(x, Angle(1)), WITHIN, true);
 }
 
 TEST_CASE(BoxPointRelations1) {
@@ -301,11 +286,11 @@ TEST_CASE(Dilation1) {
     Angle epsilon = Angle::fromDegrees(2.78e-6); // about 10 milliarcsec
     Box b = Box::fromDegrees(170, -10, 190, 10).dilatedBy(radius + epsilon);
     UnitVector3d v = UnitVector3d(LonLat::fromDegrees(170, -10));
-    CHECK(b.relate(Circle(v, radius)) == CONTAINS);
+    checkRelations(b, Circle(v, radius), CONTAINS, true);
     v = UnitVector3d(LonLat::fromDegrees(170, 10));
-    CHECK(b.relate(Circle(v, radius)) == CONTAINS);
+    checkRelations(b, Circle(v, radius), CONTAINS, true);
     v = UnitVector3d(LonLat::fromDegrees(190, -10));
-    CHECK(b.relate(Circle(v, radius)) == CONTAINS);
+    checkRelations(b, Circle(v, radius), CONTAINS,true);
     v = UnitVector3d(LonLat::fromDegrees(190, 10));
     CHECK(b.contains(Circle(v, radius).getBoundingBox()));
 }
@@ -342,13 +327,13 @@ TEST_CASE(BoxBounds1) {
 TEST_CASE(BoxBounds2) {
     Box b = Box::fromDegrees(100, 84, 278, 85);
     Circle c = b.getBoundingCircle();
-    CHECK(b.relate(c) == WITHIN);
+    checkRelations(b, c, WITHIN, true);
 }
 
 TEST_CASE(BoxBounds3) {
     Box b = Box::fromDegrees(100, -86, 270, -85);
     Circle c = b.getBoundingCircle();
-    CHECK(b.relate(c) == WITHIN);
+    checkRelations(b, c, WITHIN, true);
 }
 
 // Check bounding circle properties for boxes that span more
@@ -359,7 +344,7 @@ TEST_CASE(BoxBounds4) {
     Circle c = b.getBoundingCircle();
     CHECK(c.getCenter() == UnitVector3d::Z());
     CHECK(c.getOpeningAngle().asDegrees() < 45.001);
-    CHECK(c.relate(b) == CONTAINS);
+    checkRelations(c, b, CONTAINS, true);
 }
 
 TEST_CASE(BoxBounds5) {
@@ -367,7 +352,7 @@ TEST_CASE(BoxBounds5) {
     Circle c = b.getBoundingCircle();
     CHECK(c.getCenter() == -UnitVector3d::Z());
     CHECK(c.getOpeningAngle().asDegrees() < 45.001);
-    CHECK(c.relate(b) == CONTAINS);
+    checkRelations(c, b, CONTAINS, true);
 }
 
 TEST_CASE(BoxBounds6) {
@@ -375,7 +360,7 @@ TEST_CASE(BoxBounds6) {
     Circle c = b.getBoundingCircle();
     CHECK(c.getCenter().z() == 0);
     CHECK(c.getOpeningAngle().asDegrees() < 135.001);
-    CHECK(c.relate(b) == CONTAINS);
+    checkRelations(c, b, CONTAINS, true);
 }
 
 TEST_CASE(Box3dBounds) {
