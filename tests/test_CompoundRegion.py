@@ -261,10 +261,16 @@ class IntersectionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
         ur = UnionRegion(u1, u2)
         ir = IntersectionRegion(i1, i2)
         self.assertEqual(Region.getRegions(c1), [c1])
-        self.assertEqual(Region.getRegions(Region.getRegions(ir)[0]), [c1, b1])
-        self.assertEqual(Region.getRegions(Region.getRegions(ir)[1]), [c2, b2])
-        self.assertEqual(Region.getRegions(Region.getRegions(ur)[0]), [c1, b1])
-        self.assertEqual(Region.getRegions(Region.getRegions(ur)[1]), [c2, b2])
+        self.assertEqual(Region.getRegions(i1), [c1, b1])
+        self.assertEqual(Region.getRegions(u1), [c1, b1])
+        # Compounds of compounds will be flattened, order preserved.
+        self.assertEqual(Region.getRegions(ir), [c1, b1, c2, b2])
+        self.assertEqual(Region.getRegions(ur), [c1, b1, c2, b2])
+
+        # TODO: This test fails because CompoundRegion does not define
+        # equality operator, and it is non-trivial to add one.
+        # ur2 = UnionRegion(u1, i1, u2)
+        # self.assertEqual(Region.getRegions(ur2), [c1, b1, i1, c2, b2])
 
 
 if __name__ == "__main__":
