@@ -106,6 +106,10 @@ protected:
     // Check if we have any operands.
     bool empty() const { return _operands.empty(); }
 
+    // Flatten vector of regions in-place.
+    template <typename Compound>
+    void flatten_operands();
+
 private:
     std::vector<std::unique_ptr<Region>> _operands;
 };
@@ -118,7 +122,8 @@ class UnionRegion : public CompoundRegion {
 public:
     static constexpr std::uint8_t TYPE_CODE = 'u';
 
-    using CompoundRegion::CompoundRegion;
+    /// Construct by taking ownership of operands.
+    explicit UnionRegion(std::vector<std::unique_ptr<Region>> operands);
 
     // Region interface.
     std::unique_ptr<Region> clone() const override { return std::make_unique<UnionRegion>(*this); }
@@ -157,7 +162,8 @@ class IntersectionRegion : public CompoundRegion {
 public:
     static constexpr std::uint8_t TYPE_CODE = 'i';
 
-    using CompoundRegion::CompoundRegion;
+    /// Construct by taking ownership of operands.
+    explicit IntersectionRegion(std::vector<std::unique_ptr<Region>> operands);
 
     // Region interface.
     std::unique_ptr<Region> clone() const override { return std::make_unique<IntersectionRegion>(*this); }

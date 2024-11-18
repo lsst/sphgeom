@@ -32,6 +32,7 @@
 
 #include "lsst/sphgeom/CompoundRegion.h"
 
+#include <algorithm>
 #include <iostream>
 #include <stdexcept>
 
@@ -91,6 +92,24 @@ CompoundRegion::CompoundRegion(CompoundRegion const &other)
     }
 }
 
+// Flatten vector of regions in-place.
+template <typename Compound>
+void CompoundRegion::flatten_operands() {
+    for (size_t i = 0; i != _operands.size(); ) {
+        if (auto compound = dynamic_cast<Compound*>(_operands[i].get())) {
+            // Move all regions from this operand, then remove it.
+            std::move(
+                compound->_operands.begin(),
+                compound->_operands.end(),
+                std::inserter(_operands, _operands.begin() + i + 1)
+            );
+            _operands.erase(_operands.begin() + i);
+        } else {
+            ++ i;
+        }
+    }
+}
+
 Relationship CompoundRegion::relate(Box const &b) const { return relate(static_cast<Region const &>(b)); }
 Relationship CompoundRegion::relate(Circle const &c) const { return relate(static_cast<Region const &>(c)); }
 Relationship CompoundRegion::relate(ConvexPolygon const &p) const { return relate(static_cast<Region const &>(p)); }
@@ -141,6 +160,12 @@ std::unique_ptr<CompoundRegion> CompoundRegion::decode(std::uint8_t const *buffe
         default:
             throw std::runtime_error("Byte string is not an encoded CompoundRegion.");
     }
+}
+
+UnionRegion::UnionRegion(std::vector<std::unique_ptr<Region>> operands)
+    : CompoundRegion(std::move(operands))
+{
+    flatten_operands<UnionRegion>();
 }
 
 bool UnionRegion::isEmpty() const {
@@ -243,6 +268,12 @@ TriState UnionRegion::overlaps(ConvexPolygon const &p) const {
 
 TriState UnionRegion::overlaps(Ellipse const &e) const {
     return overlaps(static_cast<Region const&>(e));
+}
+
+IntersectionRegion::IntersectionRegion(std::vector<std::unique_ptr<Region>> operands)
+    : CompoundRegion(std::move(operands))
+{
+    flatten_operands<IntersectionRegion>();
 }
 
 bool IntersectionRegion::isEmpty() const {
