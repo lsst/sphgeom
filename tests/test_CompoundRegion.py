@@ -122,6 +122,15 @@ class CompoundRegionTestMixin:
         """Test the cloneOperands accessor."""
         self.assertOperandsEqual(self.instance, self.operands)
 
+    def testIterator(self):
+        """Test Python iteration."""
+        self.assertEqual(len(self.instance), len(self.operands))
+        it = iter(self.instance)
+        self.assertEqual(next(it), self.operands[0])
+        self.assertEqual(next(it), self.operands[1])
+        with self.assertRaises(StopIteration):
+            next(it)
+
     def testCodec(self):
         """Test that encode and decode round-trip."""
         s = self.instance.encode()
