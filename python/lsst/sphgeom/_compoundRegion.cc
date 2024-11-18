@@ -67,11 +67,42 @@ std::unique_ptr<_CompoundRegion> _args_factory(const py::args& args) {
     return std::make_unique<_CompoundRegion>(std::move(operands));
 }
 
+// Iterator for CompoundRegion.
+class CompoundIterator {
+public:
+    CompoundIterator(CompoundRegion const& compound, size_t pos) : _compound(compound), _pos(pos) {}
+
+    Region const& operator*() const { return _compound.getOperand(_pos); }
+
+    CompoundIterator& operator++() {
+        ++ _pos;
+        return *this;
+    }
+
+    bool operator==(CompoundIterator const& other) const {
+        return &_compound == &other._compound and _pos == other._pos;
+    }
+
+private:
+    CompoundRegion const& _compound;
+    size_t _pos;
+};
+
 }  // namespace
 
 template <>
 void defineClass(py::class_<CompoundRegion, std::unique_ptr<CompoundRegion>, Region> &cls) {
     cls.def("nOperands", &CompoundRegion::nOperands);
+    cls.def("__len__", &CompoundRegion::nOperands);
+    cls.def(
+        "__iter__",
+        [](CompoundRegion const& region) {
+            return py::make_iterator(
+                CompoundIterator(region, 0U), CompoundIterator(region, region.nOperands())
+            );
+        },
+        py::return_value_policy::reference_internal  // Keeps region alive while iterator is in use.
+    );
     cls.def(
         "cloneOperand",
         [](CompoundRegion const &self, std::ptrdiff_t n) {
