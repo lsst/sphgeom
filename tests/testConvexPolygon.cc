@@ -177,9 +177,9 @@ TEST_CASE(CircleRelations) {
     checkRelations(p, Circle::full(), WITHIN, TriState(true));
     checkRelations(p, Circle::empty(), (CONTAINS | DISJOINT), TriState(false));
     checkRelations(p, Circle(UnitVector3d(1, 1, 1), 0.25), CONTAINS, TriState(true));
-    checkRelations(p, Circle(UnitVector3d::X(), 1), INTERSECTS, TriState());
-    checkRelations(p, Circle(UnitVector3d::Y(), 1), INTERSECTS, TriState());
-    checkRelations(p, Circle(UnitVector3d::Z(), 1), INTERSECTS, TriState());
+    checkRelations(p, Circle(UnitVector3d::X(), 1), INTERSECTS, TriState(true));
+    checkRelations(p, Circle(UnitVector3d::Y(), 1), INTERSECTS, TriState(true));
+    checkRelations(p, Circle(UnitVector3d::Z(), 1), INTERSECTS, TriState(true));
     checkRelations(p, Circle(-UnitVector3d::X(), 1), DISJOINT, TriState(false));
     checkRelations(p, Circle(-UnitVector3d::Y(), 1), DISJOINT, TriState(false));
     checkRelations(p, Circle(-UnitVector3d::Z(), 1), DISJOINT, TriState(false));
@@ -206,22 +206,22 @@ TEST_CASE(PolygonRelations2) {
     points.emplace_back(2, 1, 0);
     points.push_back(-UnitVector3d::Z());
     ConvexPolygon p = ConvexPolygon::convexHull(points);
-    checkRelations(p, t, INTERSECTS, TriState());
-    checkRelations(t, p, INTERSECTS, TriState());
+    checkRelations(p, t, INTERSECTS, TriState(true));
+    checkRelations(t, p, INTERSECTS, TriState(true));
     points.clear();
     points.emplace_back(2, -1, 0);
     points.emplace_back(-1, 2, 0);
     points.push_back(-UnitVector3d::Z());
     p = ConvexPolygon::convexHull(points);
-    checkRelations(p, t, INTERSECTS, TriState());
-    checkRelations(t, p, INTERSECTS, TriState());
+    checkRelations(p, t, INTERSECTS, TriState(true));
+    checkRelations(t, p, INTERSECTS, TriState(true));
     points.clear();
     points.emplace_back(1, 1, 0);
     points.emplace_back(-1, 2, 0);
     points.push_back(-UnitVector3d::Z());
     p = ConvexPolygon::convexHull(points);
-    checkRelations(p, t, INTERSECTS, TriState());
-    checkRelations(t, p, INTERSECTS, TriState());
+    checkRelations(p, t, INTERSECTS, TriState(true));
+    checkRelations(t, p, INTERSECTS, TriState(true));
 }
 
 TEST_CASE(PolygonRelations3) {
@@ -232,9 +232,9 @@ TEST_CASE(PolygonRelations3) {
     points.emplace_back(-1, 2, 1);
     points.emplace_back(2, 2, -1);
     ConvexPolygon p3 = ConvexPolygon::convexHull(points);
-    checkRelations(p1, p2, INTERSECTS, TriState());
-    checkRelations(p1, p3, INTERSECTS, TriState());
-    checkRelations(p2, p3, INTERSECTS, TriState());
+    checkRelations(p1, p2, INTERSECTS, TriState(true));
+    checkRelations(p1, p3, INTERSECTS, TriState(true));
+    checkRelations(p2, p3, INTERSECTS, TriState(true));
 }
 
 TEST_CASE(BoundingBox) {

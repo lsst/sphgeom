@@ -358,22 +358,22 @@ Relationship ConvexPolygon::relate(Ellipse const & e) const {
 }
 
 TriState ConvexPolygon::overlaps(Box const &b) const {
-    // Due to approximations we cannot know exact answer.
+    // Relation with box uses approximations, we cannot know exact answer.
     return _relationship_to_overlaps(relate(b));
 }
 
 TriState ConvexPolygon::overlaps(Circle const &c) const {
-    // Due to approximations we cannot know exact answer.
-    return _relationship_to_overlaps(relate(c));
+    // Circle relation is exact, not-disjoint means they overlap.
+    return TriState((relate(c) & DISJOINT) == 0);
 }
 
 TriState ConvexPolygon::overlaps(ConvexPolygon const &p) const {
-    // Due to approximations we cannot know exact answer.
-    return _relationship_to_overlaps(relate(p));
+    // Polygon relation is exact, not-disjoint means they overlap.
+    return TriState((relate(p) & DISJOINT) == 0);
 }
 
 TriState ConvexPolygon::overlaps(Ellipse const &e) const {
-    // Due to approximations we cannot know exact answer.
+    // Relation with ellipse uses approximations, we cannot know exact answer.
     return _relationship_to_overlaps(relate(e));
 }
 
