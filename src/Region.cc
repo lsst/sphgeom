@@ -52,6 +52,20 @@ bool Region::contains(double lon, double lat) const {
     return contains(UnitVector3d(LonLat::fromRadians(lon, lat)));
 }
 
+TriState
+Region::overlaps(Region const& other) const {
+    // Default implementation just uses `relate`, and it returns unknown state
+    // more frequently, subclasses will want to implement better tests.
+    auto r = this->relate(other);
+    if ((r & DISJOINT).any()) {
+        return TriState(false);
+    } else if ((r & (CONTAINS | WITHIN)).any()) {
+        return TriState(true);
+    } else {
+        return TriState();
+    }
+}
+
 std::unique_ptr<Region> Region::decode(std::uint8_t const * buffer, size_t n) {
     if (buffer == nullptr || n == 0) {
         throw std::runtime_error("Byte-string is not an encoded Region");
@@ -76,12 +90,11 @@ std::unique_ptr<Region> Region::decode(std::uint8_t const * buffer, size_t n) {
 std::vector<std::unique_ptr<Region>> Region::getRegions(Region const &region) {
     std::vector<std::unique_ptr<Region>> result;
     if (auto union_region = dynamic_cast<UnionRegion const *>(&region)) {
-        for(int i = 0; i < 2; ++i) {
+        for(unsigned i = 0; i < union_region->nOperands(); ++i) {
             result.emplace_back(union_region->getOperand(i).clone());
         }
     } else if(auto intersection_region = dynamic_cast<IntersectionRegion const *>(&region)) {
-        for(int i = 0; i < 2; ++i) {
-            intersection_region->getOperand(i);
+        for(unsigned i = 0; i < intersection_region->nOperands(); ++i) {
             result.emplace_back(intersection_region->getOperand(i).clone());
         }
     } else {

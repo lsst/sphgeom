@@ -38,6 +38,7 @@
 #include <cstdint>
 
 #include "Relationship.h"
+#include "TriState.h"
 
 
 namespace lsst {
@@ -100,6 +101,9 @@ public:
     /// `getBoundingCircle` returns a bounding-circle for this region.
     virtual Circle getBoundingCircle() const = 0;
 
+    /// `isEmpty` returns true when a region does not contain any points.
+    virtual bool isEmpty() const = 0;
+
     /// `contains` tests whether the given unit vector is inside this region.
     virtual bool contains(UnitVector3d const &) const = 0;
 
@@ -136,6 +140,18 @@ public:
     virtual Relationship relate(Ellipse const &) const = 0;
     ///@}
 
+    ///@{
+    /// `overlaps` tests whether two regions overlap. This method returns
+    /// a `TriState` object, when the value is `true` it means that regions
+    /// definitely overlap, `false` means they are definitely disjont, and
+    /// unknown state means that they may or may not overlap.
+    virtual TriState overlaps(Region const& other) const = 0;
+    virtual TriState overlaps(Box const &) const = 0;
+    virtual TriState overlaps(Circle const &) const = 0;
+    virtual TriState overlaps(ConvexPolygon const &) const = 0;
+    virtual TriState overlaps(Ellipse const &) const = 0;
+    ///@}
+
     /// `encode` serializes this region into an opaque byte string. Byte strings
     /// emitted by encode can be deserialized with decode.
     virtual std::vector<std::uint8_t> encode() const = 0;
@@ -152,6 +168,24 @@ public:
     /// `getRegions` returns a vector of Region.
     static std::vector<std::unique_ptr<Region>> getRegions(Region const &region);
     ///@}
+
+protected:
+
+    // Default transformation of the region Relationship as returned from
+    // `relate` to TriState. Can be used when specific region class cannot
+    // compute more precise overlap relation.
+    static TriState _relationship_to_overlaps(Relationship r) {
+        // `relate` returns exact relation when specific bit is set, if it is
+        // not then relation may be true or not.
+        if ((r & DISJOINT) == DISJOINT) {
+            return TriState(false);
+        }
+        if ((r & (WITHIN | CONTAINS)).any()) {
+            return TriState(true);
+        }
+        return TriState();
+    }
+
 };
 
 }} // namespace lsst::sphgeom

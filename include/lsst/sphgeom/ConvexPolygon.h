@@ -117,6 +117,8 @@ public:
         return std::unique_ptr<ConvexPolygon>(new ConvexPolygon(*this));
     }
 
+    bool isEmpty() const override;
+
     Box getBoundingBox() const override;
     Box3d getBoundingBox3d() const override;
     Circle getBoundingCircle() const override;
@@ -157,6 +159,14 @@ public:
     Relationship relate(Circle const &) const override;
     Relationship relate(ConvexPolygon const &) const override;
     Relationship relate(Ellipse const &) const override;
+
+    TriState overlaps(Region const& other) const override {
+        return other.overlaps(*this);
+    }
+    TriState overlaps(Box const &) const override;
+    TriState overlaps(Circle const &) const override;
+    TriState overlaps(ConvexPolygon const &) const override;
+    TriState overlaps(Ellipse const &) const override;
 
     std::vector<std::uint8_t> encode() const override;
 

@@ -79,7 +79,9 @@ class EllipseTestCase(unittest.TestCase):
         self.assertTrue(UnitVector3d.X() in e)
         c = Circle(UnitVector3d.X(), Angle(math.pi / 2))
         self.assertEqual(c.relate(e), CONTAINS)
+        self.assertEqual(c.overlaps(e), True)
         self.assertEqual(e.relate(c), WITHIN)
+        self.assertEqual(e.overlaps(c), True)
 
     def test_vectorized_contains(self):
         e = Ellipse(UnitVector3d.X(), Angle(math.pi / 3), Angle(math.pi / 6), Angle(0))
