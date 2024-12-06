@@ -80,6 +80,44 @@ public:
         return not this->operator==(value);
     }
 
+    /// @brief Compute the logical OR of two TriState values.
+    /// @param other Other TriState value.
+    /// @return True if either operand is known to be true, false if both
+    ///         operands are known to be false, and unknown otherwise.
+    TriState operator|(TriState const & other) const {
+        if (*this == true || other == true) {
+            return TriState(true);
+        } else if (*this == false && other == false) {
+            return TriState(false);
+        } else {
+            return TriState();
+        }
+    }
+
+    /// @brief Compute the logical AND of two TriState values.
+    /// @param other Other TriState value.
+    /// @return False if either operand is known to be false, true if both
+    ///         operands are known to be true, and unknown otherwise.
+    TriState operator&(TriState const & other) const {
+        if (*this == false || other == false) {
+            return TriState(false);
+        } else if (*this == true && other == true) {
+            return TriState(true);
+        } else {
+            return TriState();
+        }
+    }
+
+    /// @brief Compute the logical NOT of a TriState value.
+    /// @return True if the current state is known to be false, false if the
+    ///         current state is known to be true, and unknown otherwise.
+    TriState operator~() const {
+        if (known()) {
+            return TriState(!_value);
+        }
+        return TriState();
+    }
+
     /// @brief Check whether the state is known.
     /// @return True is returned when state is known.
     bool known() const { return _known; }
