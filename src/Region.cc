@@ -114,6 +114,34 @@ std::unique_ptr<Region> Region::decodeBase64(std::string_view const & s) {
     }
 }
 
+TriState Region::decodeOverlapsBase64(std::string_view const & s) {
+    TriState result(false);
+    if (s.empty()) {
+        // False makes the most sense as the limit of a logical OR of zero
+        // terms (e.g. `any([])` in Python).
+        return result;
+    }
+    auto begin = s.begin();
+    while (result != true) {  // if result is known to be true, we're done.
+        auto mid = std::find(begin, s.end(), '&');
+        if (mid == s.end()) {
+            throw std::runtime_error("No '&' found in encoded overlap expression term.");
+        }
+        auto a = Region::decode(base64::decode_into<std::vector<std::uint8_t>>(begin, mid));
+        ++mid;
+        auto end = std::find(mid, s.end(), '|');
+        auto b = Region::decode(base64::decode_into<std::vector<std::uint8_t>>(mid, end));
+        result = result | a->overlaps(*b);
+        if (end == s.end()) {
+            break;
+        } else {
+            begin = end;
+            ++begin;
+        }
+    }
+    return result;
+}
+
 std::vector<std::unique_ptr<Region>> Region::getRegions(Region const &region) {
     std::vector<std::unique_ptr<Region>> result;
     if (auto union_region = dynamic_cast<UnionRegion const *>(&region)) {
@@ -129,5 +157,6 @@ std::vector<std::unique_ptr<Region>> Region::getRegions(Region const &region) {
     }
     return result;
 }
+
 
 }} // namespace lsst:sphgeom
