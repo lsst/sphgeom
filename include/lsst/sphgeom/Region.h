@@ -36,6 +36,7 @@
 #include <memory>
 #include <vector>
 #include <cstdint>
+#include <string>
 
 #include "Relationship.h"
 #include "TriState.h"
@@ -163,6 +164,20 @@ public:
     }
 
     static std::unique_ptr<Region> decode(std::uint8_t const * buffer, size_t n);
+    ///@}
+
+    ///@{
+    /// `decodeBase64` deserializes a Region from an ASCII string produced by
+    /// encode and then base64-encoding that result.
+    ///
+    /// This method also interprets ':' as a delimiter for the elements of a
+    /// UnionRegion, to support cases where a union of region is constructed
+    /// server-side in a database as a concatenation with that delimiter.
+    static std::unique_ptr<Region> decodeBase64(std::string const & s) {
+        return decodeBase64(s);
+    }
+
+    static std::unique_ptr<Region> decodeBase64(std::string_view const & s);
     ///@}
 
     /// `getRegions` returns a vector of Region.

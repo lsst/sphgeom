@@ -27,6 +27,7 @@
 
 import pickle
 import unittest
+from base64 import b64decode, b64encode
 
 try:
     import yaml
@@ -227,6 +228,20 @@ class UnionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
         # This test fails for first operand (Circle), I guess due to precision.
         for operand in self.operands[-1:]:
             self.assertTrue(self.instance.getBoundingCircle().relate(operand), CONTAINS)
+
+    def testDecodeBase64(self):
+        """Test Region.decodeBase64, which includes special handling for
+        union regions.
+        """
+        # Test with the full UnionRegion encoded, then base64-encoded.
+        s1 = b64encode(self.instance.encode()).decode("ascii")
+        self.assertCompoundRegionsEqual(Region.decodeBase64(s1), self.instance)
+        # Test alternate form with union members concatenated with ':' after
+        # base64-encoding.
+        s2 = ":".join(b64encode(region.encode()).decode("ascii") for region in self.instance)
+        self.assertCompoundRegionsEqual(Region.decodeBase64(s2), self.instance)
+        # Test that an empty string decodes as a UnionRegion with no members.
+        self.assertCompoundRegionsEqual(Region.decodeBase64(""), UnionRegion())
 
 
 class IntersectionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):

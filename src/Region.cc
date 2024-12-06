@@ -31,6 +31,7 @@
 /// \brief This file contains the Region class implementation.
 
 #include <stdexcept>
+#include <algorithm>
 
 #include "lsst/sphgeom/Region.h"
 
@@ -40,6 +41,8 @@
 #include "lsst/sphgeom/Ellipse.h"
 #include "lsst/sphgeom/CompoundRegion.h"
 #include "lsst/sphgeom/UnitVector3d.h"
+
+#include "base64.hpp"
 
 namespace lsst {
 namespace sphgeom {
@@ -85,6 +88,30 @@ std::unique_ptr<Region> Region::decode(std::uint8_t const * buffer, size_t n) {
         return IntersectionRegion::decode(buffer, n);
     }
     throw std::runtime_error("Byte-string is not an encoded Region");
+}
+
+std::unique_ptr<Region> Region::decodeBase64(std::string_view const & s) {
+    if (s.empty()) {
+        return std::unique_ptr<UnionRegion>(new UnionRegion({}));
+    }
+    auto region_begin = s.begin();
+    auto region_end = std::find(s.begin(), s.end(), ':');
+    if (region_end != s.end()) {
+        std::vector<std::unique_ptr<Region>> union_args;
+        while (region_end != s.end()) {
+            auto bytes = base64::decode_into<std::vector<std::uint8_t>>(region_begin, region_end);
+            union_args.push_back(decode(bytes));
+            region_begin = region_end;
+            ++region_begin;
+            region_end = std::find(region_begin, s.end(), ':');
+        }
+        auto bytes = base64::decode_into<std::vector<std::uint8_t>>(region_begin, region_end);
+        union_args.push_back(decode(bytes));
+        return std::unique_ptr<UnionRegion>(new UnionRegion(std::move(union_args)));
+    } else {
+        auto bytes = base64::decode_into<std::vector<std::uint8_t>>(region_begin, region_end);
+        return decode(bytes);
+    }
 }
 
 std::vector<std::unique_ptr<Region>> Region::getRegions(Region const &region) {
