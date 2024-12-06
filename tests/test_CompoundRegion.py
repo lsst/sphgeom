@@ -235,7 +235,7 @@ class IntersectionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
         self.instance = IntersectionRegion(*self.operands)
 
     def testEmpty(self):
-        """Test zero-operand intersection which is quivalent to full sphere."""
+        """Test zero-operand intersection (equivalent to full sphere)."""
         region = IntersectionRegion()
 
         self.assertTrue(region.contains(UnitVector3d(self.point_in_both)))
@@ -293,6 +293,33 @@ class IntersectionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
         # equality operator, and it is non-trivial to add one.
         # ur2 = UnionRegion(u1, i1, u2)
         # self.assertEqual(Region.getRegions(ur2), [c1, b1, i1, c2, b2])
+
+    def testDecodeOverlapsBase64(self):
+        """Test Region.decodeOverlapsBase64.
+
+        This test is in this test case because it can make good use of the
+        concrete regions defined in setUp.
+        """
+
+        def run_overlaps(pairs):
+            or_terms = []
+            for a, b in pairs:
+                a_str = b64encode(a.encode()).decode("ascii")
+                b_str = b64encode(b.encode()).decode("ascii")
+                or_terms.append(f"{a_str}&{b_str}")
+            overlap_str = "|".join(or_terms)
+            return Region.decodeOverlapsBase64(overlap_str)
+
+        self.assertEqual(run_overlaps([]), False)
+        self.assertEqual(run_overlaps([(self.box, self.circle)]), True)
+        self.assertEqual(run_overlaps([(self.box, self.faraway)]), False)
+        self.assertEqual(run_overlaps([(self.circle, self.faraway)]), False)
+        self.assertEqual(run_overlaps([(self.instance, self.box)]), None)
+        self.assertEqual(run_overlaps([(self.box, self.circle), (self.box, self.faraway)]), True)
+        self.assertEqual(run_overlaps([(self.faraway, self.circle), (self.box, self.faraway)]), False)
+        self.assertEqual(run_overlaps([(self.instance, self.box), (self.circle, self.faraway)]), None)
+        self.assertEqual(run_overlaps([(self.instance, self.box), (self.circle, self.box)]), True)
+        self.assertEqual(run_overlaps([(self.circle, self.box), (self.instance, self.box)]), True)
 
 
 if __name__ == "__main__":
