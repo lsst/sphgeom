@@ -77,6 +77,9 @@ void defineClass(py::class_<Region, std::unique_ptr<Region>> &cls) {
     cls.def_static("decode", &python::decode<Region>, "bytes"_a);
     cls.def_static("decodeBase64", py::overload_cast<std::string_view const&>(&Region::decodeBase64),
                    "bytes"_a);
+    cls.def_static("decodeOverlapsBase64",
+                    py::overload_cast<std::string_view const&>(&Region::decodeOverlapsBase64),
+                   "bytes"_a);
     cls.def_static("getRegions", Region::getRegions, "region"_a);
 }
 

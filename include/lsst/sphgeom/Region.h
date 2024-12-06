@@ -180,6 +180,20 @@ public:
     static std::unique_ptr<Region> decodeBase64(std::string_view const & s);
     ///@}
 
+    ///@{
+    /// `decodeOverlapsBase64` evaluates an encoded overlap expression.
+    ///
+    /// A single overlap expression is formed by concatenating a pair of
+    /// base64-encoded regions (`Region::encode` then base64 encoding) with
+    /// '&' as the delimiter.  Multiple such pairwise overlap expressions can
+    /// then be concatenated with '|' as the delimiter to form the logical OR.
+    static TriState decodeOverlapsBase64(std::string const & s) {
+        return decodeOverlapsBase64(s);
+    }
+
+    static TriState decodeOverlapsBase64(std::string_view const & s);
+    ///@}
+
     /// `getRegions` returns a vector of Region.
     static std::vector<std::unique_ptr<Region>> getRegions(Region const &region);
     ///@}
