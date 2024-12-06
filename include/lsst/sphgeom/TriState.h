@@ -48,7 +48,7 @@ public:
     /// Construct value in unknown state.
     TriState() {}
 
-    /// COnstruct value in a known state.
+    /// Construct value in a known state.
     explicit TriState(bool value) : _known(true), _value(value) {}
 
     TriState& operator=(TriState const & other) = default;
@@ -71,7 +71,7 @@ public:
 
     /// @brief Compare this tri-state value with a boolean.
     /// @param value Boolean value to compare to.
-    /// @return Return true
+    /// @return True if the state is known to be equal to the given boolean.
     bool operator==(bool value) const {
         return _known && _value == value;
     }
