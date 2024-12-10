@@ -156,7 +156,7 @@ public:
     AngleInterval const & getLat() const { return _lat; }
 
     /// `isEmpty` returns true if this box does not contain any points.
-    bool isEmpty() const { return _lat.isEmpty(); }
+    bool isEmpty() const override { return _lat.isEmpty(); }
 
     /// `isFull` returns true if this box contains all points on
     /// the unit sphere.
@@ -340,6 +340,14 @@ public:
     Relationship relate(Circle const &) const override;
     Relationship relate(ConvexPolygon const &) const override;
     Relationship relate(Ellipse const &) const override;
+
+    TriState overlaps(Region const& other) const override {
+        return other.overlaps(*this);
+    }
+    TriState overlaps(Box const &) const override;
+    TriState overlaps(Circle const &) const override;
+    TriState overlaps(ConvexPolygon const &) const override;
+    TriState overlaps(Ellipse const &) const override;
 
     std::vector<std::uint8_t> encode() const override;
 

@@ -451,6 +451,26 @@ Relationship Box::relate(Ellipse const & e) const {
     return invert(e.relate(*this));
 }
 
+TriState Box::overlaps(Box const &b) const {
+    // `intersects` returns exact value.
+    return TriState(intersects(b));
+}
+
+TriState Box::overlaps(Circle const &c) const {
+    // `relate` with Circle returns exact value.
+    return TriState(not (relate(c) & DISJOINT).any());
+}
+
+TriState Box::overlaps(ConvexPolygon const &p) const {
+    // ConvexPolygon-Box relations are implemented by ConvexPolygon.
+    return p.overlaps(*this);
+}
+
+TriState Box::overlaps(Ellipse const &e) const {
+    // Ellipse-Box relations are implemented by Ellipse.
+    return e.overlaps(*this);
+}
+
 std::vector<std::uint8_t> Box::encode() const {
     std::vector<std::uint8_t> buffer;
     std::uint8_t tc = TYPE_CODE;

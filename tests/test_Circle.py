@@ -87,7 +87,9 @@ class CircleTestCase(unittest.TestCase):
         self.assertTrue(c.intersects(UnitVector3d.X()))
         self.assertTrue(e.isDisjointFrom(d))
         self.assertEqual(d.relate(c), CONTAINS)
+        self.assertEqual(d.overlaps(c), True)
         self.assertEqual(e.relate(d), DISJOINT)
+        self.assertEqual(e.overlaps(d), False)
 
     def test_vectorized_contains(self):
         b = Circle(UnitVector3d(*np.random.randn(3)), Angle(0.4 * math.pi))
