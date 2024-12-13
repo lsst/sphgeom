@@ -61,6 +61,9 @@ std::uint64_t consumeDecodeU64(std::uint8_t const *&buffer, std::uint8_t const *
 
 template <typename F>
 auto getUnionBounds(UnionRegion const &compound, F func) {
+    if (compound.nOperands() == 0) {
+        return func(Box::empty());
+    }
     auto bounds = func(compound.getOperand(0));
     for (std::size_t i = 1; i < compound.nOperands(); ++ i) {
         bounds.expandTo(func(compound.getOperand(i)));
@@ -70,6 +73,9 @@ auto getUnionBounds(UnionRegion const &compound, F func) {
 
 template <typename F>
 auto getIntersectionBounds(IntersectionRegion const &compound, F func) {
+    if (compound.nOperands() == 0) {
+        return func(Box::full());
+    }
     auto bounds = func(compound.getOperand(0));
     for (std::size_t i = 1; i < compound.nOperands(); ++ i) {
         bounds.clipTo(func(compound.getOperand(i)));

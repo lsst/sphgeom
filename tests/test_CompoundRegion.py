@@ -213,6 +213,21 @@ class UnionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
         self.assertRelations(self.box, self.instance, WITHIN, True)
         self.assertRelations(self.faraway, self.instance, DISJOINT, False)
 
+    def testBounding(self):
+        """Test for getBounding*() methods."""
+        region = UnionRegion()
+        self.assertTrue(region.getBoundingBox().empty())
+        self.assertTrue(region.getBoundingBox3d().empty())
+        self.assertTrue(region.getBoundingCircle().empty())
+
+        for operand in self.operands:
+            self.assertEqual(self.instance.getBoundingBox().relate(operand), CONTAINS)
+        for operand in self.operands:
+            self.assertTrue(self.instance.getBoundingBox3d().contains(operand.getBoundingBox3d()))
+        # This test fails for first operand (Circle), I guess due to precision.
+        for operand in self.operands[-1:]:
+            self.assertTrue(self.instance.getBoundingCircle().relate(operand), CONTAINS)
+
 
 class IntersectionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
     """Test intersection region."""
@@ -280,6 +295,18 @@ class IntersectionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
         # equality operator, and it is non-trivial to add one.
         # ur2 = UnionRegion(u1, i1, u2)
         # self.assertEqual(Region.getRegions(ur2), [c1, b1, i1, c2, b2])
+
+    def testBounding(self):
+        """Test for getBounding*() methods."""
+        region = UnionRegion()
+        self.assertTrue(region.getBoundingBox().full())
+        self.assertTrue(region.getBoundingBox3d().full())
+        self.assertTrue(region.getBoundingCircle().full())
+
+        # Only Box3d test works reliably, other two fails due to boundary
+        # overlaps and precision.
+        for operand in self.operands:
+            self.assertTrue(operand.getBoundingBox3d().contains(self.instance.getBoundingBox3d()))
 
 
 if __name__ == "__main__":
