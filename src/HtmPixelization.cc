@@ -224,11 +224,11 @@ std::uint64_t HtmPixelization::index(UnitVector3d const & v) const {
 }
 
 RangeSet HtmPixelization::_envelope(Region const & r, size_t maxRanges) const {
-    return detail::findPixels<HtmPixelFinder, false>(r, maxRanges, _level);
+    return detail::findPixels<HtmPixelFinder, false>(r, maxRanges, _level, universe());
 }
 
 RangeSet HtmPixelization::_interior(Region const & r, size_t maxRanges) const {
-    return detail::findPixels<HtmPixelFinder, true>(r, maxRanges, _level);
+    return detail::findPixels<HtmPixelFinder, true>(r, maxRanges, _level, universe());
 }
 
 }} // namespace lsst::sphgeom

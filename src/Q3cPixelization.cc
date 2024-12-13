@@ -341,11 +341,11 @@ std::unique_ptr<Region> Q3cPixelization::pixel(std::uint64_t i) const {
 #endif
 
 RangeSet Q3cPixelization::_envelope(Region const & r, size_t maxRanges) const {
-    return detail::findPixels<Q3cPixelFinder, false>(r, maxRanges, _level);
+    return detail::findPixels<Q3cPixelFinder, false>(r, maxRanges, _level, universe());
 }
 
 RangeSet Q3cPixelization::_interior(Region const & r, size_t maxRanges) const {
-    return detail::findPixels<Q3cPixelFinder, true>(r, maxRanges, _level);
+    return detail::findPixels<Q3cPixelFinder, true>(r, maxRanges, _level, universe());
 }
 
 }} // namespace lsst::sphgeom

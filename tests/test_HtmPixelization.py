@@ -119,6 +119,16 @@ class HtmPixelizationTestCase(unittest.TestCase):
         rsi2 = pixelization.envelope(intersection2)
         self.assertEqual(rsi2, rsi2 & rsi)
 
+        # Check with empty union.
+        union3 = UnionRegion()
+        rsu3 = pixelization.envelope(union3)
+        self.assertTrue(rsu3.empty())
+
+        # Check with empty intersection, which is the same as the full sky.
+        intersection3 = IntersectionRegion()
+        rsi3 = pixelization.envelope(intersection3)
+        self.assertEqual(rsi3, pixelization.universe())
+
     def test_index_to_string(self):
         strings = ["S0", "S1", "S2", "S3", "N0", "N1", "N2", "N3"]
         for i in range(8, 16):
