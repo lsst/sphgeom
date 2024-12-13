@@ -114,7 +114,7 @@ public:
     }
     bool operator!=(Circle const & c) const { return !(*this == c); }
 
-    bool isEmpty() const {
+    bool isEmpty() const override {
         // Return true when _squaredChordLength is negative or NaN.
         return !(_squaredChordLength >= 0.0);
     }
@@ -251,6 +251,14 @@ public:
     Relationship relate(Circle const &) const override;
     Relationship relate(ConvexPolygon const &) const override;
     Relationship relate(Ellipse const &) const override;
+
+    TriState overlaps(Region const& other) const override {
+        return other.overlaps(*this);
+    }
+    TriState overlaps(Box const &) const override;
+    TriState overlaps(Circle const &) const override;
+    TriState overlaps(ConvexPolygon const &) const override;
+    TriState overlaps(Ellipse const &) const override;
 
     std::vector<std::uint8_t> encode() const override;
 

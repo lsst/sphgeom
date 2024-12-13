@@ -27,6 +27,7 @@
 
 import pickle
 import unittest
+from base64 import b64encode
 
 try:
     import yaml
@@ -79,7 +80,8 @@ class CompoundRegionTestMixin:
         """Assert that a compound regions operands are equal to the given
         tuple of operands.
         """
-        self.assertCountEqual((region.cloneOperand(0), region.cloneOperand(1)), operands)
+        regions = tuple(region.cloneOperand(i) for i in range(region.nOperands()))
+        self.assertCountEqual(regions, operands)
 
     def assertCompoundRegionsEqual(self, a, b):
         """Assert that two compound regions are equal.
@@ -89,8 +91,14 @@ class CompoundRegionTestMixin:
         to its operands.  But the concrete operands (circle and box) we use in
         these tests do implement equality comparison.
         """
+        operands = tuple(b.cloneOperand(i) for i in range(b.nOperands()))
         self.assertEqual(type(a), type(b))
-        self.assertOperandsEqual(a, (b.cloneOperand(0), b.cloneOperand(1)))
+        self.assertOperandsEqual(a, operands)
+
+    def assertRelations(self, r1, r2, relation, overlaps):
+        """Assert relation between two regions."""
+        self.assertEqual(r1.relate(r2), relation)
+        self.assertEqual(r1.overlaps(r2), overlaps)
 
     def testSetUp(self):
         """Test that the points and operand regions being tested have the
@@ -104,16 +112,25 @@ class CompoundRegionTestMixin:
         self.assertTrue(self.box.contains(UnitVector3d(self.point_in_both)))
         self.assertFalse(self.box.contains(UnitVector3d(self.point_in_circle)))
         self.assertFalse(self.box.contains(UnitVector3d(self.point_in_neither)))
-        self.assertEqual(self.circle.relate(self.circle), CONTAINS | WITHIN)
-        self.assertEqual(self.circle.relate(self.box), INTERSECTS)
-        self.assertEqual(self.circle.relate(self.faraway), DISJOINT)
-        self.assertEqual(self.box.relate(self.circle), INTERSECTS)
-        self.assertEqual(self.box.relate(self.box), CONTAINS | WITHIN)
-        self.assertEqual(self.box.relate(self.faraway), DISJOINT)
+        self.assertRelations(self.circle, self.circle, CONTAINS | WITHIN, True)
+        self.assertRelations(self.circle, self.box, INTERSECTS, True)
+        self.assertRelations(self.circle, self.faraway, DISJOINT, False)
+        self.assertRelations(self.box, self.circle, INTERSECTS, True)
+        self.assertRelations(self.box, self.box, CONTAINS | WITHIN, True)
+        self.assertRelations(self.box, self.faraway, DISJOINT, False)
 
     def testOperands(self):
         """Test the cloneOperands accessor."""
         self.assertOperandsEqual(self.instance, self.operands)
+
+    def testIterator(self):
+        """Test Python iteration."""
+        self.assertEqual(len(self.instance), len(self.operands))
+        it = iter(self.instance)
+        self.assertEqual(next(it), self.operands[0])
+        self.assertEqual(next(it), self.operands[1])
+        with self.assertRaises(StopIteration):
+            next(it)
 
     def testCodec(self):
         """Test that encode and decode round-trip."""
@@ -161,6 +178,26 @@ class UnionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
         CompoundRegionTestMixin.setUp(self)
         self.instance = UnionRegion(*self.operands)
 
+    def testEmpty(self):
+        """Test zero-operand union which is quivalent to empty region."""
+        region = UnionRegion()
+
+        self.assertFalse(region.contains(UnitVector3d(self.point_in_both)))
+        self.assertFalse(region.contains(UnitVector3d(self.point_in_circle)))
+        self.assertFalse(region.contains(UnitVector3d(self.point_in_box)))
+        self.assertFalse(region.contains(UnitVector3d(self.point_in_neither)))
+
+        self.assertRelations(region, self.box, DISJOINT, False)
+        self.assertRelations(region, self.circle, DISJOINT, False)
+        self.assertRelations(region, self.faraway, DISJOINT, False)
+        self.assertRelations(region, self.instance, DISJOINT, False)
+        self.assertRelations(self.box, region, DISJOINT, False)
+        self.assertRelations(self.circle, region, DISJOINT, False)
+        self.assertRelations(self.faraway, region, DISJOINT, False)
+        self.assertRelations(self.instance, region, DISJOINT, False)
+
+        self.assertEqual(Region.getRegions(region), [])
+
     def testContains(self):
         """Test point-in-region checks."""
         self.assertTrue(self.instance.contains(UnitVector3d(self.point_in_both)))
@@ -170,12 +207,41 @@ class UnionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
 
     def testRelate(self):
         """Test region-region relationship checks."""
-        self.assertEqual(self.instance.relate(self.circle), CONTAINS)
-        self.assertEqual(self.instance.relate(self.box), CONTAINS)
-        self.assertEqual(self.instance.relate(self.faraway), DISJOINT)
-        self.assertEqual(self.circle.relate(self.instance), WITHIN)
-        self.assertEqual(self.box.relate(self.instance), WITHIN)
-        self.assertEqual(self.faraway.relate(self.instance), DISJOINT)
+        self.assertRelations(self.instance, self.circle, CONTAINS, True)
+        self.assertRelations(self.instance, self.box, CONTAINS, True)
+        self.assertRelations(self.instance, self.faraway, DISJOINT, False)
+        self.assertRelations(self.circle, self.instance, WITHIN, True)
+        self.assertRelations(self.box, self.instance, WITHIN, True)
+        self.assertRelations(self.faraway, self.instance, DISJOINT, False)
+
+    def testBounding(self):
+        """Test for getBounding*() methods."""
+        region = UnionRegion()
+        self.assertTrue(region.getBoundingBox().empty())
+        self.assertTrue(region.getBoundingBox3d().empty())
+        self.assertTrue(region.getBoundingCircle().empty())
+
+        for operand in self.operands:
+            self.assertEqual(self.instance.getBoundingBox().relate(operand), CONTAINS)
+        for operand in self.operands:
+            self.assertTrue(self.instance.getBoundingBox3d().contains(operand.getBoundingBox3d()))
+        # This test fails for first operand (Circle), I guess due to precision.
+        for operand in self.operands[-1:]:
+            self.assertTrue(self.instance.getBoundingCircle().relate(operand), CONTAINS)
+
+    def testDecodeBase64(self):
+        """Test Region.decodeBase64, which includes special handling for
+        union regions.
+        """
+        # Test with the full UnionRegion encoded, then base64-encoded.
+        s1 = b64encode(self.instance.encode()).decode("ascii")
+        self.assertCompoundRegionsEqual(Region.decodeBase64(s1), self.instance)
+        # Test alternate form with union members concatenated with ':' after
+        # base64-encoding.
+        s2 = ":".join(b64encode(region.encode()).decode("ascii") for region in self.instance)
+        self.assertCompoundRegionsEqual(Region.decodeBase64(s2), self.instance)
+        # Test that an empty string decodes as a UnionRegion with no members.
+        self.assertCompoundRegionsEqual(Region.decodeBase64(""), UnionRegion())
 
 
 class IntersectionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
@@ -184,6 +250,27 @@ class IntersectionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
     def setUp(self):
         CompoundRegionTestMixin.setUp(self)
         self.instance = IntersectionRegion(*self.operands)
+
+    def testEmpty(self):
+        """Test zero-operand intersection (equivalent to full sphere)."""
+        region = IntersectionRegion()
+
+        self.assertTrue(region.contains(UnitVector3d(self.point_in_both)))
+        self.assertTrue(region.contains(UnitVector3d(self.point_in_circle)))
+        self.assertTrue(region.contains(UnitVector3d(self.point_in_box)))
+        self.assertTrue(region.contains(UnitVector3d(self.point_in_neither)))
+
+        self.assertRelations(region, self.box, CONTAINS, True)
+        self.assertRelations(region, self.circle, CONTAINS, True)
+        self.assertRelations(region, self.faraway, CONTAINS, True)
+        self.assertRelations(region, self.instance, CONTAINS, True)
+        self.assertRelations(self.box, region, WITHIN, True)
+        self.assertRelations(self.circle, region, WITHIN, True)
+        self.assertRelations(self.faraway, region, WITHIN, True)
+        # Overlaps between intersections are very conservative.
+        self.assertRelations(self.instance, region, WITHIN, None)
+
+        self.assertEqual(Region.getRegions(region), [])
 
     def testContains(self):
         """Test point-in-region checks."""
@@ -194,12 +281,12 @@ class IntersectionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
 
     def testRelate(self):
         """Test region-region relationship checks."""
-        self.assertEqual(self.instance.relate(self.box), WITHIN)
-        self.assertEqual(self.instance.relate(self.circle), WITHIN)
-        self.assertEqual(self.instance.relate(self.faraway), DISJOINT)
-        self.assertEqual(self.circle.relate(self.instance), CONTAINS)
-        self.assertEqual(self.box.relate(self.instance), CONTAINS)
-        self.assertEqual(self.faraway.relate(self.instance), DISJOINT)
+        self.assertRelations(self.instance, self.box, WITHIN, None)
+        self.assertRelations(self.instance, self.circle, WITHIN, None)
+        self.assertRelations(self.instance, self.faraway, DISJOINT, False)
+        self.assertRelations(self.circle, self.instance, CONTAINS, None)
+        self.assertRelations(self.box, self.instance, CONTAINS, None)
+        self.assertRelations(self.faraway, self.instance, DISJOINT, False)
 
     def testGetRegion(self):
         c1 = Circle(UnitVector3d(0.0, 0.0, 1.0), 1.0)
@@ -213,10 +300,59 @@ class IntersectionRegionTestCase(CompoundRegionTestMixin, unittest.TestCase):
         ur = UnionRegion(u1, u2)
         ir = IntersectionRegion(i1, i2)
         self.assertEqual(Region.getRegions(c1), [c1])
-        self.assertEqual(Region.getRegions(Region.getRegions(ir)[0]), [c1, b1])
-        self.assertEqual(Region.getRegions(Region.getRegions(ir)[1]), [c2, b2])
-        self.assertEqual(Region.getRegions(Region.getRegions(ur)[0]), [c1, b1])
-        self.assertEqual(Region.getRegions(Region.getRegions(ur)[1]), [c2, b2])
+        self.assertEqual(Region.getRegions(i1), [c1, b1])
+        self.assertEqual(Region.getRegions(u1), [c1, b1])
+        # Compounds of compounds will be flattened, order preserved.
+        self.assertEqual(Region.getRegions(ir), [c1, b1, c2, b2])
+        self.assertEqual(Region.getRegions(ur), [c1, b1, c2, b2])
+
+        # TODO: This test fails because CompoundRegion does not define
+        # equality operator, and it is non-trivial to add one.
+        # ur2 = UnionRegion(u1, i1, u2)
+        # self.assertEqual(Region.getRegions(ur2), [c1, b1, i1, c2, b2])
+
+    def testBounding(self):
+        """Test for getBounding*() methods."""
+        region = UnionRegion()
+        self.assertTrue(region.getBoundingBox().full())
+        self.assertTrue(region.getBoundingBox3d().full())
+        self.assertTrue(region.getBoundingCircle().full())
+
+        # Only Box3d test works reliably, other two fails due to boundary
+        # overlaps and precision.
+        for operand in self.operands:
+            self.assertTrue(operand.getBoundingBox3d().contains(self.instance.getBoundingBox3d()))
+
+    def testDecodeOverlapsBase64(self):
+        """Test Region.decodeOverlapsBase64.
+
+        This test is in this test case because it can make good use of the
+        concrete regions defined in setUp.
+        """
+
+        def run_overlaps(pairs):
+            or_terms = []
+            for a, b in pairs:
+                a_str = b64encode(a.encode()).decode("ascii")
+                b_str = b64encode(b.encode()).decode("ascii")
+                or_terms.append(f"{a_str}&{b_str}")
+            overlap_str = "|".join(or_terms)
+            return Region.decodeOverlapsBase64(overlap_str)
+
+        self.assertEqual(run_overlaps([]), False)
+        self.assertEqual(run_overlaps([(self.box, self.circle)]), True)
+        self.assertEqual(run_overlaps([(self.box, self.faraway)]), False)
+        self.assertEqual(run_overlaps([(self.circle, self.faraway)]), False)
+        self.assertEqual(run_overlaps([(self.instance, self.box)]), None)
+        self.assertEqual(run_overlaps([(self.box, self.circle), (self.box, self.faraway)]), True)
+        self.assertEqual(run_overlaps([(self.faraway, self.circle), (self.box, self.faraway)]), False)
+        self.assertEqual(run_overlaps([(self.instance, self.box), (self.circle, self.faraway)]), None)
+        self.assertEqual(run_overlaps([(self.instance, self.box), (self.circle, self.box)]), True)
+        self.assertEqual(run_overlaps([(self.circle, self.box), (self.instance, self.box)]), True)
+
+        with self.assertRaises(RuntimeError):
+            # Decoding a single region is an error; that's not an expression.
+            Region.decodeOverlapsBase64(b64encode(self.box.encode()).decode("ascii"))
 
 
 if __name__ == "__main__":

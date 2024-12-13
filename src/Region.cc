@@ -31,6 +31,7 @@
 /// \brief This file contains the Region class implementation.
 
 #include <stdexcept>
+#include <algorithm>
 
 #include "lsst/sphgeom/Region.h"
 
@@ -41,6 +42,8 @@
 #include "lsst/sphgeom/CompoundRegion.h"
 #include "lsst/sphgeom/UnitVector3d.h"
 
+#include "base64.hpp"
+
 namespace lsst {
 namespace sphgeom {
 
@@ -50,6 +53,20 @@ bool Region::contains(double x, double y, double z) const {
 
 bool Region::contains(double lon, double lat) const {
     return contains(UnitVector3d(LonLat::fromRadians(lon, lat)));
+}
+
+TriState
+Region::overlaps(Region const& other) const {
+    // Default implementation just uses `relate`, and it returns unknown state
+    // more frequently, subclasses will want to implement better tests.
+    auto r = this->relate(other);
+    if ((r & DISJOINT).any()) {
+        return TriState(false);
+    } else if ((r & (CONTAINS | WITHIN)).any()) {
+        return TriState(true);
+    } else {
+        return TriState();
+    }
 }
 
 std::unique_ptr<Region> Region::decode(std::uint8_t const * buffer, size_t n) {
@@ -73,15 +90,66 @@ std::unique_ptr<Region> Region::decode(std::uint8_t const * buffer, size_t n) {
     throw std::runtime_error("Byte-string is not an encoded Region");
 }
 
+std::unique_ptr<Region> Region::decodeBase64(std::string_view const & s) {
+    if (s.empty()) {
+        return std::unique_ptr<UnionRegion>(new UnionRegion({}));
+    }
+    auto region_begin = s.begin();
+    auto region_end = std::find(s.begin(), s.end(), ':');
+    if (region_end != s.end()) {
+        std::vector<std::unique_ptr<Region>> union_args;
+        while (region_end != s.end()) {
+            auto bytes = base64::decode_into<std::vector<std::uint8_t>>(region_begin, region_end);
+            union_args.push_back(decode(bytes));
+            region_begin = region_end;
+            ++region_begin;
+            region_end = std::find(region_begin, s.end(), ':');
+        }
+        auto bytes = base64::decode_into<std::vector<std::uint8_t>>(region_begin, region_end);
+        union_args.push_back(decode(bytes));
+        return std::unique_ptr<UnionRegion>(new UnionRegion(std::move(union_args)));
+    } else {
+        auto bytes = base64::decode_into<std::vector<std::uint8_t>>(region_begin, region_end);
+        return decode(bytes);
+    }
+}
+
+TriState Region::decodeOverlapsBase64(std::string_view const & s) {
+    TriState result(false);
+    if (s.empty()) {
+        // False makes the most sense as the limit of a logical OR of zero
+        // terms (e.g. `any([])` in Python).
+        return result;
+    }
+    auto begin = s.begin();
+    while (result != true) {  // if result is known to be true, we're done.
+        auto mid = std::find(begin, s.end(), '&');
+        if (mid == s.end()) {
+            throw std::runtime_error("No '&' found in encoded overlap expression term.");
+        }
+        auto a = Region::decode(base64::decode_into<std::vector<std::uint8_t>>(begin, mid));
+        ++mid;
+        auto end = std::find(mid, s.end(), '|');
+        auto b = Region::decode(base64::decode_into<std::vector<std::uint8_t>>(mid, end));
+        result = result | a->overlaps(*b);
+        if (end == s.end()) {
+            break;
+        } else {
+            begin = end;
+            ++begin;
+        }
+    }
+    return result;
+}
+
 std::vector<std::unique_ptr<Region>> Region::getRegions(Region const &region) {
     std::vector<std::unique_ptr<Region>> result;
     if (auto union_region = dynamic_cast<UnionRegion const *>(&region)) {
-        for(int i = 0; i < 2; ++i) {
+        for(unsigned i = 0; i < union_region->nOperands(); ++i) {
             result.emplace_back(union_region->getOperand(i).clone());
         }
     } else if(auto intersection_region = dynamic_cast<IntersectionRegion const *>(&region)) {
-        for(int i = 0; i < 2; ++i) {
-            intersection_region->getOperand(i);
+        for(unsigned i = 0; i < intersection_region->nOperands(); ++i) {
             result.emplace_back(intersection_region->getOperand(i).clone());
         }
     } else {
@@ -89,5 +157,6 @@ std::vector<std::unique_ptr<Region>> Region::getRegions(Region const &region) {
     }
     return result;
 }
+
 
 }} // namespace lsst:sphgeom

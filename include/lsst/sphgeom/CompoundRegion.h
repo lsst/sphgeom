@@ -36,7 +36,7 @@
 
 #include <iosfwd>
 #include <iterator>
-#include <array>
+#include <vector>
 #include <cstdint>
 
 #include "Region.h"
@@ -55,9 +55,8 @@ class Ellipse;
 class CompoundRegion : public Region {
 public:
     //@{
-    /// Construct by copying or taking ownership of operands.
-    CompoundRegion(Region const &first, Region const &second);
-    explicit CompoundRegion(std::array<std::unique_ptr<Region>, 2> operands) noexcept;
+    /// Construct by taking ownership of operands.
+    explicit CompoundRegion(std::vector<std::unique_ptr<Region>> operands) noexcept;
     //@}
 
     CompoundRegion(CompoundRegion const &);
@@ -67,6 +66,9 @@ public:
     // to guarantee memory safety for operand accessors in Python.
     CompoundRegion &operator=(CompoundRegion const &) = delete;
     CompoundRegion &operator=(CompoundRegion &&) = delete;
+
+    // Return number of operands
+    size_t nOperands() const { return _operands.size(); }
 
     // Return references to the operands.
     Region const & getOperand(std::size_t n) const {
@@ -95,11 +97,18 @@ protected:
     std::vector<std::uint8_t> _encode(std::uint8_t tc) const;
 
     // Implementation helper for decode().
-    static std::array<std::unique_ptr<Region>, 2> _decode(
+    static std::vector<std::unique_ptr<Region>> _decode(
         std::uint8_t tc, std::uint8_t const *buffer, std::size_t nBytes);
 
+    // Provide read access to all operands for quick iteration.
+    std::vector<std::unique_ptr<Region>> const& operands() const { return _operands; }
+
+    // Flatten vector of regions in-place.
+    template <typename Compound>
+    void flatten_operands();
+
 private:
-    std::array<std::unique_ptr<Region>, 2> _operands;
+    std::vector<std::unique_ptr<Region>> _operands;
 };
 
 /// UnionRegion is a lazy point-set union of its operands.
@@ -110,16 +119,23 @@ class UnionRegion : public CompoundRegion {
 public:
     static constexpr std::uint8_t TYPE_CODE = 'u';
 
-    using CompoundRegion::CompoundRegion;
+    /// Construct by taking ownership of operands.
+    explicit UnionRegion(std::vector<std::unique_ptr<Region>> operands);
 
     // Region interface.
     std::unique_ptr<Region> clone() const override { return std::make_unique<UnionRegion>(*this); }
+    bool isEmpty() const override;
     Box getBoundingBox() const override;
     Box3d getBoundingBox3d() const override;
     Circle getBoundingCircle() const override;
     using Region::contains;
     bool contains(UnitVector3d const &v) const override;
     Relationship relate(Region const &r) const override;
+    TriState overlaps(Region const& other) const override;
+    TriState overlaps(Box const &) const override;
+    TriState overlaps(Circle const &) const override;
+    TriState overlaps(ConvexPolygon const &) const override;
+    TriState overlaps(Ellipse const &) const override;
     std::vector<std::uint8_t> encode() const override { return _encode(TYPE_CODE); }
 
     ///@{
@@ -143,16 +159,23 @@ class IntersectionRegion : public CompoundRegion {
 public:
     static constexpr std::uint8_t TYPE_CODE = 'i';
 
-    using CompoundRegion::CompoundRegion;
+    /// Construct by taking ownership of operands.
+    explicit IntersectionRegion(std::vector<std::unique_ptr<Region>> operands);
 
     // Region interface.
     std::unique_ptr<Region> clone() const override { return std::make_unique<IntersectionRegion>(*this); }
+    bool isEmpty() const override;
     Box getBoundingBox() const override;
     Box3d getBoundingBox3d() const override;
     Circle getBoundingCircle() const override;
     using Region::contains;
     bool contains(UnitVector3d const &v) const override;
     Relationship relate(Region const &r) const override;
+    TriState overlaps(Region const& other) const override;
+    TriState overlaps(Box const &) const override;
+    TriState overlaps(Circle const &) const override;
+    TriState overlaps(ConvexPolygon const &) const override;
+    TriState overlaps(Ellipse const &) const override;
     std::vector<std::uint8_t> encode() const override { return _encode(TYPE_CODE); }
 
     ///@{

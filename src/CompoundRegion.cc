@@ -32,6 +32,7 @@
 
 #include "lsst/sphgeom/CompoundRegion.h"
 
+#include <algorithm>
 #include <iostream>
 #include <stdexcept>
 
@@ -60,29 +61,60 @@ std::uint64_t consumeDecodeU64(std::uint8_t const *&buffer, std::uint8_t const *
 
 template <typename F>
 auto getUnionBounds(UnionRegion const &compound, F func) {
+    if (compound.nOperands() == 0) {
+        return func(Box::empty());
+    }
     auto bounds = func(compound.getOperand(0));
-    bounds.expandTo(func(compound.getOperand(1)));
+    for (std::size_t i = 1; i < compound.nOperands(); ++ i) {
+        bounds.expandTo(func(compound.getOperand(i)));
+    }
     return bounds;
 }
 
 template <typename F>
 auto getIntersectionBounds(IntersectionRegion const &compound, F func) {
+    if (compound.nOperands() == 0) {
+        return func(Box::full());
+    }
     auto bounds = func(compound.getOperand(0));
-    bounds.clipTo(func(compound.getOperand(1)));
+    for (std::size_t i = 1; i < compound.nOperands(); ++ i) {
+        bounds.clipTo(func(compound.getOperand(i)));
+    }
     return bounds;
 }
 
 }  // namespace
 
-CompoundRegion::CompoundRegion(Region const &first, Region const &second)
-        : _operands{first.clone(), second.clone()} {}
-
-CompoundRegion::CompoundRegion(
-    std::array<std::unique_ptr<Region>, 2> operands) noexcept
-        : _operands(std::move(operands)) {}
+CompoundRegion::CompoundRegion(std::vector<std::unique_ptr<Region>> operands) noexcept
+        : _operands(std::move(operands))
+{
+}
 
 CompoundRegion::CompoundRegion(CompoundRegion const &other)
-        : _operands{other.getOperand(0).clone(), other.getOperand(1).clone()} {}
+        : _operands()
+{
+    for (auto&& operand: other._operands) {
+        _operands.emplace_back(operand->clone());
+    }
+}
+
+// Flatten vector of regions in-place.
+template <typename Compound>
+void CompoundRegion::flatten_operands() {
+    for (size_t i = 0; i != _operands.size(); ) {
+        if (auto compound = dynamic_cast<Compound*>(_operands[i].get())) {
+            // Move all regions from this operand, then remove it.
+            std::move(
+                compound->_operands.begin(),
+                compound->_operands.end(),
+                std::inserter(_operands, _operands.begin() + i + 1)
+            );
+            _operands.erase(_operands.begin() + i);
+        } else {
+            ++ i;
+        }
+    }
+}
 
 Relationship CompoundRegion::relate(Box const &b) const { return relate(static_cast<Region const &>(b)); }
 Relationship CompoundRegion::relate(Circle const &c) const { return relate(static_cast<Region const &>(c)); }
@@ -92,16 +124,15 @@ Relationship CompoundRegion::relate(Ellipse const &e) const { return relate(stat
 std::vector<std::uint8_t> CompoundRegion::_encode(std::uint8_t tc) const {
     std::vector<std::uint8_t> buffer;
     buffer.push_back(tc);
-    auto buffer1 = getOperand(0).encode();
-    encodeU64(buffer1.size(), buffer);
-    buffer.insert(buffer.end(), buffer1.begin(), buffer1.end());
-    auto buffer2 = getOperand(1).encode();
-    encodeU64(buffer2.size(), buffer);
-    buffer.insert(buffer.end(), buffer2.begin(), buffer2.end());
+    for (auto&& operand: _operands) {
+        auto operand_buffer = operand->encode();
+        encodeU64(operand_buffer.size(), buffer);
+        buffer.insert(buffer.end(), operand_buffer.begin(), operand_buffer.end());
+    }
     return buffer;
 }
 
-std::array<std::unique_ptr<Region>, 2> CompoundRegion::_decode(
+std::vector<std::unique_ptr<Region>> CompoundRegion::_decode(
     std::uint8_t tc, std::uint8_t const *buffer, std::size_t nBytes) {
     std::uint8_t const *end = buffer + nBytes;
     if (nBytes == 0) {
@@ -111,15 +142,14 @@ std::array<std::unique_ptr<Region>, 2> CompoundRegion::_decode(
         throw std::runtime_error("Byte string is not an encoded CompoundRegion.");
     }
     ++buffer;
-    std::array<std::unique_ptr<Region>, 2> result;
-    std::uint64_t nBytes1 = consumeDecodeU64(buffer, end);
-    result[0] = Region::decode(buffer, nBytes1);
-    buffer += nBytes1;
-    std::uint64_t nBytes2 = consumeDecodeU64(buffer, end);
-    result[1] = Region::decode(buffer, nBytes2);
-    buffer += nBytes2;
-    if (buffer != end) {
-        throw std::runtime_error("Encoded CompoundRegion is has unexpected additional bytes.");
+    std::vector<std::unique_ptr<Region>> result;
+    while (buffer != end) {
+        std::uint64_t nBytes = consumeDecodeU64(buffer, end);
+        if (buffer + nBytes > end) {
+            throw std::runtime_error("Encoded CompoundRegion is truncated.");
+        }
+        result.push_back(Region::decode(buffer, nBytes));
+        buffer += nBytes;
     }
     return result;
 }
@@ -138,6 +168,22 @@ std::unique_ptr<CompoundRegion> CompoundRegion::decode(std::uint8_t const *buffe
     }
 }
 
+UnionRegion::UnionRegion(std::vector<std::unique_ptr<Region>> operands)
+    : CompoundRegion(std::move(operands))
+{
+    flatten_operands<UnionRegion>();
+}
+
+bool UnionRegion::isEmpty() const {
+    // It can be empty when there are no operands or all operands are empty.
+    for (auto&& operand: operands()) {
+        if (not operand->isEmpty()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 Box UnionRegion::getBoundingBox() const {
     return getUnionBounds(*this, [](Region const &r) { return r.getBoundingBox(); });
 }
@@ -151,21 +197,115 @@ Circle UnionRegion::getBoundingCircle() const {
 }
 
 bool UnionRegion::contains(UnitVector3d const &v) const {
-    return getOperand(0).contains(v) || getOperand(1).contains(v);
+    for (auto&& operand: operands()) {
+        if (operand->contains(v)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 Relationship UnionRegion::relate(Region const &rhs) const {
-    auto r1 = getOperand(0).relate(rhs);
-    auto r2 = getOperand(1).relate(rhs);
-    return
-        // Both operands must be disjoint with the given region for the union
+    if (nOperands() == 0) {
+        return DISJOINT;
+    }
+    auto result = DISJOINT | WITHIN;
+    // When result becomes CONTAINS we can stop checking.
+    auto const stop = CONTAINS;
+    for (auto&& operand: operands()) {
+        auto rel = operand->relate(rhs);
+        // All operands must be disjoint with the given region for the union
         // to be disjoint with it.
-        ((r1 & DISJOINT) & (r2 & DISJOINT))
-        // Both operands must be within the given region for the union to be
+        if ((rel & DISJOINT) != DISJOINT) {
+            result &= ~DISJOINT;
+        }
+        // All operands must be within the given region for the union to be
         // within it.
-        | ((r1 & WITHIN) & (r2 & WITHIN))
-        // If either operand contains the given region, the union contains it.
-        | ((r1 & CONTAINS) | (r2 & CONTAINS));
+        if ((rel & WITHIN) != WITHIN) {
+            result &= ~WITHIN;
+        }
+        // If any operand contains the given region, the union contains it.
+        if ((rel & CONTAINS) == CONTAINS) {
+            result |= CONTAINS;
+        }
+        if (result == stop) {
+            break;
+        }
+    }
+
+    return result;
+}
+
+TriState UnionRegion::overlaps(Region const& other) const {
+    // Union overlaps if any operand overlaps, and disjoint when all are
+    // disjoint. Empty union is disjoint with anyhting.
+    if (nOperands() == 0) {
+        return TriState(false);
+    }
+    bool may_overlap = false;
+    for (auto&& operand: operands()) {
+        auto state = operand->overlaps(other);
+        if (state == true) {
+            // Definitely overlap.
+            return TriState(true);
+        } if (not state.known()) {
+            // May or may not overlap.
+            may_overlap = true;
+        }
+    }
+    if (may_overlap) {
+        return TriState();
+    }
+    // None overlaps.
+    return TriState(false);
+}
+
+TriState UnionRegion::overlaps(Box const &b) const {
+    return overlaps(static_cast<Region const&>(b));
+}
+
+TriState UnionRegion::overlaps(Circle const &c) const {
+    return overlaps(static_cast<Region const&>(c));
+}
+
+TriState UnionRegion::overlaps(ConvexPolygon const &p) const {
+    return overlaps(static_cast<Region const&>(p));
+}
+
+TriState UnionRegion::overlaps(Ellipse const &e) const {
+    return overlaps(static_cast<Region const&>(e));
+}
+
+IntersectionRegion::IntersectionRegion(std::vector<std::unique_ptr<Region>> operands)
+    : CompoundRegion(std::move(operands))
+{
+    flatten_operands<IntersectionRegion>();
+}
+
+bool IntersectionRegion::isEmpty() const {
+    // Intersection is harder to decide - the only clear case is when there are
+    // no operands, which we declare to be equivalent to full sphere. Other
+    // clear case is when all operands are empty.
+    if (nOperands() == 0) {
+        return false;
+    }
+    if (std::all_of(
+        operands().begin(), operands().end(), [](auto const& operand) { return operand->isEmpty(); }
+    )) {
+        return true;
+    }
+    // Another test is for when any operand is disjoint with any other operands.
+    auto begin = operands().begin();
+    auto const end = operands().end();
+    for (auto op1 = begin; op1 != end; ++ op1) {
+        for (auto op2 = op1 + 1; op2 != end; ++ op2) {
+            if ((*op1)->overlaps(**op2) == false) {
+                return true;
+            }
+        }
+    }
+    // Still may be empty but hard to guess.
+    return false;
 }
 
 Box IntersectionRegion::getBoundingBox() const {
@@ -181,22 +321,78 @@ Circle IntersectionRegion::getBoundingCircle() const {
 }
 
 bool IntersectionRegion::contains(UnitVector3d const &v) const {
-    return getOperand(0).contains(v) && getOperand(1).contains(v);
+    for (auto&& operand: operands()) {
+        if (not operand->contains(v)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 Relationship IntersectionRegion::relate(Region const &rhs) const {
-    auto r1 = getOperand(0).relate(rhs);
-    auto r2 = getOperand(1).relate(rhs);
-    return
-        // Both operands must contain the given region for the intersection to
+    auto result = CONTAINS;
+    // When result becomes DISJOINT | WITHIN we can stop checking.
+    auto const stop = DISJOINT | WITHIN;
+    for (auto&& operand: operands()) {
+        auto rel = operand->relate(rhs);
+        // All operands must contain the given region for the intersection to
         // contain it.
-        ((r1 & CONTAINS) & (r2 & CONTAINS))
-        // If either operand is disjoint with the given region, the
+        if ((rel & CONTAINS) != CONTAINS) {
+            result &= ~CONTAINS;
+        }
+        // If any operand is disjoint with the given region, the
         // intersection is disjoint with it.
-        | ((r1 & DISJOINT) | (r2 & DISJOINT))
-        // If either operand is within the given region, the intersection is
+        if ((rel & DISJOINT) == DISJOINT) {
+            result |= DISJOINT;
+        }
+        // If any operand is within the given region, the intersection is
         // within it.
-        | ((r1 & WITHIN) | (r2 & WITHIN));
+        if ((rel & WITHIN) == WITHIN) {
+            result |= WITHIN;
+        }
+        if (result == stop) {
+            break;
+        }
+    }
+
+    return result;
+}
+
+TriState IntersectionRegion::overlaps(Region const& other) const {
+    // Intersection case is harder, difficult to guess "definitely overlaps"
+    // without building actual overlap region. It is easier to check for
+    // disjoint - if any operand is disjoint then intersection is disjoint too.
+    if (nOperands() == 0) {
+        // Empty intersection is equivalent to whole sphere, so it should
+        // overlap anything, but there is case of empty regions that overlap
+        // nothing.
+        return TriState(not other.isEmpty());
+    }
+
+    for (auto&& operand: operands()) {
+        auto state = operand->overlaps(other);
+        if (state == false) {
+            return TriState(false);
+        }
+    }
+    // Not disjoint, but may or may not overlap.
+    return TriState();
+}
+
+TriState IntersectionRegion::overlaps(Box const &b) const {
+    return overlaps(static_cast<Region const&>(b));
+}
+
+TriState IntersectionRegion::overlaps(Circle const &c) const {
+    return overlaps(static_cast<Region const&>(c));
+}
+
+TriState IntersectionRegion::overlaps(ConvexPolygon const &p) const {
+    return overlaps(static_cast<Region const&>(p));
+}
+
+TriState IntersectionRegion::overlaps(Ellipse const &e) const {
+    return overlaps(static_cast<Region const&>(e));
 }
 
 }  // namespace sphgeom

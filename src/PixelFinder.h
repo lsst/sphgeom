@@ -155,7 +155,7 @@ template <
     template <typename, bool> class Finder,
     bool InteriorOnly
 >
-RangeSet findPixels(Region const & r, size_t maxRanges, int level) {
+RangeSet findPixels(Region const & r, size_t maxRanges, int level, RangeSet const & universe) {
     RangeSet s;
     if (auto circle = dynamic_cast<Circle const *>(&r)) {
         Finder<Circle, InteriorOnly> find(s, *circle, level, maxRanges);
@@ -172,17 +172,20 @@ RangeSet findPixels(Region const & r, size_t maxRanges, int level) {
                 s, *polygon, level, maxRanges);
         find();
     } else if (auto union_region = dynamic_cast<UnionRegion const *>(&r)) {
-        Region const &region1 = union_region->getOperand(0);
-        Region const &region2 = union_region->getOperand(1);
-        auto rs1 = findPixels<Finder, InteriorOnly>(region1, maxRanges, level);
-        auto rs2 = findPixels<Finder, InteriorOnly>(region2, maxRanges, level);
-        s = rs1.join(rs2);
+        // This can generate more ranges than maxRanges.
+        for (std::size_t i = 0; i < union_region->nOperands(); ++ i) {
+            Region const &region = union_region->getOperand(i);
+            auto rs = findPixels<Finder, InteriorOnly>(region, maxRanges, level, universe);
+            s = s.join(rs);
+        }
     } else if (auto intersection_region = dynamic_cast<IntersectionRegion const *>(&r)) {
-        Region const &region1 = intersection_region->getOperand(0);
-        Region const &region2 = intersection_region->getOperand(1);
-        auto rs1 = findPixels<Finder, InteriorOnly>(region1, maxRanges, level);
-        auto rs2 = findPixels<Finder, InteriorOnly>(region2, maxRanges, level);
-        s = rs1.intersection(rs2);
+        // Empty IntersectionRegion normally means whole sky.
+        s = universe;
+        for (std::size_t i = 0; i < intersection_region->nOperands(); ++ i) {
+            Region const &region = intersection_region->getOperand(i);
+            auto rs = findPixels<Finder, InteriorOnly>(region, maxRanges, level, universe);
+            s = s.intersection(rs);
+        }
     } else {
         throw std::runtime_error(std::string("PixelFinder: Unsupported type ") + typeid(r).name());
     }

@@ -300,6 +300,11 @@ bool ConvexPolygon::operator==(ConvexPolygon const & p) const {
     return true;
 }
 
+bool ConvexPolygon::isEmpty() const {
+    // Polygons should not be empty by construction.
+    return true;
+}
+
 UnitVector3d ConvexPolygon::getCentroid() const {
     return detail::centroid(_vertices.begin(), _vertices.end());
 }
@@ -350,6 +355,26 @@ Relationship ConvexPolygon::relate(ConvexPolygon const & p) const {
 
 Relationship ConvexPolygon::relate(Ellipse const & e) const {
     return detail::relate(_vertices.begin(), _vertices.end(), e);
+}
+
+TriState ConvexPolygon::overlaps(Box const &b) const {
+    // Relation with box uses approximations, we cannot know exact answer.
+    return _relationship_to_overlaps(relate(b));
+}
+
+TriState ConvexPolygon::overlaps(Circle const &c) const {
+    // Circle relation is exact, not-disjoint means they overlap.
+    return TriState((relate(c) & DISJOINT) == 0);
+}
+
+TriState ConvexPolygon::overlaps(ConvexPolygon const &p) const {
+    // Polygon relation is exact, not-disjoint means they overlap.
+    return TriState((relate(p) & DISJOINT) == 0);
+}
+
+TriState ConvexPolygon::overlaps(Ellipse const &e) const {
+    // Relation with ellipse uses approximations, we cannot know exact answer.
+    return _relationship_to_overlaps(relate(e));
 }
 
 std::vector<std::uint8_t> ConvexPolygon::encode() const {

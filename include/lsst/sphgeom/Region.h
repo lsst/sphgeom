@@ -36,8 +36,10 @@
 #include <memory>
 #include <vector>
 #include <cstdint>
+#include <string>
 
 #include "Relationship.h"
+#include "TriState.h"
 
 
 namespace lsst {
@@ -100,6 +102,9 @@ public:
     /// `getBoundingCircle` returns a bounding-circle for this region.
     virtual Circle getBoundingCircle() const = 0;
 
+    /// `isEmpty` returns true when a region does not contain any points.
+    virtual bool isEmpty() const = 0;
+
     /// `contains` tests whether the given unit vector is inside this region.
     virtual bool contains(UnitVector3d const &) const = 0;
 
@@ -136,6 +141,18 @@ public:
     virtual Relationship relate(Ellipse const &) const = 0;
     ///@}
 
+    ///@{
+    /// `overlaps` tests whether two regions overlap. This method returns
+    /// a `TriState` object, when the value is `true` it means that regions
+    /// definitely overlap, `false` means they are definitely disjont, and
+    /// unknown state means that they may or may not overlap.
+    virtual TriState overlaps(Region const& other) const = 0;
+    virtual TriState overlaps(Box const &) const = 0;
+    virtual TriState overlaps(Circle const &) const = 0;
+    virtual TriState overlaps(ConvexPolygon const &) const = 0;
+    virtual TriState overlaps(Ellipse const &) const = 0;
+    ///@}
+
     /// `encode` serializes this region into an opaque byte string. Byte strings
     /// emitted by encode can be deserialized with decode.
     virtual std::vector<std::uint8_t> encode() const = 0;
@@ -149,9 +166,55 @@ public:
     static std::unique_ptr<Region> decode(std::uint8_t const * buffer, size_t n);
     ///@}
 
+    ///@{
+    /// `decodeBase64` deserializes a Region from an ASCII string produced by
+    /// encode and then base64-encoding that result.
+    ///
+    /// This method also interprets ':' as a delimiter for the elements of a
+    /// UnionRegion, to support cases where a union of region is constructed
+    /// server-side in a database as a concatenation with that delimiter.
+    static std::unique_ptr<Region> decodeBase64(std::string const & s) {
+        return decodeBase64(s);
+    }
+
+    static std::unique_ptr<Region> decodeBase64(std::string_view const & s);
+    ///@}
+
+    ///@{
+    /// `decodeOverlapsBase64` evaluates an encoded overlap expression.
+    ///
+    /// A single overlap expression is formed by concatenating a pair of
+    /// base64-encoded regions (`Region::encode` then base64 encoding) with
+    /// '&' as the delimiter.  Multiple such pairwise overlap expressions can
+    /// then be concatenated with '|' as the delimiter to form the logical OR.
+    static TriState decodeOverlapsBase64(std::string const & s) {
+        return decodeOverlapsBase64(s);
+    }
+
+    static TriState decodeOverlapsBase64(std::string_view const & s);
+    ///@}
+
     /// `getRegions` returns a vector of Region.
     static std::vector<std::unique_ptr<Region>> getRegions(Region const &region);
     ///@}
+
+protected:
+
+    // Default transformation of the region Relationship as returned from
+    // `relate` to TriState. Can be used when specific region class cannot
+    // compute more precise overlap relation.
+    static TriState _relationship_to_overlaps(Relationship r) {
+        // `relate` returns exact relation when specific bit is set, if it is
+        // not then relation may be true or not.
+        if ((r & DISJOINT) == DISJOINT) {
+            return TriState(false);
+        }
+        if ((r & (WITHIN | CONTAINS)).any()) {
+            return TriState(true);
+        }
+        return TriState();
+    }
+
 };
 
 }} // namespace lsst::sphgeom

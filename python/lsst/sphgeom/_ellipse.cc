@@ -67,7 +67,6 @@ void defineClass(py::class_<Ellipse, std::unique_ptr<Ellipse>, Region> &cls) {
     cls.def("__eq__", &Ellipse::operator==, py::is_operator());
     cls.def("__ne__", &Ellipse::operator!=, py::is_operator());
 
-    cls.def("isEmpty", &Ellipse::isEmpty);
     cls.def("isFull", &Ellipse::isFull);
     cls.def("isGreatCircle", &Ellipse::isGreatCircle);
     cls.def("isCircle", &Ellipse::isCircle);
