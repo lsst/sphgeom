@@ -82,13 +82,14 @@ jobs:
           weekly_sha=$(git tag -l 'w.*' | while read tag; do
             git rev-list -n 1 "${tag}"
           done)
-
+          echo "Weekly tag SHA ${weekly_sha}"
           # Extract the current tag and its SHA
           current_tag=${GITHUB_REF#refs/tags/}
-          current_sha=$(git rev-list -1 "${current_tag}")
-
+          echo "Current tag: ${current_tag}"
+          current_sha=$(git rev-list -1 "${current_tag}") || echo "no_value"
+          echo "Current sha: ${current_sha}"
           # Count occurrences of the current SHA in the weekly SHA list
-          n=$(echo "${weekly_sha}" | grep -c "${current_sha}")
+          n=$(echo "${weekly_sha}" | grep -c "${current_sha}") || echo "0"
           echo "Current tag ${current_tag} (${current_sha}) SHA found ${n} time(s)"
 
           # Determine whether to skip the upload based on the count
