@@ -32,10 +32,12 @@ jobs:
       - name: Build and install
         run: |
           python -m pip install --upgrade pip setuptools uv
-          uv pip install --system .[yaml,test]
+          uv venv
+          uv pip install pytest
+          uv pip install  .[yaml,test]
 
       - name: Run tests
-        run: pytest -r a -v
+        run: uv run pytest -r a -v
 
   pypi_sdist_build:
     runs-on: ubuntu-latest
