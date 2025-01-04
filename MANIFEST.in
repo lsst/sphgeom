@@ -1,4 +1,4 @@
 include LICENSE
 include README.md
 recursive-include include *.h
-recursive-include src *.h
+recursive-include src *.h *.hpp
