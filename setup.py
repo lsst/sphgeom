@@ -13,4 +13,5 @@ from skbuild import setup
 
 setup(
     cmake_source_dir=".",
+    cmake_install_dir=".",
 )
