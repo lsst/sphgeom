@@ -11,7 +11,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "lsst-sphgeom"
 description = "A spherical geometry library."
-requires-python = ">=3.8.0"
+requires-python = ">=3.10.0"
 license = {text = "BSD 3-Clause License"}
 readme = "README.md"
 authors = [
@@ -23,8 +23,6 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS :: MacOS X",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
