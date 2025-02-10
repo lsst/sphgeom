@@ -123,10 +123,14 @@ select = [
     "W",  # pycodestyle
     "D",  # pydocstyle
     "UP", # pyupgrade
+    "I",  # isort
 ]
 extend-select = [
     "RUF100", # Warn about unused noqa
 ]
+
+[tool.ruff.lint.isort]
+known-first-party = ["lsst"]
 
 [tool.ruff.lint.pycodestyle]
 max-doc-length = 79
