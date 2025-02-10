@@ -36,6 +36,7 @@ import math
 import unittest
 
 import numpy as np
+
 from lsst.sphgeom import CONTAINS, WITHIN, Angle, Circle, Ellipse, Region, UnitVector3d
 
 

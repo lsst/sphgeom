@@ -29,6 +29,7 @@ import pickle
 import unittest
 
 import numpy as np
+
 from lsst.sphgeom import CONTAINS, DISJOINT, Box3d, Interval1d, Vector3d
 
 

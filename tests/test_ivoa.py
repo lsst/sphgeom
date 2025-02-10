@@ -76,7 +76,7 @@ class IvoaTestCase(unittest.TestCase):
         region_type2, coords2 = self._split_pos(pos2)
         self.assertEqual(region_type1, region_type2)
         self.assertEqual(len(coords1), len(coords2))
-        for c1, c2 in zip(coords1, coords2):
+        for c1, c2 in zip(coords1, coords2, strict=True):
             self.assertAlmostEqual(c1, c2)
 
     def test_circle(self):
