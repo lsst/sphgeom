@@ -126,6 +126,7 @@ select = [
     "I",  # isort
     "RUF022",  # sort __all__
     "B",  # bugbear
+    "C4",  # comprehensions
 ]
 extend-select = [
     "RUF100", # Warn about unused noqa
