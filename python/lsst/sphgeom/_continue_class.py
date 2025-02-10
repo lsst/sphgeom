@@ -156,7 +156,7 @@ class Region:
                 )
             # Coordinates are x1, y1, x2, y2, x3, y3...
             # Get pairs by skipping every other value.
-            pairs = list(zip(coordinates[0::2], coordinates[1::2]))
+            pairs = list(zip(coordinates[0::2], coordinates[1::2], strict=True))
             vertices = [LonLat.fromDegrees(lon, lat) for lon, lat in pairs]
             return ConvexPolygon([UnitVector3d(c) for c in vertices])
 
