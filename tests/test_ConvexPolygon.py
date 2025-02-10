@@ -35,6 +35,7 @@ except ImportError:
 import unittest
 
 import numpy as np
+
 from lsst.sphgeom import CONTAINS, Circle, ConvexPolygon, Region, UnitVector3d
 
 
