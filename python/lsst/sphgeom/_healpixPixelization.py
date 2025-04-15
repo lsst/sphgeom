@@ -130,13 +130,24 @@ class HealpixPixelization(PixelizationABC):
         """
         if isinstance(region, Circle):
             center = LonLat(region.getCenter())
-            pixels = hpg.query_circle(
-                nside,
-                center.getLon().asRadians(),
-                center.getLat().asRadians(),
-                region.getOpeningAngle().asRadians(),
-                degrees=False,
-            )
+            radius_rad = region.getOpeningAngle().asRadians()
+            if radius_rad > 0:
+                pixels = hpg.query_circle(
+                    nside,
+                    center.getLon().asRadians(),
+                    center.getLat().asRadians(),
+                    radius_rad,
+                    degrees=False,
+                )
+            elif radius_rad == 0:
+                pixels = hpg.angle_to_pixel(
+                    nside,
+                    center.getLon().asRadians(),
+                    center.getLat().asRadians(),
+                    degrees=False,
+                )
+            else:
+                raise ValueError("Invalid circle radius.")
         elif isinstance(region, ConvexPolygon):
             vertices = np.array([[v.x(), v.y(), v.z()] for v in region.getVertices()])
             pixels = hpg.query_polygon_vec(nside, vertices)

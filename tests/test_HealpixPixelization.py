@@ -114,6 +114,14 @@ class HealpixPixelizationTestCase(unittest.TestCase):
         )
         self._check_envelope(h, circle, [98, 99, 104, 105])
 
+        # Try a circle region with zero-radius (representing a point)
+        pt_circle = Circle(
+            center=UnitVector3d(
+                LonLat.fromDegrees((ra_range[0] + ra_range[1]) / 2.0, (dec_range[0] + dec_range[1]) / 2.0)
+            ),
+        )
+        self._check_envelope(h, pt_circle, [98])
+
     def test_envelope_missing_neighbors(self):
         """Test envelope, with a pixel with missing neighbors.
 
