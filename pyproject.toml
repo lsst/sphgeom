@@ -11,7 +11,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "lsst-sphgeom"
 description = "A spherical geometry library."
-requires-python = ">=3.8.0"
+requires-python = ">=3.10.0"
 license = {text = "BSD 3-Clause License"}
 readme = "README.md"
 authors = [
@@ -23,8 +23,6 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS :: MacOS X",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -64,6 +62,7 @@ target-version = ["py310"]
 [tool.isort]
 profile = "black"
 line_length = 110
+known_first_party = ["lsst"]
 
 [tool.lsst_versions]
 write_to = "python/lsst/sphgeom/version.py"
@@ -122,13 +121,24 @@ select = [
     "W",  # pycodestyle
     "D",  # pydocstyle
     "UP", # pyupgrade
+    "I",  # isort
+    "RUF022",  # sort __all__
+    "B",  # bugbear
+    "C4",  # comprehensions
 ]
 extend-select = [
     "RUF100", # Warn about unused noqa
 ]
+
+[tool.ruff.lint.isort]
+known-first-party = ["lsst"]
 
 [tool.ruff.lint.pycodestyle]
 max-doc-length = 79
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = 79
