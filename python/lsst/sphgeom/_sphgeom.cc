@@ -73,45 +73,35 @@ PYBIND11_MODULE(_sphgeom, mod) {
 
     py::class_<Angle> angle(mod, "Angle");
     py::class_<NormalizedAngle> normalizedAngle(mod, "NormalizedAngle");
-    py::class_<LonLat, std::shared_ptr<LonLat>> lonLat(mod, "LonLat");
-    py::class_<Vector3d, std::shared_ptr<Vector3d>> vector3d(mod, "Vector3d");
-    py::class_<UnitVector3d, std::shared_ptr<UnitVector3d>> unitVector3d(
-            mod, "UnitVector3d");
-    py::class_<Matrix3d, std::shared_ptr<Matrix3d>> matrix3d(mod, "Matrix3d");
+    py::class_<LonLat> lonLat(mod, "LonLat");
+    py::class_<Vector3d> vector3d(mod, "Vector3d");
+    py::class_<UnitVector3d> unitVector3d(mod, "UnitVector3d");
+    py::class_<Matrix3d> matrix3d(mod, "Matrix3d");
 
-    py::class_<AngleInterval, std::shared_ptr<AngleInterval>> angleInterval(
-            mod, "AngleInterval");
-    py::class_<NormalizedAngleInterval,
-               std::shared_ptr<NormalizedAngleInterval>>
-            normalizedAngleInterval(mod, "NormalizedAngleInterval");
-    py::class_<Interval1d, std::shared_ptr<Interval1d>> interval1d(
-            mod, "Interval1d");
+    py::class_<AngleInterval> angleInterval(mod, "AngleInterval");
+    py::class_<NormalizedAngleInterval> normalizedAngleInterval(mod, "NormalizedAngleInterval");
+    py::class_<Interval1d> interval1d(mod, "Interval1d");
 
-    py::class_<Box3d, std::shared_ptr<Box3d>> box3d(mod, "Box3d");
+    py::class_<Box3d> box3d(mod, "Box3d");
 
-    py::class_<Region, std::unique_ptr<Region>> region(mod, "Region");
-    py::class_<Box, std::unique_ptr<Box>, Region> box(mod, "Box");
-    py::class_<Circle, std::unique_ptr<Circle>, Region> circle(mod, "Circle");
-    py::class_<ConvexPolygon, std::unique_ptr<ConvexPolygon>, Region>
-            convexPolygon(mod, "ConvexPolygon");
-    py::class_<Ellipse, std::unique_ptr<Ellipse>, Region> ellipse(mod,
+    py::class_<Region> region(mod, "Region");
+    py::class_<Box, Region> box(mod, "Box");
+    py::class_<Circle, Region> circle(mod, "Circle");
+    py::class_<ConvexPolygon, Region> convexPolygon(mod, "ConvexPolygon");
+    py::class_<Ellipse, Region> ellipse(mod,
                                                                   "Ellipse");
-    py::class_<CompoundRegion, std::unique_ptr<CompoundRegion>, Region> compoundRegion(mod, "CompoundRegion");
-    py::class_<UnionRegion, std::unique_ptr<UnionRegion>, CompoundRegion> unionRegion(mod, "UnionRegion");
-    py::class_<IntersectionRegion, std::unique_ptr<IntersectionRegion>, CompoundRegion>
-            intersectionRegion(mod, "IntersectionRegion");
+    py::class_<CompoundRegion, Region> compoundRegion(mod, "CompoundRegion");
+    py::class_<UnionRegion, CompoundRegion> unionRegion(mod, "UnionRegion");
+    py::class_<IntersectionRegion, CompoundRegion> intersectionRegion(mod, "IntersectionRegion");
 
-    py::class_<RangeSet, std::shared_ptr<RangeSet>> rangeSet(mod, "RangeSet");
+    py::class_<RangeSet> rangeSet(mod, "RangeSet");
 
     py::class_<Pixelization> pixelization(mod, "Pixelization");
-    py::class_<HtmPixelization, Pixelization> htmPixelization(
-            mod, "HtmPixelization");
-    py::class_<Mq3cPixelization, Pixelization> mq3cPixelization(
-            mod, "Mq3cPixelization");
-    py::class_<Q3cPixelization, Pixelization> q3cPixelization(
-            mod, "Q3cPixelization");
+    py::class_<HtmPixelization, Pixelization> htmPixelization(mod, "HtmPixelization");
+    py::class_<Mq3cPixelization, Pixelization> mq3cPixelization(mod, "Mq3cPixelization");
+    py::class_<Q3cPixelization, Pixelization> q3cPixelization(mod, "Q3cPixelization");
 
-    py::class_<Chunker, std::shared_ptr<Chunker>> chunker(mod, "Chunker");
+    py::class_<Chunker> chunker(mod, "Chunker");
 
     defineClass(angle);
     defineClass(normalizedAngle);

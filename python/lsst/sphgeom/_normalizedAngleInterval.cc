@@ -40,8 +40,7 @@ namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<NormalizedAngleInterval,
-                            std::shared_ptr<NormalizedAngleInterval>> &cls) {
+void defineClass(py::class_<NormalizedAngleInterval> &cls) {
     python::defineInterval<decltype(cls), NormalizedAngleInterval,
                            NormalizedAngle>(cls);
 

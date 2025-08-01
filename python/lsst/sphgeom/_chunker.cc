@@ -47,7 +47,7 @@ py::str toString(Chunker const &self) {
 }
 
 template <>
-void defineClass(py::class_<Chunker, std::shared_ptr<Chunker>> &cls) {
+void defineClass(py::class_<Chunker> &cls) {
     cls.def(py::init<int32_t, int32_t>(), "numStripes"_a,
             "numSubStripesPerStripe"_a);
 
