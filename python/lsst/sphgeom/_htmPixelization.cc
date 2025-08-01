@@ -39,7 +39,7 @@ namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<HtmPixelization, Pixelization> &cls) {
+void defineClass(py::classh<HtmPixelization, Pixelization> &cls) {
     cls.attr("MAX_LEVEL") = py::int_(HtmPixelization::MAX_LEVEL);
 
     cls.def_static("level", &HtmPixelization::level, "i"_a);

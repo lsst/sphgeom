@@ -42,7 +42,7 @@ namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<Box3d> &cls) {
+void defineClass(py::classh<Box3d> &cls) {
     cls.def_static("empty", &Box3d::empty);
     cls.def_static("full", &Box3d::full);
     cls.def_static("aroundUnitSphere", &Box3d::aroundUnitSphere);

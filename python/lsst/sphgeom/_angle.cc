@@ -40,7 +40,7 @@ namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<Angle> &cls) {
+void defineClass(py::classh<Angle> &cls) {
     cls.def_static("nan", &Angle::nan);
     cls.def_static("fromDegrees", &Angle::fromDegrees);
     cls.def_static("fromRadians", &Angle::fromRadians);

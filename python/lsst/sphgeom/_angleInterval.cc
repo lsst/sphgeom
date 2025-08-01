@@ -41,7 +41,7 @@ namespace sphgeom {
 
 template <>
 void defineClass(
-        py::class_<AngleInterval> &cls) {
+        py::classh<AngleInterval> &cls) {
     python::defineInterval<decltype(cls), AngleInterval, Angle>(cls);
 
     cls.def_static("fromDegrees", &AngleInterval::fromDegrees, "x"_a, "y"_a);

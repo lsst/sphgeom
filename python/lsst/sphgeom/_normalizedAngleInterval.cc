@@ -40,7 +40,7 @@ namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<NormalizedAngleInterval> &cls) {
+void defineClass(py::classh<NormalizedAngleInterval> &cls) {
     python::defineInterval<decltype(cls), NormalizedAngleInterval,
                            NormalizedAngle>(cls);
 

@@ -71,37 +71,37 @@ PYBIND11_MODULE(_sphgeom, mod) {
     // This results in docstrings containing only Python type names, even
     // when there are circular dependencies in C++.
 
-    py::class_<Angle> angle(mod, "Angle");
-    py::class_<NormalizedAngle> normalizedAngle(mod, "NormalizedAngle");
-    py::class_<LonLat> lonLat(mod, "LonLat");
-    py::class_<Vector3d> vector3d(mod, "Vector3d");
-    py::class_<UnitVector3d> unitVector3d(mod, "UnitVector3d");
-    py::class_<Matrix3d> matrix3d(mod, "Matrix3d");
+    py::classh<Angle> angle(mod, "Angle");
+    py::classh<NormalizedAngle> normalizedAngle(mod, "NormalizedAngle");
+    py::classh<LonLat> lonLat(mod, "LonLat");
+    py::classh<Vector3d> vector3d(mod, "Vector3d");
+    py::classh<UnitVector3d> unitVector3d(mod, "UnitVector3d");
+    py::classh<Matrix3d> matrix3d(mod, "Matrix3d");
 
-    py::class_<AngleInterval> angleInterval(mod, "AngleInterval");
-    py::class_<NormalizedAngleInterval> normalizedAngleInterval(mod, "NormalizedAngleInterval");
-    py::class_<Interval1d> interval1d(mod, "Interval1d");
+    py::classh<AngleInterval> angleInterval(mod, "AngleInterval");
+    py::classh<NormalizedAngleInterval> normalizedAngleInterval(mod, "NormalizedAngleInterval");
+    py::classh<Interval1d> interval1d(mod, "Interval1d");
 
-    py::class_<Box3d> box3d(mod, "Box3d");
+    py::classh<Box3d> box3d(mod, "Box3d");
 
-    py::class_<Region> region(mod, "Region");
-    py::class_<Box, Region> box(mod, "Box");
-    py::class_<Circle, Region> circle(mod, "Circle");
-    py::class_<ConvexPolygon, Region> convexPolygon(mod, "ConvexPolygon");
-    py::class_<Ellipse, Region> ellipse(mod,
+    py::classh<Region> region(mod, "Region");
+    py::classh<Box, Region> box(mod, "Box");
+    py::classh<Circle, Region> circle(mod, "Circle");
+    py::classh<ConvexPolygon, Region> convexPolygon(mod, "ConvexPolygon");
+    py::classh<Ellipse, Region> ellipse(mod,
                                                                   "Ellipse");
-    py::class_<CompoundRegion, Region> compoundRegion(mod, "CompoundRegion");
-    py::class_<UnionRegion, CompoundRegion> unionRegion(mod, "UnionRegion");
-    py::class_<IntersectionRegion, CompoundRegion> intersectionRegion(mod, "IntersectionRegion");
+    py::classh<CompoundRegion, Region> compoundRegion(mod, "CompoundRegion");
+    py::classh<UnionRegion, CompoundRegion> unionRegion(mod, "UnionRegion");
+    py::classh<IntersectionRegion, CompoundRegion> intersectionRegion(mod, "IntersectionRegion");
 
-    py::class_<RangeSet> rangeSet(mod, "RangeSet");
+    py::classh<RangeSet> rangeSet(mod, "RangeSet");
 
-    py::class_<Pixelization> pixelization(mod, "Pixelization");
-    py::class_<HtmPixelization, Pixelization> htmPixelization(mod, "HtmPixelization");
-    py::class_<Mq3cPixelization, Pixelization> mq3cPixelization(mod, "Mq3cPixelization");
-    py::class_<Q3cPixelization, Pixelization> q3cPixelization(mod, "Q3cPixelization");
+    py::classh<Pixelization> pixelization(mod, "Pixelization");
+    py::classh<HtmPixelization, Pixelization> htmPixelization(mod, "HtmPixelization");
+    py::classh<Mq3cPixelization, Pixelization> mq3cPixelization(mod, "Mq3cPixelization");
+    py::classh<Q3cPixelization, Pixelization> q3cPixelization(mod, "Q3cPixelization");
 
-    py::class_<Chunker> chunker(mod, "Chunker");
+    py::classh<Chunker> chunker(mod, "Chunker");
 
     defineClass(angle);
     defineClass(normalizedAngle);

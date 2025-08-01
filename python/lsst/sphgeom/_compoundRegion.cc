@@ -91,7 +91,7 @@ private:
 }  // namespace
 
 template <>
-void defineClass(py::class_<CompoundRegion, Region> &cls) {
+void defineClass(py::classh<CompoundRegion, Region> &cls) {
     cls.def("nOperands", &CompoundRegion::nOperands);
     cls.def("__len__", &CompoundRegion::nOperands);
     cls.def(
@@ -113,7 +113,7 @@ void defineClass(py::class_<CompoundRegion, Region> &cls) {
 }
 
 template <>
-void defineClass(py::class_<UnionRegion, CompoundRegion> &cls) {
+void defineClass(py::classh<UnionRegion, CompoundRegion> &cls) {
     cls.attr("TYPE_CODE") = py::int_(UnionRegion::TYPE_CODE);
     cls.def(py::init(&_args_factory<UnionRegion>));
     cls.def(py::pickle(&python::encode, &python::decode<UnionRegion>));
@@ -121,7 +121,7 @@ void defineClass(py::class_<UnionRegion, CompoundRegion> &cls) {
 }
 
 template <>
-void defineClass(py::class_<IntersectionRegion, CompoundRegion> &cls) {
+void defineClass(py::classh<IntersectionRegion, CompoundRegion> &cls) {
     cls.attr("TYPE_CODE") = py::int_(IntersectionRegion::TYPE_CODE);
     cls.def(py::init(&_args_factory<IntersectionRegion>));
     cls.def(py::pickle(&python::encode, &python::decode<IntersectionRegion>));
