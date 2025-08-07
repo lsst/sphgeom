@@ -42,7 +42,7 @@ namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<Vector3d, std::shared_ptr<Vector3d>> &cls) {
+void defineClass(py::classh<Vector3d> &cls) {
     cls.def(py::init<>());
     cls.def(py::init<double, double, double>(), "x"_a, "y"_a, "z"_a);
     cls.def(py::init<Vector3d const &>(), "vector"_a);

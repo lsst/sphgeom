@@ -51,7 +51,7 @@ namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<Region, std::unique_ptr<Region>> &cls) {
+void defineClass(py::classh<Region> &cls) {
     cls.def("clone", &Region::clone);
     cls.def("isEmpty", &Region::isEmpty);
     cls.def("getBoundingBox", &Region::getBoundingBox);

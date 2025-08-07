@@ -41,7 +41,7 @@ namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<NormalizedAngle> &cls) {
+void defineClass(py::classh<NormalizedAngle> &cls) {
     // Provide the equivalent of the NormalizedAngle to Angle C++ cast
     // operator in Python
     py::implicitly_convertible<NormalizedAngle, Angle>();

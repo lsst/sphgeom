@@ -41,7 +41,7 @@ namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<Pixelization> &cls) {
+void defineClass(py::classh<Pixelization> &cls) {
     cls.def("universe", &Pixelization::universe);
     cls.def("pixel", &Pixelization::pixel, "i"_a);
     cls.def("index", &Pixelization::index, "i"_a);

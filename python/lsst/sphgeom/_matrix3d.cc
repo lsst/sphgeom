@@ -46,7 +46,7 @@ Vector3d getRow(Matrix3d const &self, py::int_ row) {
 }
 
 template <>
-void defineClass(py::class_<Matrix3d, std::shared_ptr<Matrix3d>> &cls) {
+void defineClass(py::classh<Matrix3d> &cls) {
     cls.def(py::init<>());
     cls.def(py::init<double, double, double, double, double, double, double,
                      double, double>(),

@@ -52,7 +52,7 @@ namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<Box, std::unique_ptr<Box>, Region> &cls) {
+void defineClass(py::classh<Box, Region> &cls) {
     cls.attr("TYPE_CODE") = py::int_(Box::TYPE_CODE);
 
     cls.def_static("fromDegrees", &Box::fromDegrees, "lon1"_a, "lat1"_a,

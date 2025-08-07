@@ -49,8 +49,7 @@ namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<ConvexPolygon, std::unique_ptr<ConvexPolygon>,
-                            Region> &cls) {
+void defineClass(py::classh<ConvexPolygon, Region> &cls) {
     cls.attr("TYPE_CODE") = py::int_(ConvexPolygon::TYPE_CODE);
 
     cls.def_static("convexHull", &ConvexPolygon::convexHull, "points"_a);

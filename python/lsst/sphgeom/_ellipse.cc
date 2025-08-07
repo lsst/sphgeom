@@ -48,7 +48,7 @@ namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<Ellipse, std::unique_ptr<Ellipse>, Region> &cls) {
+void defineClass(py::classh<Ellipse, Region> &cls) {
     cls.attr("TYPE_CODE") = py::int_(Ellipse::TYPE_CODE);
 
     cls.def_static("empty", &Ellipse::empty);

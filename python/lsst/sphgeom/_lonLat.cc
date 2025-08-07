@@ -40,7 +40,7 @@ namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<LonLat, std::shared_ptr<LonLat>> &cls) {
+void defineClass(py::classh<LonLat> &cls) {
     cls.def_static("fromDegrees", &LonLat::fromDegrees);
     cls.def_static("fromRadians", &LonLat::fromRadians);
     cls.def_static("latitudeOf", &LonLat::latitudeOf);

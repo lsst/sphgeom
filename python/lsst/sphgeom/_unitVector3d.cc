@@ -43,7 +43,7 @@ namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<UnitVector3d, std::shared_ptr<UnitVector3d>> &cls) {
+void defineClass(py::classh<UnitVector3d> &cls) {
     // Provide the equivalent of the UnitVector3d to Vector3d C++ cast
     // operator in Python
     py::implicitly_convertible<UnitVector3d, Vector3d>();

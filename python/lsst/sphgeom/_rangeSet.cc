@@ -91,7 +91,7 @@ py::list ranges(RangeSet const &self) {
 }  // <anonymous>
 
 template <>
-void defineClass(py::class_<RangeSet, std::shared_ptr<RangeSet>> &cls) {
+void defineClass(py::classh<RangeSet> &cls) {
     cls.def(py::init<>());
     cls.def(py::init<uint64_t>(), "integer"_a);
     cls.def(py::init([](uint64_t a, uint64_t b) {

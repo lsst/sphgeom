@@ -48,7 +48,7 @@ namespace lsst {
 namespace sphgeom {
 
 template <>
-void defineClass(py::class_<Circle, std::unique_ptr<Circle>, Region> &cls) {
+void defineClass(py::classh<Circle, Region> &cls) {
     cls.attr("TYPE_CODE") = py::int_(Circle::TYPE_CODE);
 
     cls.def_static("empty", &Circle::empty);
