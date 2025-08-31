@@ -9,25 +9,9 @@ This is not a complete definition.
   interface.
 """
 
-import glob
-
-from pybind11.setup_helpers import ParallelCompile, Pybind11Extension, build_ext
-from setuptools import setup
-
-# Optional multithreaded build.
-ParallelCompile("NPY_NUM_BUILD_JOBS").install()
-
-# Find the source code -- we can combine it into a single module
-pybind_src = sorted(glob.glob("python/lsst/sphgeom/*.cc"))
-cpp_src = sorted(glob.glob("src/*.cc"))
-
-# Very inefficient approach since this compiles the maing sphgeom
-# library code for every extension rather than building everything once
-ext_modules = [
-    Pybind11Extension("lsst.sphgeom._sphgeom", sorted(cpp_src + pybind_src), include_dirs=["include"])
-]
+from skbuild import setup
 
 setup(
-    ext_modules=ext_modules,
-    cmdclass={"build_ext": build_ext},
+    cmake_source_dir=".",
+    cmake_install_dir=".",
 )
