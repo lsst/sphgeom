@@ -1,3 +1,4 @@
+find_package(Python COMPONENTS Development Interpreter)
 find_package(pybind11 REQUIRED)
 
 pybind11_add_module(_sphgeom
