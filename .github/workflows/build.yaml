@@ -61,7 +61,7 @@ jobs:
         run: |
             python -m build --sdist
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: sphgeom-sdist
           path: dist/*
@@ -138,7 +138,7 @@ jobs:
       - name: Build and create distribution
         run: |
           python -m cibuildwheel --output-dir dist
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: sphgeom-${{ matrix.os }}-${{ matrix.python-version }}
           path: dist/*
