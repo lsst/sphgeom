@@ -150,7 +150,17 @@ class HealpixPixelization(PixelizationABC):
                 raise ValueError("Invalid circle radius.")
         elif isinstance(region, ConvexPolygon):
             vertices = np.array([[v.x(), v.y(), v.z()] for v in region.getVertices()])
-            pixels = hpg.query_polygon_vec(nside, vertices)
+            retry = False
+            try:
+                pixels = hpg.query_polygon_vec(nside, vertices)
+            except RuntimeError:
+                # This happens if the polygon is determined to have a
+                # degenerate corner (which can happen with rounding).
+                # In this case, redo with a bounding circle.
+                retry = True
+
+            if retry:
+                pixels = self._interior_pixels_from_region(nside, region.getBoundingCircle())
         elif isinstance(region, Box):
             pixels = hpg.query_box(
                 nside,
