@@ -122,6 +122,17 @@ class HealpixPixelizationTestCase(unittest.TestCase):
         )
         self._check_envelope(h, pt_circle, [98])
 
+        # Try an ellipse region
+        circle = Ellipse(
+            center=UnitVector3d(
+                LonLat.fromDegrees((ra_range[0] + ra_range[1]) / 2.0, (dec_range[0] + dec_range[1]) / 2.0)
+            ),
+            alpha=Angle.fromDegrees(1.5 * (dec_range[1] - dec_range[0]) / 2.0),
+            beta=Angle.fromDegrees(0.5 * (dec_range[1] - dec_range[0]) / 2.0),
+            orientation=Angle.fromDegrees(45.0),
+        )
+        self._check_envelope(h, circle, [98, 99, 104, 105])
+
     def test_envelope_missing_neighbors(self):
         """Test envelope, with a pixel with missing neighbors.
 
@@ -147,6 +158,45 @@ class HealpixPixelizationTestCase(unittest.TestCase):
         )
 
         self._check_envelope(h, box, [0, 1, 5])
+
+    def test_envelope_small(self):
+        """Test envelope, DM-54274."""
+        h = HealpixPixelization(3)
+
+        # Test the box region
+        box = Box(
+            point1=LonLat.fromDegrees(0.6, 0.6),
+            point2=LonLat.fromDegrees(0.61, 0.61),
+        )
+        self._check_envelope(h, box, [282, 304])
+
+        # Try a polygon region:
+        poly = ConvexPolygon(
+            [
+                UnitVector3d(-0.9879246204440798, -0.08691162558237045, 0.12826267445773423),
+                UnitVector3d(-0.9885269066487583, -0.08474209761828523, 0.1250333224492182),
+                UnitVector3d(-0.9885167542515381, -0.08795173158697882, 0.12287847441621431),
+                UnitVector3d(-0.9879142847819917, -0.09012140316514382, 0.1261090742779096),
+            ],
+        )
+
+        self._check_envelope(h, poly, [433])
+
+        # Try a circle region
+        circle = Circle(
+            center=UnitVector3d(LonLat.fromDegrees(0.6, 0.6)),
+            angle=Angle.fromDegrees(0.01),
+        )
+        self._check_envelope(h, circle, [282, 304])
+
+        # Try an ellipse region
+        circle = Ellipse(
+            center=UnitVector3d(LonLat.fromDegrees(0.6, 0.6)),
+            alpha=Angle.fromDegrees(0.02),
+            beta=Angle.fromDegrees(0.005),
+            orientation=Angle.fromDegrees(45.0),
+        )
+        self._check_envelope(h, circle, [282, 304])
 
     def _check_envelope(self, pixelization, region, check_pixels):
         """Check the envelope from a region.
