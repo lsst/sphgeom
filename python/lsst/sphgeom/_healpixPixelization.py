@@ -138,6 +138,7 @@ class HealpixPixelization(PixelizationABC):
                     center.getLat().asRadians(),
                     radius_rad,
                     degrees=False,
+                    inclusive=True,
                 )
             elif radius_rad == 0:
                 pixels = hpg.angle_to_pixel(
@@ -152,7 +153,7 @@ class HealpixPixelization(PixelizationABC):
             vertices = np.array([[v.x(), v.y(), v.z()] for v in region.getVertices()])
             retry = False
             try:
-                pixels = hpg.query_polygon_vec(nside, vertices)
+                pixels = hpg.query_polygon_vec(nside, vertices, inclusive=True)
             except RuntimeError:
                 # This happens if the polygon is determined to have a
                 # degenerate corner (which can happen with rounding).
@@ -169,6 +170,7 @@ class HealpixPixelization(PixelizationABC):
                 region.getLat().getA().asRadians(),
                 region.getLat().getB().asRadians(),
                 degrees=False,
+                inclusive=True,
             )
         elif isinstance(region, Ellipse):
             # hpgeom supports query_ellipse given center, alpha, beta,
@@ -183,6 +185,7 @@ class HealpixPixelization(PixelizationABC):
                 center.getLat().asRadians(),
                 _circle.getOpeningAngle().asRadians(),
                 degrees=False,
+                inclusive=True,
             )
         else:
             raise ValueError("Invalid region.")
