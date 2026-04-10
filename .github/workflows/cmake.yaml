@@ -9,6 +9,8 @@ on:
 jobs:
   cmake:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v5
         with:
@@ -26,15 +28,18 @@ jobs:
       - name: Install Python prereqs
         run: |
           pip install \
+            gcovr \
             numpy \
             pybind11[global] \
             pytest \
+            pytest-cov \
             pyyaml \
             hpgeom
 
       - name: CMake configure
         run: |
           cmake \
+            -DSPHGEOM_ENABLE_COVERAGE=ON \
             -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install \
             -B ${{github.workspace}}/build
 
@@ -52,4 +57,44 @@ jobs:
         env:
           PYTHONPATH: ${{github.workspace}}/build/install/python
           LD_LIBRARY_PATH: ${{github.workspace}}/build/install/lib
-        run: pytest -r a -v
+        run: |
+          pytest -r a -v \
+            --cov=lsst.sphgeom \
+            --cov=tests \
+            --cov-branch \
+            --cov-report=term \
+            --cov-report=xml:${{github.workspace}}/build/python-coverage.xml \
+            --junitxml=${{github.workspace}}/build/junit.xml \
+            -o junit_family=legacy
+
+      - name: C++ coverage report
+        run: |
+          gcovr \
+            --root ${{github.workspace}} \
+            --filter '${{github.workspace}}/src' \
+            --filter '${{github.workspace}}/include' \
+            --filter '${{github.workspace}}/python/lsst/sphgeom' \
+            --exclude '${{github.workspace}}/tests' \
+            --exclude '${{github.workspace}}/build' \
+            --print-summary \
+            --xml-pretty \
+            --output ${{github.workspace}}/build/cpp-coverage.xml \
+            ${{github.workspace}}/build
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v6
+        with:
+          files: ./build/python-coverage.xml,./build/cpp-coverage.xml
+          disable_search: true
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v6
+        with:
+          files: ./build/junit.xml
+          disable_search: true
+          fail_ci_if_error: true
+          report_type: test_results
+          token: ${{ secrets.CODECOV_TOKEN }}
