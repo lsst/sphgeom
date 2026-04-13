@@ -116,7 +116,7 @@ jobs:
 
     steps:
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
         if: runner.os == 'Linux'
         with:
           platforms: arm64
