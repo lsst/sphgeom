@@ -26,11 +26,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <vector>
+
 #include "pybind11/pybind11.h"
+#include "pybind11/stl.h"
 
 #include "lsst/sphgeom/python.h"
 
 #include "lsst/sphgeom/Pixelization.h"
+#include "lsst/sphgeom/RangeSet.h"
 #include "lsst/sphgeom/Region.h"
 #include "lsst/sphgeom/UnitVector3d.h"
 
@@ -47,6 +51,19 @@ void defineClass(py::classh<Pixelization> &cls) {
     cls.def("index", &Pixelization::index, "i"_a);
     cls.def("toString", &Pixelization::toString, "i"_a);
     cls.def("envelope", &Pixelization::envelope, "region"_a, "maxRanges"_a = 0);
+    cls.def("envelope_many", [](const Pixelization& self, std::vector<const Region*> regions, int maxRanges = 0) {
+        py::gil_scoped_release release;
+        std::vector<RangeSet> output;
+        output.reserve(regions.size());
+
+        for (const Region* region : regions) {
+            output.push_back(self.envelope(*region, maxRanges));
+        }
+
+        return output;
+    },
+    "regions"_a,
+    "maxRanges"_a = 0);
     cls.def("interior", &Pixelization::interior, "region"_a, "maxRanges"_a = 0);
 }
 

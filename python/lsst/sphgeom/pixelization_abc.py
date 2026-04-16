@@ -27,6 +27,7 @@
 __all__ = ["PixelizationABC"]
 
 import abc
+from collections.abc import Iterable
 
 from ._sphgeom import RangeSet, Region, UnitVector3d
 
@@ -126,6 +127,31 @@ class PixelizationABC(abc.ABC):
         rangeSet : `lsst.sphgeom.RangeSet`
         """
         pass
+
+    def envelope_many(self, regions: Iterable[Region], maxRanges: int = 0):
+        """Return the indexes of the pixels intersecting each given spherical
+        regions.
+
+        The ``maxRanges`` parameter can be used to limit both these costs -
+        setting it to a non-zero value sets a cap on the number of ranges
+        returned by this method. To meet this constraint, implementations are
+        allowed to return pixels that do not intersect the region along with
+        those, that do.
+        This allows two ranges [a, b) and [c, d), a < b < c < d, to be
+        merged into one range [a, d) (by adding in the pixels [b, c)). Since
+        simplification proceeds by adding pixels, the return value will always
+        be a superset of the intersecting pixels.
+
+        Parameters
+        ----------
+        regions : `~collections.abc.Iterable` [ `lsst.sphgeom.Region` ]
+        maxRanges : `int`
+
+        Returns
+        -------
+        rangeSets : `~collections.abc.Iterable` [ `lsst.sphgeom.RangeSet` ]
+        """
+        return [self.envelope(r, maxRanges) for r in regions]
 
     @abc.abstractmethod
     def interior(self, region: Region, maxRanges: int = 0):
