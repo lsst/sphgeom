@@ -30,6 +30,7 @@ import unittest
 
 from lsst.sphgeom import (
     Angle,
+    Box,
     Circle,
     ConvexPolygon,
     Ellipse,
@@ -200,6 +201,26 @@ class StcsTestCase(unittest.TestCase):
         self.assertTrue(ellipse.isEmpty())
         with self.assertRaises(ValueError):
             ellipse.to_ivoa_stcs()
+
+    def test_box_not_supported(self):
+        """Box explicitly raises NotImplementedError with a helpful message."""
+        box = Box(
+            LonLat.fromDegrees(1.0, 2.0),
+            LonLat.fromDegrees(5.0, 6.0),
+        )
+        with self.assertRaises(NotImplementedError) as cm:
+            box.to_ivoa_stcs()
+        # The error message should mention an alternative for callers.
+        self.assertIn("Polygon", str(cm.exception))
+
+    def test_box_body_not_supported(self):
+        """Box body helper also raises NotImplementedError."""
+        box = Box(
+            LonLat.fromDegrees(1.0, 2.0),
+            LonLat.fromDegrees(5.0, 6.0),
+        )
+        with self.assertRaises(NotImplementedError):
+            box._ivoa_stcs_body()
 
 
 if __name__ == "__main__":

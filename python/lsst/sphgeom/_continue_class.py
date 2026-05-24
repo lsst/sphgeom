@@ -277,6 +277,14 @@ class Box:  # noqa: F811
         # that is any better than 0. -> 360.
         return f"RANGE {lon1} {lon2} {lat1} {lat2}"
 
+    def _ivoa_stcs_body(self) -> str:
+        # Docstring inherited.
+        raise NotImplementedError(
+            "Box cannot be converted to STC-S directly because STC-S has no "
+            "latitude-parallel range region; build a Polygon (ConvexPolygon) "
+            "from this Box if an STC-S representation is required."
+        )
+
 
 @_continueClass
 class ConvexPolygon:  # noqa: F811
