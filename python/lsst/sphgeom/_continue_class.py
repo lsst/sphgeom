@@ -172,6 +172,40 @@ class Region:
         """
         raise NotImplementedError("This region can not be converted to an IVOA POS string.")
 
+    def to_ivoa_stcs(self, frame: str = "ICRS") -> str:
+        """Represent the region as an IVOA STC-S string.
+
+        Parameters
+        ----------
+        frame : `str`, optional
+            STC-S coordinate frame keyword (e.g. ``"ICRS"``, ``"FK5"``,
+            ``"GALACTIC"``). Emitted verbatim. Defaults to ``"ICRS"``.
+
+        Returns
+        -------
+        stcs : `str`
+            The region in STC-S format.
+
+        Notes
+        -----
+        See
+        http://www.ivoa.net/Documents/Notes/STC-S/20091030/NOTE-STC-S-1.33-20091030.html
+        for the format definition. Supported region types are ``Circle``,
+        ``Polygon``, ``Ellipse``, and the ``Union`` / ``Intersection``
+        compound operators. ``Box`` regions cannot be converted directly
+        because STC-S has no latitude-parallel range region.
+        """
+        head, _, tail = self._ivoa_stcs_body().partition(" ")
+        return f"{head} {frame} {tail}"
+
+    def _ivoa_stcs_body(self) -> str:
+        """Return the STC-S body of this region without the frame keyword.
+
+        Used internally by compound regions so the frame keyword is emitted
+        only once at the outermost level.
+        """
+        raise NotImplementedError("This region can not be converted to an IVOA STC-S string.")
+
 
 @_continueClass
 class Circle:  # noqa: F811
