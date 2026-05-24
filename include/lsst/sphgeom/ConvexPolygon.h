@@ -108,6 +108,16 @@ public:
         return _vertices;
     }
 
+    /// `toIvoaStcsBody` returns this polygon as the body of an IVOA STC-S
+    /// string (the form without a frame keyword), e.g.
+    /// `"Polygon 12.0 34.0 14.0 34.0 ..."`. Used by `Region.to_ivoa_stcs`
+    /// (Python) which inserts the frame keyword after the shape name.
+    ///
+    /// Floating-point coordinates are formatted with `std::to_chars`
+    /// (shortest round-trip), so every emitted number parses back to the
+    /// exact same `double` it was emitted from.
+    std::string toIvoaStcsBody() const;
+
     /// The centroid of a polygon is its center of mass projected onto
     /// S², assuming a uniform mass distribution over the polygon surface.
     UnitVector3d getCentroid() const;
