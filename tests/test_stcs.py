@@ -65,6 +65,39 @@ class StcsTestCase(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             Region._ivoa_stcs_body(circle)
 
+    def test_circle(self):
+        """Circle round-trips through STC-S."""
+        circle = Circle(
+            UnitVector3d(LonLat.fromDegrees(180.0, 30.0)),
+            Angle.fromDegrees(2.0),
+        )
+        self.assert_stcs_equal(
+            circle.to_ivoa_stcs(),
+            "Circle ICRS 180.0 30.0 2.0",
+        )
+
+    def test_circle_frame_argument(self):
+        """The frame argument is emitted verbatim."""
+        circle = Circle(
+            UnitVector3d(LonLat.fromDegrees(180.0, 30.0)),
+            Angle.fromDegrees(2.0),
+        )
+        self.assert_stcs_equal(
+            circle.to_ivoa_stcs(frame="GALACTIC"),
+            "Circle GALACTIC 180.0 30.0 2.0",
+        )
+
+    def test_circle_body(self):
+        """The internal body helper omits the frame keyword."""
+        circle = Circle(
+            UnitVector3d(LonLat.fromDegrees(180.0, 30.0)),
+            Angle.fromDegrees(2.0),
+        )
+        self.assert_stcs_equal(
+            circle._ivoa_stcs_body(),
+            "Circle 180.0 30.0 2.0",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

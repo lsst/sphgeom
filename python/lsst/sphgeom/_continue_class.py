@@ -219,6 +219,14 @@ class Circle:  # noqa: F811
         rad = self.getOpeningAngle().asDegrees()
         return f"CIRCLE {lon} {lat} {rad}"
 
+    def _ivoa_stcs_body(self) -> str:
+        # Docstring inherited.
+        center = LonLat(self.getCenter())
+        lon = center.getLon().asDegrees()
+        lat = center.getLat().asDegrees()
+        rad = self.getOpeningAngle().asDegrees()
+        return f"Circle {lon} {lat} {rad}"
+
 
 @_continueClass
 class Box:  # noqa: F811
