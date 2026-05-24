@@ -36,6 +36,7 @@ from lsst.sphgeom import (
     Ellipse,
     LonLat,
     Region,
+    UnionRegion,
     UnitVector3d,
 )
 
@@ -221,6 +222,55 @@ class StcsTestCase(unittest.TestCase):
         )
         with self.assertRaises(NotImplementedError):
             box._ivoa_stcs_body()
+
+    def test_union(self):
+        """Union of two circles emits a single ICRS keyword."""
+        c1 = Circle(UnitVector3d(LonLat.fromDegrees(180.0, 10.0)), Angle.fromDegrees(2.0))
+        c2 = Circle(UnitVector3d(LonLat.fromDegrees(190.0, 20.0)), Angle.fromDegrees(1.0))
+        u = UnionRegion(c1, c2)
+        self.assert_stcs_equal(
+            u.to_ivoa_stcs(),
+            "Union ICRS ( Circle 180.0 10.0 2.0 Circle 190.0 20.0 1.0 )",
+        )
+
+    def test_union_nested(self):
+        """Nested unions are flattened by ``UnionRegion`` at construction
+        time, so the resulting STC-S is a single ``Union`` with all three
+        operands and a single frame keyword.
+        """
+        c1 = Circle(UnitVector3d(LonLat.fromDegrees(0.0, 0.0)), Angle.fromDegrees(1.0))
+        c2 = Circle(UnitVector3d(LonLat.fromDegrees(10.0, 0.0)), Angle.fromDegrees(1.0))
+        c3 = Circle(UnitVector3d(LonLat.fromDegrees(20.0, 0.0)), Angle.fromDegrees(1.0))
+        nested = UnionRegion(c1, UnionRegion(c2, c3))
+        # UnionRegion flattens same-kind operands automatically.
+        self.assertEqual(nested.nOperands(), 3)
+        stcs = nested.to_ivoa_stcs()
+        # ICRS appears exactly once.
+        self.assertEqual(stcs.count("ICRS"), 1)
+        # Only one Union keyword (flattened).
+        self.assertEqual(stcs.count("Union"), 1)
+        self.assert_stcs_equal(
+            stcs,
+            "Union ICRS ( Circle 0.0 0.0 1.0 Circle 10.0 0.0 1.0 Circle 20.0 0.0 1.0 )",
+        )
+
+    def test_union_body(self):
+        """UnionRegion body helper omits the frame keyword."""
+        c1 = Circle(UnitVector3d(LonLat.fromDegrees(180.0, 10.0)), Angle.fromDegrees(2.0))
+        c2 = Circle(UnitVector3d(LonLat.fromDegrees(190.0, 20.0)), Angle.fromDegrees(1.0))
+        u = UnionRegion(c1, c2)
+        self.assert_stcs_equal(
+            u._ivoa_stcs_body(),
+            "Union ( Circle 180.0 10.0 2.0 Circle 190.0 20.0 1.0 )",
+        )
+
+    def test_union_with_unsupported_operand(self):
+        """A Union containing a Box raises NotImplementedError."""
+        circle = Circle(UnitVector3d(LonLat.fromDegrees(0.0, 0.0)), Angle.fromDegrees(1.0))
+        box = Box(LonLat.fromDegrees(1.0, 2.0), LonLat.fromDegrees(5.0, 6.0))
+        u = UnionRegion(circle, box)
+        with self.assertRaises(NotImplementedError):
+            u.to_ivoa_stcs()
 
 
 if __name__ == "__main__":

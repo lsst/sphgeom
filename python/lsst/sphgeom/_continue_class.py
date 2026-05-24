@@ -43,6 +43,7 @@ from ._sphgeom import (
     Ellipse,
     LonLat,
     Region,
+    UnionRegion,
     UnitVector3d,
 )
 
@@ -323,3 +324,13 @@ class Ellipse:  # noqa: F811
         beta = self.getBeta().asDegrees()
         pa = _ellipse_position_angle_degrees(self)
         return f"Ellipse {lon} {lat} {alpha} {beta} {pa}"
+
+
+@_continueClass
+class UnionRegion:  # noqa: F811
+    """A union of two regions on the unit sphere."""
+
+    def _ivoa_stcs_body(self) -> str:
+        # Docstring inherited.
+        operands = [self.cloneOperand(i)._ivoa_stcs_body() for i in range(self.nOperands())]
+        return f"Union ( {' '.join(operands)} )"
