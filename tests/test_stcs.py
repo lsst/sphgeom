@@ -142,6 +142,34 @@ class StcsTestCase(unittest.TestCase):
         for tok in tokens[1:]:
             float(tok)  # raises ValueError if non-numeric
 
+    def test_polygon_roundtrip_precision(self):
+        """Lon/lat values round-trip through STC-S without precision loss.
+
+        This locks in shortest-round-trip formatting: when the body string is
+        re-parsed with ``float()``, every value must equal the polygon's
+        actual stored vertex coordinate exactly (no tolerance).
+        """
+        vertices = [
+            UnitVector3d(LonLat.fromDegrees(12.345678901234567, 34.56789012345678)),
+            UnitVector3d(LonLat.fromDegrees(56.789012345678901, 78.90123456789012)),
+            UnitVector3d(LonLat.fromDegrees(-23.456789012345678, -45.67890123456789)),
+        ]
+        poly = ConvexPolygon(vertices)
+        body = poly._ivoa_stcs_body()
+        tokens = body.split()
+        self.assertEqual(tokens[0], "Polygon")
+        emitted = [float(t) for t in tokens[1:]]
+        # Compare to the polygon's stored vertices (ConvexPolygon may reorder
+        # or rotate the input, so compare against its actual getVertices()).
+        expected = []
+        for v in poly.getVertices():
+            ll = LonLat(v)
+            expected.append(ll.getLon().asDegrees())
+            expected.append(ll.getLat().asDegrees())
+        self.assertEqual(len(emitted), len(expected))
+        for got, want in zip(emitted, expected, strict=True):
+            self.assertEqual(got, want, f"got {got!r} expected {want!r}")
+
     def test_ellipse(self):
         """Ellipse round-trips through STC-S, including position angle."""
         center = UnitVector3d(LonLat.fromDegrees(180.0, 30.0))
