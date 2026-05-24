@@ -41,6 +41,7 @@ from ._sphgeom import (
     Circle,
     ConvexPolygon,
     Ellipse,
+    IntersectionRegion,
     LonLat,
     Region,
     UnionRegion,
@@ -334,3 +335,13 @@ class UnionRegion:  # noqa: F811
         # Docstring inherited.
         operands = [self.cloneOperand(i)._ivoa_stcs_body() for i in range(self.nOperands())]
         return f"Union ( {' '.join(operands)} )"
+
+
+@_continueClass
+class IntersectionRegion:  # noqa: F811
+    """An intersection of two regions on the unit sphere."""
+
+    def _ivoa_stcs_body(self) -> str:
+        # Docstring inherited.
+        operands = [self.cloneOperand(i)._ivoa_stcs_body() for i in range(self.nOperands())]
+        return f"Intersection ( {' '.join(operands)} )"

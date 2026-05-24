@@ -34,6 +34,7 @@ from lsst.sphgeom import (
     Circle,
     ConvexPolygon,
     Ellipse,
+    IntersectionRegion,
     LonLat,
     Region,
     UnionRegion,
@@ -271,6 +272,32 @@ class StcsTestCase(unittest.TestCase):
         u = UnionRegion(circle, box)
         with self.assertRaises(NotImplementedError):
             u.to_ivoa_stcs()
+
+    def test_intersection(self):
+        """Intersection of a circle and a polygon."""
+        circle = Circle(UnitVector3d(LonLat.fromDegrees(0.0, 0.0)), Angle.fromDegrees(5.0))
+        vertices = [
+            UnitVector3d(LonLat.fromDegrees(-1.0, -1.0)),
+            UnitVector3d(LonLat.fromDegrees(1.0, -1.0)),
+            UnitVector3d(LonLat.fromDegrees(1.0, 1.0)),
+            UnitVector3d(LonLat.fromDegrees(-1.0, 1.0)),
+        ]
+        poly = ConvexPolygon(vertices)
+        inter = IntersectionRegion(circle, poly)
+        stcs = inter.to_ivoa_stcs()
+        # Top-level keyword and frame are deterministic.
+        self.assertTrue(stcs.startswith("Intersection ICRS ( "))
+        self.assertEqual(stcs.count("ICRS"), 1)
+        self.assertIn("Circle 0.0 0.0 5.0", stcs)
+        self.assertIn("Polygon ", stcs)
+
+    def test_intersection_with_unsupported_operand(self):
+        """Intersection containing a Box raises NotImplementedError."""
+        circle = Circle(UnitVector3d(LonLat.fromDegrees(0.0, 0.0)), Angle.fromDegrees(1.0))
+        box = Box(LonLat.fromDegrees(1.0, 2.0), LonLat.fromDegrees(5.0, 6.0))
+        inter = IntersectionRegion(circle, box)
+        with self.assertRaises(NotImplementedError):
+            inter.to_ivoa_stcs()
 
 
 if __name__ == "__main__":
