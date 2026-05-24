@@ -35,7 +35,16 @@ import math
 import sys
 import typing
 
-from ._sphgeom import Angle, Box, Circle, ConvexPolygon, LonLat, Region, UnitVector3d
+from ._sphgeom import (
+    Angle,
+    Box,
+    Circle,
+    ConvexPolygon,
+    Ellipse,
+    LonLat,
+    Region,
+    UnitVector3d,
+)
 
 # Copy and paste from lsst.utils.wrappers:
 # * INTRINSIC_SPECIAL_ATTRIBUTES
@@ -95,6 +104,28 @@ def _inf_to_lat(lat: float) -> float:
 def _inf_to_lon(lat: float) -> float:
     """Map longitude +Inf to +360 and -Inf to 0 degrees."""
     return _inf_to_limit(lat, 0.0, 360.0)
+
+
+def _ellipse_position_angle_degrees(ellipse) -> float:
+    """Compute the position angle (east of north, degrees) of the first
+    ellipse axis at its centre.
+
+    Returned value is normalised to ``[0, 360)``.
+    """
+    matrix = ellipse.getTransformMatrix()
+    axis = matrix.getRow(0)  # first axis direction (Vector3d)
+    center = LonLat(ellipse.getCenter())
+    lam = center.getLon().asRadians()
+    phi = center.getLat().asRadians()
+    sin_lam = math.sin(lam)
+    cos_lam = math.cos(lam)
+    sin_phi = math.sin(phi)
+    cos_phi = math.cos(phi)
+    # Local east and north 3-vectors at the centre.
+    east_dot = -sin_lam * axis.x() + cos_lam * axis.y()
+    north_dot = -sin_phi * cos_lam * axis.x() - sin_phi * sin_lam * axis.y() + cos_phi * axis.z()
+    pa_deg = math.degrees(math.atan2(east_dot, north_dot))
+    return pa_deg % 360.0
 
 
 @_continueClass
@@ -263,3 +294,24 @@ class ConvexPolygon:  # noqa: F811
         coords = (LonLat(v) for v in self.getVertices())
         coord_strings = [f"{c.getLon().asDegrees()} {c.getLat().asDegrees()}" for c in coords]
         return f"Polygon {' '.join(coord_strings)}"
+
+
+@_continueClass
+class Ellipse:  # noqa: F811
+    """An elliptical region on the unit sphere."""
+
+    def _ivoa_stcs_body(self) -> str:
+        # Docstring inherited.
+        if self.isEmpty():
+            raise ValueError("Empty Ellipse has no STC-S representation.")
+        if self.isFull():
+            raise ValueError("Full Ellipse has no STC-S representation.")
+        if self.isGreatCircle():
+            raise ValueError("Great-circle Ellipse has no STC-S representation.")
+        center = LonLat(self.getCenter())
+        lon = center.getLon().asDegrees()
+        lat = center.getLat().asDegrees()
+        alpha = self.getAlpha().asDegrees()
+        beta = self.getBeta().asDegrees()
+        pa = _ellipse_position_angle_degrees(self)
+        return f"Ellipse {lon} {lat} {alpha} {beta} {pa}"

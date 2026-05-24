@@ -25,12 +25,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import math
 import unittest
 
 from lsst.sphgeom import (
     Angle,
     Circle,
     ConvexPolygon,
+    Ellipse,
     LonLat,
     Region,
     UnitVector3d,
@@ -136,6 +138,68 @@ class StcsTestCase(unittest.TestCase):
         # No "ICRS" or any non-numeric token after "Polygon".
         for tok in tokens[1:]:
             float(tok)  # raises ValueError if non-numeric
+
+    def test_ellipse(self):
+        """Ellipse round-trips through STC-S, including position angle."""
+        center = UnitVector3d(LonLat.fromDegrees(180.0, 30.0))
+        ellipse = Ellipse(
+            center,
+            Angle.fromDegrees(2.0),  # alpha
+            Angle.fromDegrees(1.0),  # beta
+            Angle.fromDegrees(45.0),  # orientation (PA)
+        )
+        self.assert_stcs_equal(
+            ellipse.to_ivoa_stcs(),
+            "Ellipse ICRS 180.0 30.0 2.0 1.0 45.0",
+        )
+
+    def test_ellipse_pa_zero(self):
+        """Ellipse with orientation=0 emits PA close to 0."""
+        center = UnitVector3d(LonLat.fromDegrees(45.0, 0.0))
+        ellipse = Ellipse(
+            center,
+            Angle.fromDegrees(2.0),
+            Angle.fromDegrees(1.0),
+            Angle.fromDegrees(0.0),
+        )
+        tokens = ellipse.to_ivoa_stcs().split()
+        # Last token is the position angle.
+        pa = float(tokens[-1])
+        # PA may come back as 0 or 180 (axis is unsigned).
+        self.assertTrue(
+            math.isclose(pa, 0.0, abs_tol=1e-6) or math.isclose(pa, 180.0, abs_tol=1e-6),
+            f"unexpected PA {pa}",
+        )
+
+    def test_ellipse_body(self):
+        """Ellipse body helper omits the frame keyword."""
+        center = UnitVector3d(LonLat.fromDegrees(180.0, 30.0))
+        ellipse = Ellipse(
+            center,
+            Angle.fromDegrees(2.0),
+            Angle.fromDegrees(1.0),
+            Angle.fromDegrees(45.0),
+        )
+        self.assert_stcs_equal(
+            ellipse._ivoa_stcs_body(),
+            "Ellipse 180.0 30.0 2.0 1.0 45.0",
+        )
+
+    def test_ellipse_full_raises(self):
+        """A full ellipse cannot be represented as STC-S."""
+        center = UnitVector3d(LonLat.fromDegrees(0.0, 0.0))
+        ellipse = Ellipse(center, Angle.fromDegrees(180.0))  # full
+        self.assertTrue(ellipse.isFull())
+        with self.assertRaises(ValueError):
+            ellipse.to_ivoa_stcs()
+
+    def test_ellipse_empty_raises(self):
+        """An empty ellipse cannot be represented as STC-S."""
+        # Default-constructed Ellipse is empty.
+        ellipse = Ellipse()
+        self.assertTrue(ellipse.isEmpty())
+        with self.assertRaises(ValueError):
+            ellipse.to_ivoa_stcs()
 
 
 if __name__ == "__main__":
