@@ -257,3 +257,9 @@ class ConvexPolygon:  # noqa: F811
         coord_strings = [f"{c.getLon().asDegrees()} {c.getLat().asDegrees()}" for c in coords]
 
         return f"POLYGON {' '.join(coord_strings)}"
+
+    def _ivoa_stcs_body(self) -> str:
+        # Docstring inherited.
+        coords = (LonLat(v) for v in self.getVertices())
+        coord_strings = [f"{c.getLon().asDegrees()} {c.getLat().asDegrees()}" for c in coords]
+        return f"Polygon {' '.join(coord_strings)}"

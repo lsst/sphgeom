@@ -30,6 +30,7 @@ import unittest
 from lsst.sphgeom import (
     Angle,
     Circle,
+    ConvexPolygon,
     LonLat,
     Region,
     UnitVector3d,
@@ -97,6 +98,44 @@ class StcsTestCase(unittest.TestCase):
             circle._ivoa_stcs_body(),
             "Circle 180.0 30.0 2.0",
         )
+
+    def test_polygon(self):
+        """Polygon emits Polygon <frame> followed by lon/lat pairs."""
+        vertices = [
+            UnitVector3d(LonLat.fromDegrees(12.0, 34.0)),
+            UnitVector3d(LonLat.fromDegrees(14.0, 34.0)),
+            UnitVector3d(LonLat.fromDegrees(14.0, 36.0)),
+            UnitVector3d(LonLat.fromDegrees(12.0, 36.0)),
+        ]
+        poly = ConvexPolygon(vertices)
+        # ConvexPolygon may rotate the vertex order; compare token counts and
+        # numeric values pairwise after extracting (lon, lat) pairs.
+        stcs = poly.to_ivoa_stcs()
+        tokens = stcs.split()
+        self.assertEqual(tokens[0], "Polygon")
+        self.assertEqual(tokens[1], "ICRS")
+        coords = [float(t) for t in tokens[2:]]
+        self.assertEqual(len(coords), 8)
+        # Recover the 4 (lon, lat) pairs as a set of rounded tuples.
+        emitted = {(round(coords[i], 6), round(coords[i + 1], 6)) for i in range(0, 8, 2)}
+        expected = {(12.0, 34.0), (14.0, 34.0), (14.0, 36.0), (12.0, 36.0)}
+        self.assertEqual(emitted, expected)
+
+    def test_polygon_body(self):
+        """ConvexPolygon body helper omits the frame keyword."""
+        vertices = [
+            UnitVector3d(LonLat.fromDegrees(12.0, 34.0)),
+            UnitVector3d(LonLat.fromDegrees(14.0, 34.0)),
+            UnitVector3d(LonLat.fromDegrees(14.0, 36.0)),
+            UnitVector3d(LonLat.fromDegrees(12.0, 36.0)),
+        ]
+        poly = ConvexPolygon(vertices)
+        body = poly._ivoa_stcs_body()
+        tokens = body.split()
+        self.assertEqual(tokens[0], "Polygon")
+        # No "ICRS" or any non-numeric token after "Polygon".
+        for tok in tokens[1:]:
+            float(tok)  # raises ValueError if non-numeric
 
 
 if __name__ == "__main__":
