@@ -174,7 +174,7 @@ public:
     /// UnionRegion, to support cases where a union of region is constructed
     /// server-side in a database as a concatenation with that delimiter.
     static std::unique_ptr<Region> decodeBase64(std::string const & s) {
-        return decodeBase64(s);
+        return decodeBase64(std::string_view(s));
     }
 
     static std::unique_ptr<Region> decodeBase64(std::string_view const & s);
@@ -188,7 +188,7 @@ public:
     /// '&' as the delimiter.  Multiple such pairwise overlap expressions can
     /// then be concatenated with '|' as the delimiter to form the logical OR.
     static TriState decodeOverlapsBase64(std::string const & s) {
-        return decodeOverlapsBase64(s);
+        return decodeOverlapsBase64(std::string_view(s));
     }
 
     static TriState decodeOverlapsBase64(std::string_view const & s);
