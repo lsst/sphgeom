@@ -81,6 +81,25 @@ void defineClass(py::classh<Region> &cls) {
                     py::overload_cast<std::string_view const&>(&Region::decodeOverlapsBase64),
                    "bytes"_a);
     cls.def_static("getRegions", Region::getRegions, "region"_a);
+    cls.def("to_ivoa_stcs", &Region::toIvoaStcs, "frame"_a = "ICRS",
+            "Return this region as an IVOA STC-S string.\n\n"
+            "Parameters\n"
+            "----------\n"
+            "frame : `str`, optional\n"
+            "    STC-S coordinate frame keyword (e.g. ``\"ICRS\"``, ``\"FK5\"``,\n"
+            "    ``\"GALACTIC\"``). Emitted verbatim. Defaults to ``\"ICRS\"``.\n\n"
+            "Returns\n"
+            "-------\n"
+            "stcs : `str`\n"
+            "    The region in STC-S format.\n\n"
+            "Notes\n"
+            "-----\n"
+            "See\n"
+            "http://www.ivoa.net/Documents/Notes/STC-S/20091030/NOTE-STC-S-1.33-20091030.html\n"
+            "for the format definition. Supported region types are ``Circle``,\n"
+            "``Polygon``, ``Ellipse``, and the ``Union`` / ``Intersection``\n"
+            "compound operators. ``Box`` regions cannot be converted directly\n"
+            "because STC-S has no latitude-parallel range region.");
 }
 
 }  // sphgeom

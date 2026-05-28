@@ -32,14 +32,17 @@
 
 #include "lsst/sphgeom/Ellipse.h"
 
+#include <charconv>
 #include <cmath>
 #include <ostream>
 #include <stdexcept>
+#include <string>
 
 #include "lsst/sphgeom/Box.h"
 #include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/Circle.h"
 #include "lsst/sphgeom/ConvexPolygon.h"
+#include "lsst/sphgeom/LonLat.h"
 #include "lsst/sphgeom/codec.h"
 
 
@@ -420,6 +423,61 @@ std::ostream & operator<<(std::ostream & os, Ellipse const & e) {
     os << "{\"Ellipse\": [" << e.getTransformMatrix() << ", "
        << e.getAlpha() << ", " << e.getBeta() << "]}";
     return os;
+}
+
+namespace {
+
+// Position angle (east of north) in degrees of the first ellipse axis at
+// its centre, normalised to [0, 360).
+double _positionAngleDegrees(Ellipse const & e) {
+    Vector3d const axis = e.getTransformMatrix().getRow(0);
+    LonLat const center(e.getCenter());
+    double const lam = center.getLon().asRadians();
+    double const phi = center.getLat().asRadians();
+    double const sl = std::sin(lam);
+    double const cl = std::cos(lam);
+    double const sp = std::sin(phi);
+    double const cp = std::cos(phi);
+    double const east = -sl * axis.x() + cl * axis.y();
+    double const north = -sp * cl * axis.x() - sp * sl * axis.y() + cp * axis.z();
+    double pa = std::atan2(east, north) * (180.0 / PI);
+    pa = std::fmod(pa, 360.0);
+    if (pa < 0.0) pa += 360.0;
+    return pa;
+}
+
+}  // anonymous namespace
+
+std::string Ellipse::toIvoaStcsBody(std::string const & frame) const {
+    if (isEmpty()) {
+        throw std::invalid_argument("Empty Ellipse has no STC-S representation.");
+    }
+    if (isFull()) {
+        throw std::invalid_argument("Full Ellipse has no STC-S representation.");
+    }
+    if (isGreatCircle()) {
+        throw std::invalid_argument("Great-circle Ellipse has no STC-S representation.");
+    }
+    LonLat const c(getCenter());
+    double const lon = c.getLon().asDegrees();
+    double const lat = c.getLat().asDegrees();
+    double const alpha = getAlpha().asDegrees();
+    double const beta = getBeta().asDegrees();
+    double const pa = _positionAngleDegrees(*this);
+    std::string out;
+    out.reserve(8 + frame.size() + 1 + 5 * 25);
+    out.append("Ellipse");
+    if (!frame.empty()) {
+        out.push_back(' ');
+        out.append(frame);
+    }
+    char buf[32];
+    for (double v : {lon, lat, alpha, beta, pa}) {
+        out.push_back(' ');
+        auto r = std::to_chars(buf, buf + sizeof(buf), v);
+        out.append(buf, r.ptr - buf);
+    }
+    return out;
 }
 
 }} // namespace lsst::sphgeom
