@@ -323,7 +323,7 @@ class Ellipse:  # noqa: F811
 
 @_continueClass
 class UnionRegion:  # noqa: F811
-    """A union of two regions on the unit sphere."""
+    """A union of an arbitrary number of regions on the unit sphere."""
 
     def _ivoa_stcs_body(self) -> str:
         # Docstring inherited.
@@ -333,7 +333,7 @@ class UnionRegion:  # noqa: F811
 
 @_continueClass
 class IntersectionRegion:  # noqa: F811
-    """An intersection of two regions on the unit sphere."""
+    """An intersection of an arbitrary number of regions on the unit sphere."""
 
     def _ivoa_stcs_body(self) -> str:
         # Docstring inherited.
