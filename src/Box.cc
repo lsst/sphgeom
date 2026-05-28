@@ -503,4 +503,12 @@ std::ostream & operator<<(std::ostream & os, Box const & b) {
     return os << "{\"Box\": [" << b.getLon() << ", " << b.getLat() << "]}";
 }
 
+std::string Box::toIvoaStcsBody(std::string const &) const {
+    throw IvoaStcsNotImplemented(
+        "Box cannot be converted to STC-S directly because STC-S has no "
+        "latitude-parallel range region; build a Polygon (ConvexPolygon) "
+        "from this Box if an STC-S representation is required."
+    );
+}
+
 }} // namespace lsst::sphgeom

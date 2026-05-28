@@ -62,14 +62,13 @@ class StcsTestCase(unittest.TestCase):
             else:
                 self.assertAlmostEqual(f1, f2, places=6)
 
-    def test_base_region_raises(self):
-        """The Region base class default ``_ivoa_stcs_body`` raises
-        NotImplementedError; ``to_ivoa_stcs`` is defined only on the base
-        class and delegates to ``_ivoa_stcs_body``.
+    def test_base_region_default_raises(self):
+        """Calling ``to_ivoa_stcs`` through ``Region`` on a subclass that
+        cannot be represented in STC-S raises ``NotImplementedError``.
         """
-        circle = Circle(UnitVector3d(LonLat.fromDegrees(0.0, 0.0)), Angle.fromDegrees(1.0))
+        box = Box(LonLat.fromDegrees(1.0, 2.0), LonLat.fromDegrees(5.0, 6.0))
         with self.assertRaises(NotImplementedError):
-            Region._ivoa_stcs_body(circle)
+            Region.to_ivoa_stcs(box)
 
     def test_circle(self):
         """Circle round-trips through STC-S."""
@@ -93,14 +92,14 @@ class StcsTestCase(unittest.TestCase):
             "Circle GALACTIC 180.0 30.0 2.0",
         )
 
-    def test_circle_body(self):
-        """The internal body helper omits the frame keyword."""
+    def test_circle_no_frame(self):
+        """Passing an empty frame omits the frame keyword."""
         circle = Circle(
             UnitVector3d(LonLat.fromDegrees(180.0, 30.0)),
             Angle.fromDegrees(2.0),
         )
         self.assert_stcs_equal(
-            circle._ivoa_stcs_body(),
+            circle.to_ivoa_stcs(frame=""),
             "Circle 180.0 30.0 2.0",
         )
 
@@ -126,22 +125,6 @@ class StcsTestCase(unittest.TestCase):
         expected = {(12.0, 34.0), (14.0, 34.0), (14.0, 36.0), (12.0, 36.0)}
         self.assertEqual(emitted, expected)
 
-    def test_polygon_body(self):
-        """ConvexPolygon body helper omits the frame keyword."""
-        vertices = [
-            UnitVector3d(LonLat.fromDegrees(12.0, 34.0)),
-            UnitVector3d(LonLat.fromDegrees(14.0, 34.0)),
-            UnitVector3d(LonLat.fromDegrees(14.0, 36.0)),
-            UnitVector3d(LonLat.fromDegrees(12.0, 36.0)),
-        ]
-        poly = ConvexPolygon(vertices)
-        body = poly._ivoa_stcs_body()
-        tokens = body.split()
-        self.assertEqual(tokens[0], "Polygon")
-        # No "ICRS" or any non-numeric token after "Polygon".
-        for tok in tokens[1:]:
-            float(tok)  # raises ValueError if non-numeric
-
     def test_polygon_roundtrip_precision(self):
         """Lon/lat values round-trip through STC-S without precision loss.
 
@@ -155,10 +138,11 @@ class StcsTestCase(unittest.TestCase):
             UnitVector3d(LonLat.fromDegrees(-23.456789012345678, -45.67890123456789)),
         ]
         poly = ConvexPolygon(vertices)
-        body = poly._ivoa_stcs_body()
-        tokens = body.split()
+        stcs = poly.to_ivoa_stcs()
+        tokens = stcs.split()
         self.assertEqual(tokens[0], "Polygon")
-        emitted = [float(t) for t in tokens[1:]]
+        self.assertEqual(tokens[1], "ICRS")
+        emitted = [float(t) for t in tokens[2:]]
         # Compare to the polygon's stored vertices (ConvexPolygon may reorder
         # or rotate the input, so compare against its actual getVertices()).
         expected = []
@@ -202,8 +186,8 @@ class StcsTestCase(unittest.TestCase):
             f"unexpected PA {pa}",
         )
 
-    def test_ellipse_body(self):
-        """Ellipse body helper omits the frame keyword."""
+    def test_ellipse_no_frame(self):
+        """Passing an empty frame omits the frame keyword."""
         center = UnitVector3d(LonLat.fromDegrees(180.0, 30.0))
         ellipse = Ellipse(
             center,
@@ -212,7 +196,7 @@ class StcsTestCase(unittest.TestCase):
             Angle.fromDegrees(45.0),
         )
         self.assert_stcs_equal(
-            ellipse._ivoa_stcs_body(),
+            ellipse.to_ivoa_stcs(frame=""),
             "Ellipse 180.0 30.0 2.0 1.0 45.0",
         )
 
@@ -242,15 +226,6 @@ class StcsTestCase(unittest.TestCase):
             box.to_ivoa_stcs()
         # The error message should mention an alternative for callers.
         self.assertIn("Polygon", str(cm.exception))
-
-    def test_box_body_not_supported(self):
-        """Box body helper also raises NotImplementedError."""
-        box = Box(
-            LonLat.fromDegrees(1.0, 2.0),
-            LonLat.fromDegrees(5.0, 6.0),
-        )
-        with self.assertRaises(NotImplementedError):
-            box._ivoa_stcs_body()
 
     def test_union(self):
         """Union of two circles emits a single ICRS keyword."""
@@ -283,13 +258,13 @@ class StcsTestCase(unittest.TestCase):
             "Union ICRS ( Circle 0.0 0.0 1.0 Circle 10.0 0.0 1.0 Circle 20.0 0.0 1.0 )",
         )
 
-    def test_union_body(self):
-        """UnionRegion body helper omits the frame keyword."""
+    def test_union_no_frame(self):
+        """Passing an empty frame omits the frame keyword at the top level."""
         c1 = Circle(UnitVector3d(LonLat.fromDegrees(180.0, 10.0)), Angle.fromDegrees(2.0))
         c2 = Circle(UnitVector3d(LonLat.fromDegrees(190.0, 20.0)), Angle.fromDegrees(1.0))
         u = UnionRegion(c1, c2)
         self.assert_stcs_equal(
-            u._ivoa_stcs_body(),
+            u.to_ivoa_stcs(frame=""),
             "Union ( Circle 180.0 10.0 2.0 Circle 190.0 20.0 1.0 )",
         )
 
@@ -313,11 +288,14 @@ class StcsTestCase(unittest.TestCase):
         poly = ConvexPolygon(vertices)
         inter = IntersectionRegion(circle, poly)
         stcs = inter.to_ivoa_stcs()
-        # Top-level keyword and frame are deterministic.
-        self.assertTrue(stcs.startswith("Intersection ICRS ( "))
+        # Polygon vertex order is not deterministic (ConvexPolygon may
+        # rotate), so check the Circle portion exactly and only assert
+        # Polygon presence.  ``assert_stcs_equal`` handles the numeric
+        # tolerance (e.g. ``5`` from ``std::to_chars`` matching ``5.0``).
+        polygon_idx = stcs.index(" Polygon ")
+        self.assert_stcs_equal(stcs[:polygon_idx], "Intersection ICRS ( Circle 0.0 0.0 5.0")
         self.assertEqual(stcs.count("ICRS"), 1)
-        self.assertIn("Circle 0.0 0.0 5.0", stcs)
-        self.assertIn("Polygon ", stcs)
+        self.assertTrue(stcs.endswith(" )"))
 
     def test_intersection_with_unsupported_operand(self):
         """Intersection containing a Box raises NotImplementedError."""

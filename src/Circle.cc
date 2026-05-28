@@ -32,13 +32,16 @@
 
 #include "lsst/sphgeom/Circle.h"
 
+#include <charconv>
 #include <ostream>
 #include <stdexcept>
+#include <string>
 
 #include "lsst/sphgeom/Box.h"
 #include "lsst/sphgeom/Box3d.h"
 #include "lsst/sphgeom/ConvexPolygon.h"
 #include "lsst/sphgeom/Ellipse.h"
+#include "lsst/sphgeom/LonLat.h"
 #include "lsst/sphgeom/codec.h"
 
 
@@ -389,6 +392,27 @@ std::ostream & operator<<(std::ostream & os, Circle const & c) {
     char tail[32];
     std::snprintf(tail, sizeof(tail), ", %.17g]}", c.getSquaredChordLength());
     return os << "{\"Circle\": [" << c.getCenter() << tail;
+}
+
+std::string Circle::toIvoaStcsBody(std::string const & frame) const {
+    LonLat const center(_center);
+    double const lon = center.getLon().asDegrees();
+    double const lat = center.getLat().asDegrees();
+    double const rad = _openingAngle.asDegrees();
+    std::string out;
+    out.reserve(7 + frame.size() + 1 + 3 * 25);
+    out.append("Circle");
+    if (!frame.empty()) {
+        out.push_back(' ');
+        out.append(frame);
+    }
+    char buf[32];
+    for (double v : {lon, lat, rad}) {
+        out.push_back(' ');
+        auto r = std::to_chars(buf, buf + sizeof(buf), v);
+        out.append(buf, r.ptr - buf);
+    }
+    return out;
 }
 
 }} // namespace lsst::sphgeom

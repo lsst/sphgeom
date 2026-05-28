@@ -40,11 +40,8 @@ from ._sphgeom import (
     Box,
     Circle,
     ConvexPolygon,
-    Ellipse,
-    IntersectionRegion,
     LonLat,
     Region,
-    UnionRegion,
     UnitVector3d,
 )
 
@@ -106,28 +103,6 @@ def _inf_to_lat(lat: float) -> float:
 def _inf_to_lon(lat: float) -> float:
     """Map longitude +Inf to +360 and -Inf to 0 degrees."""
     return _inf_to_limit(lat, 0.0, 360.0)
-
-
-def _ellipse_position_angle_degrees(ellipse) -> float:
-    """Compute the position angle (east of north, degrees) of the first
-    ellipse axis at its centre.
-
-    Returned value is normalised to ``[0, 360)``.
-    """
-    matrix = ellipse.getTransformMatrix()
-    axis = matrix.getRow(0)  # first axis direction (Vector3d)
-    center = LonLat(ellipse.getCenter())
-    lam = center.getLon().asRadians()
-    phi = center.getLat().asRadians()
-    sin_lam = math.sin(lam)
-    cos_lam = math.cos(lam)
-    sin_phi = math.sin(phi)
-    cos_phi = math.cos(phi)
-    # Local east and north 3-vectors at the centre.
-    east_dot = -sin_lam * axis.x() + cos_lam * axis.y()
-    north_dot = -sin_phi * cos_lam * axis.x() - sin_phi * sin_lam * axis.y() + cos_phi * axis.z()
-    pa_deg = math.degrees(math.atan2(east_dot, north_dot))
-    return pa_deg % 360.0
 
 
 @_continueClass
@@ -205,40 +180,6 @@ class Region:
         """
         raise NotImplementedError("This region can not be converted to an IVOA POS string.")
 
-    def to_ivoa_stcs(self, frame: str = "ICRS") -> str:
-        """Represent the region as an IVOA STC-S string.
-
-        Parameters
-        ----------
-        frame : `str`, optional
-            STC-S coordinate frame keyword (e.g. ``"ICRS"``, ``"FK5"``,
-            ``"GALACTIC"``). Emitted verbatim. Defaults to ``"ICRS"``.
-
-        Returns
-        -------
-        stcs : `str`
-            The region in STC-S format.
-
-        Notes
-        -----
-        See
-        http://www.ivoa.net/Documents/Notes/STC-S/20091030/NOTE-STC-S-1.33-20091030.html
-        for the format definition. Supported region types are ``Circle``,
-        ``Polygon``, ``Ellipse``, and the ``Union`` / ``Intersection``
-        compound operators. ``Box`` regions cannot be converted directly
-        because STC-S has no latitude-parallel range region.
-        """
-        return self._ivoa_stcs_body(frame)
-
-    def _ivoa_stcs_body(self, frame: str = "") -> str:
-        """Return the STC-S body of this region, optionally including a
-        frame keyword inserted after the shape keyword.
-
-        Used internally by compound regions, which pass an empty ``frame``
-        so the keyword is emitted only once at the outermost level.
-        """
-        raise NotImplementedError("This region can not be converted to an IVOA STC-S string.")
-
 
 @_continueClass
 class Circle:  # noqa: F811
@@ -251,16 +192,6 @@ class Circle:  # noqa: F811
         lat = center.getLat().asDegrees()
         rad = self.getOpeningAngle().asDegrees()
         return f"CIRCLE {lon} {lat} {rad}"
-
-    def _ivoa_stcs_body(self, frame: str = "") -> str:
-        # Docstring inherited.
-        center = LonLat(self.getCenter())
-        lon = center.getLon().asDegrees()
-        lat = center.getLat().asDegrees()
-        rad = self.getOpeningAngle().asDegrees()
-        if frame:
-            return f"Circle {frame} {lon} {lat} {rad}"
-        return f"Circle {lon} {lat} {rad}"
 
 
 @_continueClass
@@ -281,14 +212,6 @@ class Box:  # noqa: F811
         # that is any better than 0. -> 360.
         return f"RANGE {lon1} {lon2} {lat1} {lat2}"
 
-    def _ivoa_stcs_body(self, frame: str = "") -> str:
-        # Docstring inherited.
-        raise NotImplementedError(
-            "Box cannot be converted to STC-S directly because STC-S has no "
-            "latitude-parallel range region; build a Polygon (ConvexPolygon) "
-            "from this Box if an STC-S representation is required."
-        )
-
 
 @_continueClass
 class ConvexPolygon:  # noqa: F811
@@ -300,54 +223,3 @@ class ConvexPolygon:  # noqa: F811
         coord_strings = [f"{c.getLon().asDegrees()} {c.getLat().asDegrees()}" for c in coords]
 
         return f"POLYGON {' '.join(coord_strings)}"
-
-
-@_continueClass
-class Ellipse:  # noqa: F811
-    """An elliptical region on the unit sphere."""
-
-    def _ivoa_stcs_body(self, frame: str = "") -> str:
-        # Docstring inherited.
-        if self.isEmpty():
-            raise ValueError("Empty Ellipse has no STC-S representation.")
-        if self.isFull():
-            raise ValueError("Full Ellipse has no STC-S representation.")
-        if self.isGreatCircle():
-            raise ValueError("Great-circle Ellipse has no STC-S representation.")
-        center = LonLat(self.getCenter())
-        lon = center.getLon().asDegrees()
-        lat = center.getLat().asDegrees()
-        alpha = self.getAlpha().asDegrees()
-        beta = self.getBeta().asDegrees()
-        pa = _ellipse_position_angle_degrees(self)
-        if frame:
-            return f"Ellipse {frame} {lon} {lat} {alpha} {beta} {pa}"
-        return f"Ellipse {lon} {lat} {alpha} {beta} {pa}"
-
-
-@_continueClass
-class UnionRegion:  # noqa: F811
-    """A union of an arbitrary number of regions on the unit sphere."""
-
-    def _ivoa_stcs_body(self, frame: str = "") -> str:
-        # Docstring inherited.
-        # cloneOperand is used in preference to `for r in self` because the
-        # pybind11-generated iterator has ~10us of fixed overhead per call
-        # that dominates the cost of cloning small operands.
-        operands = [self.cloneOperand(i)._ivoa_stcs_body() for i in range(self.nOperands())]
-        if frame:
-            return f"Union {frame} ( {' '.join(operands)} )"
-        return f"Union ( {' '.join(operands)} )"
-
-
-@_continueClass
-class IntersectionRegion:  # noqa: F811
-    """An intersection of an arbitrary number of regions on the unit sphere."""
-
-    def _ivoa_stcs_body(self, frame: str = "") -> str:
-        # Docstring inherited.
-        # See UnionRegion._ivoa_stcs_body for why we use cloneOperand.
-        operands = [self.cloneOperand(i)._ivoa_stcs_body() for i in range(self.nOperands())]
-        if frame:
-            return f"Intersection {frame} ( {' '.join(operands)} )"
-        return f"Intersection ( {' '.join(operands)} )"

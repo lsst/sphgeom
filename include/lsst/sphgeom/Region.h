@@ -34,6 +34,7 @@
 /// \brief This file defines an interface for spherical regions.
 
 #include <memory>
+#include <stdexcept>
 #include <vector>
 #include <cstdint>
 #include <string>
@@ -52,6 +53,21 @@ class Circle;
 class ConvexPolygon;
 class Ellipse;
 class UnitVector3d;
+
+/// `IvoaStcsNotImplemented` signals that a region (or one of its operands)
+/// cannot be expressed as an IVOA STC-S string. The Python bindings
+/// translate this to ``NotImplementedError``. The default-visibility
+/// attribute is required so that RTTI for this class is shared across
+/// the library and binding shared objects (matters on macOS clang where
+/// the binding is built with ``-fvisibility=hidden``).
+class
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((visibility("default")))
+#endif
+IvoaStcsNotImplemented : public std::runtime_error {
+public:
+    using std::runtime_error::runtime_error;
+};
 
 /// `Region` is a minimal interface for 2-dimensional regions on the unit
 /// sphere. It provides three core pieces of functionality:
@@ -198,6 +214,23 @@ public:
     static std::vector<std::unique_ptr<Region>> getRegions(Region const &region);
     ///@}
 
+    /// `toIvoaStcs` returns this region as an IVOA STC-S string. When
+    /// ``frame`` is non-empty it is inserted immediately after the shape
+    /// keyword (e.g. ``"Circle ICRS ..."``); passing an empty string
+    /// yields the bare body, which compound regions use internally when
+    /// recursing into operands so the frame keyword appears only at the
+    /// outermost level.
+    ///
+    /// Calling this on a region that cannot be represented as STC-S
+    /// (e.g. `Box`, or a compound containing one) throws
+    /// `IvoaStcsNotImplemented`.
+    ///
+    /// This is the only public STC-S entry point; subclasses implement
+    /// the polymorphic body in a private virtual hook.
+    std::string toIvoaStcs(std::string const & frame = "ICRS") const {
+        return toIvoaStcsBody(frame);
+    }
+
 protected:
 
     // Default transformation of the region Relationship as returned from
@@ -215,6 +248,18 @@ protected:
         return TriState();
     }
 
+private:
+    /// Polymorphic STC-S body builder.  Inserts ``frame`` after the shape
+    /// keyword when non-empty.  Private so that user code goes through
+    /// ``toIvoaStcs``; subclasses override (still as private) and the
+    /// public NVI wrapper dispatches to the right override.  Compound
+    /// regions recurse via ``op.toIvoaStcs("")``, which forwards here
+    /// virtually.
+    virtual std::string toIvoaStcsBody(std::string const & frame = "") const {
+        throw IvoaStcsNotImplemented(
+            "This region can not be converted to an IVOA STC-S string."
+        );
+    }
 };
 
 }} // namespace lsst::sphgeom
