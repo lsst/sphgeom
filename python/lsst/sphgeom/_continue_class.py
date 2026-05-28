@@ -228,14 +228,14 @@ class Region:
         compound operators. ``Box`` regions cannot be converted directly
         because STC-S has no latitude-parallel range region.
         """
-        head, _, tail = self._ivoa_stcs_body().partition(" ")
-        return f"{head} {frame} {tail}"
+        return self._ivoa_stcs_body(frame)
 
-    def _ivoa_stcs_body(self) -> str:
-        """Return the STC-S body of this region without the frame keyword.
+    def _ivoa_stcs_body(self, frame: str = "") -> str:
+        """Return the STC-S body of this region, optionally including a
+        frame keyword inserted after the shape keyword.
 
-        Used internally by compound regions so the frame keyword is emitted
-        only once at the outermost level.
+        Used internally by compound regions, which pass an empty ``frame``
+        so the keyword is emitted only once at the outermost level.
         """
         raise NotImplementedError("This region can not be converted to an IVOA STC-S string.")
 
@@ -252,12 +252,14 @@ class Circle:  # noqa: F811
         rad = self.getOpeningAngle().asDegrees()
         return f"CIRCLE {lon} {lat} {rad}"
 
-    def _ivoa_stcs_body(self) -> str:
+    def _ivoa_stcs_body(self, frame: str = "") -> str:
         # Docstring inherited.
         center = LonLat(self.getCenter())
         lon = center.getLon().asDegrees()
         lat = center.getLat().asDegrees()
         rad = self.getOpeningAngle().asDegrees()
+        if frame:
+            return f"Circle {frame} {lon} {lat} {rad}"
         return f"Circle {lon} {lat} {rad}"
 
 
@@ -279,7 +281,7 @@ class Box:  # noqa: F811
         # that is any better than 0. -> 360.
         return f"RANGE {lon1} {lon2} {lat1} {lat2}"
 
-    def _ivoa_stcs_body(self) -> str:
+    def _ivoa_stcs_body(self, frame: str = "") -> str:
         # Docstring inherited.
         raise NotImplementedError(
             "Box cannot be converted to STC-S directly because STC-S has no "
@@ -304,7 +306,7 @@ class ConvexPolygon:  # noqa: F811
 class Ellipse:  # noqa: F811
     """An elliptical region on the unit sphere."""
 
-    def _ivoa_stcs_body(self) -> str:
+    def _ivoa_stcs_body(self, frame: str = "") -> str:
         # Docstring inherited.
         if self.isEmpty():
             raise ValueError("Empty Ellipse has no STC-S representation.")
@@ -318,6 +320,8 @@ class Ellipse:  # noqa: F811
         alpha = self.getAlpha().asDegrees()
         beta = self.getBeta().asDegrees()
         pa = _ellipse_position_angle_degrees(self)
+        if frame:
+            return f"Ellipse {frame} {lon} {lat} {alpha} {beta} {pa}"
         return f"Ellipse {lon} {lat} {alpha} {beta} {pa}"
 
 
@@ -325,9 +329,14 @@ class Ellipse:  # noqa: F811
 class UnionRegion:  # noqa: F811
     """A union of an arbitrary number of regions on the unit sphere."""
 
-    def _ivoa_stcs_body(self) -> str:
+    def _ivoa_stcs_body(self, frame: str = "") -> str:
         # Docstring inherited.
+        # cloneOperand is used in preference to `for r in self` because the
+        # pybind11-generated iterator has ~10us of fixed overhead per call
+        # that dominates the cost of cloning small operands.
         operands = [self.cloneOperand(i)._ivoa_stcs_body() for i in range(self.nOperands())]
+        if frame:
+            return f"Union {frame} ( {' '.join(operands)} )"
         return f"Union ( {' '.join(operands)} )"
 
 
@@ -335,7 +344,10 @@ class UnionRegion:  # noqa: F811
 class IntersectionRegion:  # noqa: F811
     """An intersection of an arbitrary number of regions on the unit sphere."""
 
-    def _ivoa_stcs_body(self) -> str:
+    def _ivoa_stcs_body(self, frame: str = "") -> str:
         # Docstring inherited.
+        # See UnionRegion._ivoa_stcs_body for why we use cloneOperand.
         operands = [self.cloneOperand(i)._ivoa_stcs_body() for i in range(self.nOperands())]
+        if frame:
+            return f"Intersection {frame} ( {' '.join(operands)} )"
         return f"Intersection ( {' '.join(operands)} )"

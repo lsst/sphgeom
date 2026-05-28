@@ -109,14 +109,16 @@ public:
     }
 
     /// `toIvoaStcsBody` returns this polygon as the body of an IVOA STC-S
-    /// string (the form without a frame keyword), e.g.
-    /// `"Polygon 12.0 34.0 14.0 34.0 ..."`. Used by `Region.to_ivoa_stcs`
-    /// (Python) which inserts the frame keyword after the shape name.
+    /// string, optionally with a frame keyword inserted after the shape
+    /// name, e.g. `"Polygon ICRS 12.0 34.0 14.0 34.0 ..."` (or
+    /// `"Polygon 12.0 34.0 14.0 34.0 ..."` when `frame` is empty).
+    /// Used by `Region.to_ivoa_stcs` (Python); compound regions pass an
+    /// empty `frame` so the keyword is emitted only at the outermost level.
     ///
     /// Floating-point coordinates are formatted with `std::to_chars`
     /// (shortest round-trip), so every emitted number parses back to the
     /// exact same `double` it was emitted from.
-    std::string toIvoaStcsBody() const;
+    std::string toIvoaStcsBody(std::string const & frame = "") const;
 
     /// The centroid of a polygon is its center of mass projected onto
     /// S², assuming a uniform mass distribution over the polygon surface.

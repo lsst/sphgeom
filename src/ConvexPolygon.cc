@@ -311,13 +311,18 @@ UnitVector3d ConvexPolygon::getCentroid() const {
     return detail::centroid(_vertices.begin(), _vertices.end());
 }
 
-std::string ConvexPolygon::toIvoaStcsBody() const {
-    // Reserve a conservative upper bound: prefix + ~24 chars per number,
-    // two numbers per vertex, plus separators. std::to_chars never
-    // produces more than ~24 chars for a double in shortest-round-trip mode.
+std::string ConvexPolygon::toIvoaStcsBody(std::string const & frame) const {
+    // Reserve a conservative upper bound: prefix + optional frame + ~24
+    // chars per number, two numbers per vertex, plus separators.
+    // std::to_chars never produces more than ~24 chars for a double in
+    // shortest-round-trip mode.
     std::string out;
-    out.reserve(8 + _vertices.size() * 52);
+    out.reserve(8 + frame.size() + 1 + _vertices.size() * 52);
     out.append("Polygon");
+    if (!frame.empty()) {
+        out.push_back(' ');
+        out.append(frame);
+    }
     char buf[32];
     for (auto const & v : _vertices) {
         LonLat const ll(v);

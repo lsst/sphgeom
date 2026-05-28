@@ -62,7 +62,7 @@ void defineClass(py::classh<ConvexPolygon, Region> &cls) {
     cls.def("__ne__", &ConvexPolygon::operator!=, py::is_operator());
 
     cls.def("getVertices", &ConvexPolygon::getVertices);
-    cls.def("_ivoa_stcs_body", &ConvexPolygon::toIvoaStcsBody);
+    cls.def("_ivoa_stcs_body", &ConvexPolygon::toIvoaStcsBody, "frame"_a = "");
     cls.def("getCentroid", &ConvexPolygon::getCentroid);
 
     // Note that much of the Region interface has already been wrapped. Here are bits that have not:
