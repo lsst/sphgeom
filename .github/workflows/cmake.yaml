@@ -82,7 +82,7 @@ jobs:
             ${{github.workspace}}/build
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           files: ./build/python-coverage.xml,./build/cpp-coverage.xml
           disable_search: true
@@ -91,7 +91,7 @@ jobs:
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           files: ./build/junit.xml
           disable_search: true
