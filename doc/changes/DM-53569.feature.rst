@@ -1,3 +1,0 @@
-Added ``Region.to_ivoa_stcs(frame="ICRS")`` for serialising regions as IVOA STC-S strings.
-Supports ``Circle``, ``ConvexPolygon``, ``Ellipse``, ``UnionRegion``, and ``IntersectionRegion``.
-``Box`` raises `NotImplementedError` because STC-S has no latitude-parallel range region.
