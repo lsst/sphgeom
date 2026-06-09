@@ -32,8 +32,10 @@
 
 #include "lsst/sphgeom/ConvexPolygon.h"
 
+#include <charconv>
 #include <ostream>
 #include <stdexcept>
+#include <string>
 
 #include "lsst/sphgeom/codec.h"
 #include "lsst/sphgeom/orientation.h"
@@ -307,6 +309,33 @@ bool ConvexPolygon::isEmpty() const {
 
 UnitVector3d ConvexPolygon::getCentroid() const {
     return detail::centroid(_vertices.begin(), _vertices.end());
+}
+
+std::string ConvexPolygon::toIvoaStcsBody(std::string const & frame) const {
+    // Reserve a conservative upper bound: prefix + optional frame + ~24
+    // chars per number, two numbers per vertex, plus separators.
+    // std::to_chars never produces more than ~24 chars for a double in
+    // shortest-round-trip mode.
+    std::string out;
+    out.reserve(8 + frame.size() + 1 + _vertices.size() * 52);
+    out.append("Polygon");
+    if (!frame.empty()) {
+        out.push_back(' ');
+        out.append(frame);
+    }
+    char buf[32];
+    for (auto const & v : _vertices) {
+        LonLat const ll(v);
+        double const lon = ll.getLon().asDegrees();
+        double const lat = ll.getLat().asDegrees();
+        out.push_back(' ');
+        auto r1 = std::to_chars(buf, buf + sizeof(buf), lon);
+        out.append(buf, r1.ptr - buf);
+        out.push_back(' ');
+        auto r2 = std::to_chars(buf, buf + sizeof(buf), lat);
+        out.append(buf, r2.ptr - buf);
+    }
+    return out;
 }
 
 Circle ConvexPolygon::getBoundingCircle() const {

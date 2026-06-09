@@ -1,6 +1,9 @@
 FUNCTION(sphgeom_tests)
     FOREACH(TEST IN ITEMS ${ARGV})
         add_executable(${TEST} ${TEST}.cc)
+        target_compile_features(${TEST} PRIVATE
+            cxx_std_17
+        )
         target_link_libraries(${TEST} PUBLIC sphgeom)
         add_test(NAME ${TEST} COMMAND ${TEST})
     ENDFOREACH()

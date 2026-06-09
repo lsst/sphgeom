@@ -183,6 +183,12 @@ private:
 
     ConvexPolygon() : _vertices() {}
 
+    /// Polymorphic STC-S body builder; floating-point coordinates are
+    /// formatted with `std::to_chars` (shortest round-trip) so every
+    /// emitted number parses back to the exact same `double` it was
+    /// emitted from.  Called via `Region::toIvoaStcs`.
+    std::string toIvoaStcsBody(std::string const & frame = "") const override;
+
     std::vector<UnitVector3d> _vertices;
 };
 

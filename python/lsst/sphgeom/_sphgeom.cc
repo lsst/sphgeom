@@ -66,6 +66,17 @@ void defineUtils(py::module&);
 namespace {
 
 PYBIND11_MODULE(_sphgeom, mod) {
+    // Translate IvoaStcsNotImplemented (thrown from C++ STC-S builders)
+    // to Python's built-in NotImplementedError so callers see a familiar
+    // exception type.
+    py::register_exception_translator([](std::exception_ptr p) {
+        try {
+            if (p) std::rethrow_exception(p);
+        } catch (lsst::sphgeom::IvoaStcsNotImplemented const & e) {
+            PyErr_SetString(PyExc_NotImplementedError, e.what());
+        }
+    });
+
     // Create all Python class instances up front, then define them.
     //
     // This results in docstrings containing only Python type names, even

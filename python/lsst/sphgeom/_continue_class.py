@@ -35,7 +35,15 @@ import math
 import sys
 import typing
 
-from ._sphgeom import Angle, Box, Circle, ConvexPolygon, LonLat, Region, UnitVector3d
+from ._sphgeom import (
+    Angle,
+    Box,
+    Circle,
+    ConvexPolygon,
+    LonLat,
+    Region,
+    UnitVector3d,
+)
 
 # Copy and paste from lsst.utils.wrappers:
 # * INTRINSIC_SPECIAL_ATTRIBUTES

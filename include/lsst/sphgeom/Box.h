@@ -360,6 +360,9 @@ public:
     ///@}
 
 private:
+    /// Box has no STC-S form; this always throws `IvoaStcsNotImplemented`.
+    std::string toIvoaStcsBody(std::string const & frame = "") const override;
+
     static constexpr size_t ENCODED_SIZE = 33;
 
     void _enforceInvariants() {

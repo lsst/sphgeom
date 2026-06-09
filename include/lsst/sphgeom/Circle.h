@@ -271,6 +271,8 @@ public:
     ///@}
 
 private:
+    std::string toIvoaStcsBody(std::string const & frame = "") const override;
+
     static constexpr size_t ENCODED_SIZE = 41;
 
     UnitVector3d _center;

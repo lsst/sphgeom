@@ -31,6 +31,10 @@ pybind11_add_module(_sphgeom
     _vector3d.cc
 )
 
+target_compile_features(_sphgeom PRIVATE
+    cxx_std_17
+)
+
 target_link_libraries(_sphgeom PUBLIC sphgeom)
 
 install(TARGETS _sphgeom DESTINATION ${CMAKE_INSTALL_PREFIX}/python/lsst/sphgeom)

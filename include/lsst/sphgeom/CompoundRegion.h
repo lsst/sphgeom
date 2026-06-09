@@ -149,6 +149,8 @@ public:
     }
     ///@}
 
+private:
+    std::string toIvoaStcsBody(std::string const & frame = "") const override;
 };
 
 /// IntersectionRegion is a lazy point-set inersection of its operands.
@@ -189,6 +191,8 @@ public:
     }
     ///@}
 
+private:
+    std::string toIvoaStcsBody(std::string const & frame = "") const override;
 };
 
 }  // namespace sphgeom

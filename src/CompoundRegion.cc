@@ -33,8 +33,10 @@
 #include "lsst/sphgeom/CompoundRegion.h"
 
 #include <algorithm>
+#include <cstring>
 #include <iostream>
 #include <stdexcept>
+#include <string>
 
 #include "lsst/sphgeom/Box.h"
 #include "lsst/sphgeom/Box3d.h"
@@ -393,6 +395,51 @@ TriState IntersectionRegion::overlaps(ConvexPolygon const &p) const {
 
 TriState IntersectionRegion::overlaps(Ellipse const &e) const {
     return overlaps(static_cast<Region const&>(e));
+}
+
+namespace {
+
+// Build the STC-S body for a CompoundRegion with the given keyword. Inner
+// operands are emitted with an empty frame so the keyword appears only at
+// the outermost level; `Region::toIvoaStcs("")` is the public entry point
+// that yields the bare body via virtual dispatch.
+std::string _compoundBody(
+    char const * keyword,
+    std::vector<std::unique_ptr<Region>> const & operands,
+    std::string const & frame
+) {
+    std::vector<std::string> bodies;
+    bodies.reserve(operands.size());
+    std::size_t joined = 0;
+    for (auto const & op : operands) {
+        bodies.push_back(op->toIvoaStcs(""));
+        joined += bodies.back().size() + 1;  // body + separator
+    }
+    std::string out;
+    std::size_t const head = std::strlen(keyword);
+    out.reserve(head + frame.size() + 5 + joined);
+    out.append(keyword);
+    if (!frame.empty()) {
+        out.push_back(' ');
+        out.append(frame);
+    }
+    out.append(" (");
+    for (auto const & b : bodies) {
+        out.push_back(' ');
+        out.append(b);
+    }
+    out.append(" )");
+    return out;
+}
+
+}  // anonymous namespace
+
+std::string UnionRegion::toIvoaStcsBody(std::string const & frame) const {
+    return _compoundBody("Union", operands(), frame);
+}
+
+std::string IntersectionRegion::toIvoaStcsBody(std::string const & frame) const {
+    return _compoundBody("Intersection", operands(), frame);
 }
 
 }  // namespace sphgeom
