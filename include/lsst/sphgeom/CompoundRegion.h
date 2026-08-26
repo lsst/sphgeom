@@ -76,7 +76,9 @@ public:
     }
 
     // Region interface.
-    virtual Relationship relate(Region const &r) const = 0; // still unimplemented; avoid shadowing
+    // Redeclared as pure virtual so that the overloads below do not hide
+    // it, and so that subclasses are still required to implement it.
+    Relationship relate(Region const &r) const override = 0;
     Relationship relate(Box const &b) const override;
     Relationship relate(Circle const &c) const override;
     Relationship relate(ConvexPolygon const &p) const override;
