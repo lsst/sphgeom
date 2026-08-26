@@ -1,6 +1,14 @@
 version: 2
 updates:
+  # Each ecosystem batches all its version updates into a single pull request.
+  # Security updates are not grouped and still open immediately.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    cooldown:
+      default-days: 7
+    groups:
+      monthly-batch:
+        patterns:
+          - "*"
