@@ -1,0 +1,3 @@
+Fixed the macOS build of the STC-S writers.
+libc++ implements the floating-point ``std::to_chars`` overloads in the dylib and marks them unavailable before macOS 13.3, so compiling against a Python built for an older deployment target -- which is what the PyPI wheel builds and many source installs do -- failed.
+Where those overloads are unavailable the numbers are now formatted by an internal fallback that reproduces the ``std::to_chars`` output exactly, so the generated STC-S strings are unchanged.
