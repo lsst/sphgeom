@@ -25,6 +25,7 @@ target_sources(sphgeom PRIVATE
     ConvexPolygon.cc
     ConvexPolygonImpl.h
     Ellipse.cc
+    floatFormat.cc
     HtmPixelization.cc
     Interval1d.cc
     LonLat.cc

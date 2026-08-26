@@ -32,7 +32,7 @@ jobs:
       - name: Build and install
         run: |
           python -m pip install --upgrade pip setuptools uv
-          uv pip install --system .[yaml,test]
+          uv pip install --system '.[yaml,test]'
 
       - name: Run tests
         run: pytest -r a -v
@@ -79,7 +79,7 @@ jobs:
         id: check
         run: |
           # Get SHA hashes for all weekly tags
-          weekly_sha=$(git tag -l 'w.*' | while read tag; do
+          weekly_sha=$(git tag -l 'w.*' | while read -r tag; do
             git rev-list -n 1 "${tag}"
           done)
           echo "Weekly tag SHA ${weekly_sha}"

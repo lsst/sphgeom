@@ -32,12 +32,12 @@
 
 #include "lsst/sphgeom/ConvexPolygon.h"
 
-#include <charconv>
 #include <ostream>
 #include <stdexcept>
 #include <string>
 
 #include "lsst/sphgeom/codec.h"
+#include "lsst/sphgeom/floatFormat.h"
 #include "lsst/sphgeom/orientation.h"
 
 #include "ConvexPolygonImpl.h"
@@ -312,28 +312,23 @@ UnitVector3d ConvexPolygon::getCentroid() const {
 }
 
 std::string ConvexPolygon::toIvoaStcsBody(std::string const & frame) const {
-    // Reserve a conservative upper bound: prefix + optional frame + ~24
-    // chars per number, two numbers per vertex, plus separators.
-    // std::to_chars never produces more than ~24 chars for a double in
-    // shortest-round-trip mode.
+    // Reserve a conservative upper bound: prefix + optional frame + the
+    // maximum number of characters per number, two numbers per vertex, plus
+    // separators.
     std::string out;
-    out.reserve(8 + frame.size() + 1 + _vertices.size() * 52);
+    out.reserve(8 + frame.size() + 1 +
+                _vertices.size() * 2 * (MAX_SHORTEST_DOUBLE_CHARS + 1));
     out.append("Polygon");
     if (!frame.empty()) {
         out.push_back(' ');
         out.append(frame);
     }
-    char buf[32];
     for (auto const & v : _vertices) {
         LonLat const ll(v);
-        double const lon = ll.getLon().asDegrees();
-        double const lat = ll.getLat().asDegrees();
         out.push_back(' ');
-        auto r1 = std::to_chars(buf, buf + sizeof(buf), lon);
-        out.append(buf, r1.ptr - buf);
+        appendShortestDouble(out, ll.getLon().asDegrees());
         out.push_back(' ');
-        auto r2 = std::to_chars(buf, buf + sizeof(buf), lat);
-        out.append(buf, r2.ptr - buf);
+        appendShortestDouble(out, ll.getLat().asDegrees());
     }
     return out;
 }
