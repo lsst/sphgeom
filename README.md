@@ -79,6 +79,11 @@ properly for the distribution.  The main purpose for now is to allow
 other packages to pip install from the GitHub URL in their CI systems
 where sphgeom is a dependency.
 
+Installing with conda
+---------------------
+
+This package is also available on the community [conda-forge repository](https://anaconda.org/conda-forge/lsst-sphgeom). To install it in a conda environment execute `conda install --channel=conda-forge lsst-sphgeom`.
+
 See Also
 --------
 
