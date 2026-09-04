@@ -75,7 +75,7 @@ void defineClass(py::classh<LonLat> &cls) {
         return py::str("LonLat.fromRadians({!r}, {!r})")
                 .format(self.getLon().asRadians(), self.getLat().asRadians());
     });
-    cls.def("__reduce__", [cls](LonLat const &self) {
+    cls.def("__reduce__", [cls](LonLat const &self) -> py::tuple {
         return py::make_tuple(cls,
                               py::make_tuple(self.getLon(), self.getLat()));
     });

@@ -164,7 +164,7 @@ void defineInterval(PyClass& cls) {
         return instance;
     });
 
-    cls.def("__reduce__", [cls](Class const &self) {
+    cls.def("__reduce__", [cls](Class const &self) -> py::tuple {
         return py::make_tuple(cls, py::make_tuple(self.getA(), self.getB()));
     });
 }

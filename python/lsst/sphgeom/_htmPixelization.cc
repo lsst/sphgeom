@@ -62,7 +62,7 @@ void defineClass(py::classh<HtmPixelization, Pixelization> &cls) {
     cls.def("__repr__", [](HtmPixelization const &self) {
         return py::str("HtmPixelization({!s})").format(self.getLevel());
     });
-    cls.def("__reduce__", [cls](HtmPixelization const &self) {
+    cls.def("__reduce__", [cls](HtmPixelization const &self) -> py::tuple {
         return py::make_tuple(cls, py::make_tuple(self.getLevel()));
     });
 }

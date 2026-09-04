@@ -61,7 +61,7 @@ void defineClass(py::classh<Q3cPixelization, Pixelization> &cls) {
     cls.def("__repr__", [](Q3cPixelization const &self) {
         return py::str("Q3cPixelization({!s})").format(self.getLevel());
     });
-    cls.def("__reduce__", [cls](Q3cPixelization const &self) {
+    cls.def("__reduce__", [cls](Q3cPixelization const &self) -> py::tuple {
         return py::make_tuple(cls, py::make_tuple(self.getLevel()));
     });
 }
