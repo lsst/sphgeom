@@ -27,6 +27,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "pybind11/pybind11.h"
+#include "pybind11/stl.h"
 
 #include "lsst/sphgeom/python.h"
 
