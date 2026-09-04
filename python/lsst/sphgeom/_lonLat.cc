@@ -52,7 +52,7 @@ void defineClass(py::classh<LonLat> &cls) {
     cls.def(py::init<Vector3d const &>(), "vector"_a);
 
     cls.def("__eq__", &LonLat::operator==, py::is_operator());
-    cls.def("__nq__", &LonLat::operator!=, py::is_operator());
+    cls.def("__ne__", &LonLat::operator!=, py::is_operator());
 
     cls.def("getLon", &LonLat::getLon);
     cls.def("getLat", &LonLat::getLat);
