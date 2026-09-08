@@ -82,7 +82,7 @@ void defineClass(py::classh<Chunker> &cls) {
     cls.def("__str__", &toString);
     cls.def("__repr__", &toString);
 
-    cls.def("__reduce__", [cls](Chunker const &self) {
+    cls.def("__reduce__", [cls](Chunker const &self) -> py::tuple {
         return py::make_tuple(cls,
                               py::make_tuple(self.getNumStripes(),
                                              self.getNumSubStripesPerStripe()));

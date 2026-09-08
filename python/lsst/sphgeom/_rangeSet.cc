@@ -215,7 +215,7 @@ void defineClass(py::classh<RangeSet> &cls) {
         return py::str("RangeSet({!s})").format(ranges(self));
     });
 
-    cls.def("__reduce__", [cls](RangeSet const &self) {
+    cls.def("__reduce__", [cls](RangeSet const &self) -> py::tuple {
         return py::make_tuple(cls, py::make_tuple(ranges(self)));
     });
 }
