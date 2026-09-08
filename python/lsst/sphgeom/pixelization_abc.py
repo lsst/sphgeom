@@ -47,7 +47,7 @@ class PixelizationABC(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def pixel(self, i) -> Region:
+    def pixel(self, i: int) -> Region:
         """Return the spherical region corresponding to the pixel index ``i``.
 
         This region will contain all unit vectors v with ``index(v) == i``.
@@ -103,7 +103,7 @@ class PixelizationABC(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def envelope(self, region: Region, maxRanges: int = 0):
+    def envelope(self, region: Region, maxRanges: int = 0) -> RangeSet:
         """Return the indexes of the pixels intersecting the spherical region.
 
         The ``maxRanges`` parameter can be used to limit both these costs -
@@ -128,7 +128,7 @@ class PixelizationABC(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def interior(self, region: Region, maxRanges: int = 0):
+    def interior(self, region: Region, maxRanges: int = 0) -> RangeSet:
         """Return the indexes of the pixels within the spherical region.
 
         The ``maxRanges`` argument is analogous to the identically named
