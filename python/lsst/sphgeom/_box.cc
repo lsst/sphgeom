@@ -102,7 +102,7 @@ void defineClass(py::classh<Box, Region> &cls) {
     cls.def("contains", (bool (Box::*)(LonLat const &) const) & Box::contains);
     cls.def("contains", (bool (Box::*)(Box const &) const) & Box::contains);
     // Rewrap these base class methods since there are overloads in this subclass
-    cls.def("contains", (bool (Region::*)(Region const &) const) & Region::contains, "region"_a);
+    cls.def("contains", (bool (Box::*)(Region const &) const) & Box::contains, "region"_a);
     cls.def("contains",
             (bool (Box::*)(UnitVector3d const &) const) & Box::contains);
     cls.def("contains", py::vectorize((bool (Box::*)(double, double, double) const)&Box::contains),
