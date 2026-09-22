@@ -82,6 +82,7 @@ void defineClass(py::classh<Circle, Region> &cls) {
     cls.def("contains",
             (bool (Circle::*)(Circle const &) const) & Circle::contains);
     // Rewrap these base class methods since there are overloads in this subclass
+    cls.def("contains", (bool (Region::*)(Region const &) const) & Region::contains, "region"_a);
     cls.def("contains",
             (bool (Circle::*)(UnitVector3d const &) const) & Circle::contains);
     cls.def("contains", py::vectorize((bool (Circle::*)(double, double, double) const)&Circle::contains),

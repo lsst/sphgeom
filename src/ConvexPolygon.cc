@@ -349,10 +349,6 @@ bool ConvexPolygon::contains(UnitVector3d const & v) const {
     return detail::contains(_vertices.begin(), _vertices.end(), v);
 }
 
-bool ConvexPolygon::contains(Region const & r) const {
-    return (relate(r) & CONTAINS) != 0;
-}
-
 bool ConvexPolygon::isDisjointFrom(Region const & r) const {
     return (relate(r) & DISJOINT) != 0;
 }

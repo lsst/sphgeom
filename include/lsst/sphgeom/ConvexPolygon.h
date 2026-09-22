@@ -127,7 +127,6 @@ public:
     /// `contains` returns true if the intersection of this convex polygon and x
     /// is equal to x.
     bool contains(UnitVector3d const & v) const override;
-    bool contains(Region const & r) const;
     ///@}
 
     using Region::contains;
