@@ -132,6 +132,21 @@ public:
     /// and latitude coordinates (in radians) is inside this region.
     bool contains(double lon, double lat) const;
 
+    /// `contains` tests whether all points in the given region are inside
+    /// this region.
+    ///
+    /// It is implemented in terms of `relate` and inherits its conservative
+    /// semantics: a true return value is conclusive, but a false one only
+    /// means that containment could not be established. How readily that
+    /// happens depends on the dynamic types of both regions, since `relate`
+    /// may substitute a simplified bounding region for either side. `Ellipse`
+    /// relates via its bounding circle and so never reports containment at
+    /// all, even of itself.
+    ///
+    /// Call `relate` directly when "does not contain" has to be
+    /// distinguished from "could not tell".
+    virtual bool contains(Region const &) const;
+
     ///@{
     /// `relate` computes the spatial relationships between this region A and
     /// another region B. The return value S is a bitset with the following
