@@ -33,7 +33,8 @@ from typing import ClassVar, overload
 import numpy
 import numpy.typing
 
-from .pixelization_abc import PixelizationABC
+from ._healpixPixelization import HealpixPixelization as HealpixPixelization
+from .pixelization_abc import PixelizationABC as PixelizationABC
 
 # _relationship.cc
 CONTAINS: int
