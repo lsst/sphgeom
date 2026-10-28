@@ -1,0 +1,11 @@
+prefix=${pcfiledir}/../..
+includedir=${prefix}/include
+libdir=${prefix}/lib
+doxygen_tag=${prefix}/doc/sphgeom.tag
+lsst_build_requires=pybind11 python3
+
+Name: lsst_sphgeom
+Description: LSST Science Pipelines spherical geometry
+Version: @VERSION@
+Cflags: -I${includedir}
+Libs: -L${libdir} -lsphgeom
