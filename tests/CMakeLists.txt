@@ -19,6 +19,7 @@ sphgeom_tests(
     testConvexPolygon
     testCurve
     testEllipse
+    testFloatFormat
     testHtmPixelization
     testInterval1d
     testLonLat

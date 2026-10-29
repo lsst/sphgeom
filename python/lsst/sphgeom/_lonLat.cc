@@ -52,7 +52,7 @@ void defineClass(py::classh<LonLat> &cls) {
     cls.def(py::init<Vector3d const &>(), "vector"_a);
 
     cls.def("__eq__", &LonLat::operator==, py::is_operator());
-    cls.def("__nq__", &LonLat::operator!=, py::is_operator());
+    cls.def("__ne__", &LonLat::operator!=, py::is_operator());
 
     cls.def("getLon", &LonLat::getLon);
     cls.def("getLat", &LonLat::getLat);
@@ -75,7 +75,7 @@ void defineClass(py::classh<LonLat> &cls) {
         return py::str("LonLat.fromRadians({!r}, {!r})")
                 .format(self.getLon().asRadians(), self.getLat().asRadians());
     });
-    cls.def("__reduce__", [cls](LonLat const &self) {
+    cls.def("__reduce__", [cls](LonLat const &self) -> py::tuple {
         return py::make_tuple(cls,
                               py::make_tuple(self.getLon(), self.getLat()));
     });

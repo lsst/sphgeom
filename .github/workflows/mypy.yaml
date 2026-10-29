@@ -1,0 +1,14 @@
+name: Run mypy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  call-workflow:
+    uses: lsst/rubin_workflows/.github/workflows/mypy.yaml@main
+    with:
+      # https://github.com/python/mypy/issues/17002
+      mypy_package: mypy!=1.9.0

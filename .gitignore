@@ -29,6 +29,7 @@ tests/testCircle
 tests/testConvexPolygon
 tests/testCurve
 tests/testEllipse
+tests/testFloatFormat
 tests/testHtmPixelization
 tests/testInterval1d
 tests/testLonLat

@@ -67,7 +67,7 @@ void defineClass(py::classh<ConvexPolygon, Region> &cls) {
     // Note that much of the Region interface has already been wrapped. Here are bits that have not:
     // (include overloads from Region that would otherwise be shadowed).
     cls.def("contains", py::overload_cast<UnitVector3d const &>(&ConvexPolygon::contains, py::const_));
-    cls.def("contains", py::overload_cast<Region const &>(&ConvexPolygon::contains, py::const_));
+    cls.def("contains", py::overload_cast<Region const &>(&Region::contains, py::const_));
     cls.def("contains",
             py::vectorize((bool (ConvexPolygon::*)(double, double, double) const)&ConvexPolygon::contains),
             "x"_a, "y"_a, "z"_a);

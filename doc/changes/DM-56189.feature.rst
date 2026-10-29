@@ -1,0 +1,5 @@
+Added a ``contains(Region)`` overload to the ``Region`` base class, in both C++ and Python.
+Previously only ``ConvexPolygon`` provided region containment, so code holding a region through a ``Region`` handle had to fall back to ``relate()``.
+The new method is implemented in terms of ``relate()`` and so shares its conservative semantics: a true result is conclusive, but a false one only means that containment could not be established.
+``Ellipse`` relates via its bounding circle and so never reports containment at all; use ``relate()`` directly where that distinction matters.
+``Box`` and ``Circle`` rewrap the new overload explicitly because their own ``contains`` overloads hide the ones bound on ``Region``.

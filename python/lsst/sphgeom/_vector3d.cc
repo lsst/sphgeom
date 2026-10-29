@@ -96,7 +96,7 @@ void defineClass(py::classh<Vector3d> &cls) {
                 .format(self.x(), self.y(), self.z());
     });
 
-    cls.def("__reduce__", [cls](Vector3d const &self) {
+    cls.def("__reduce__", [cls](Vector3d const &self) -> py::tuple {
         return py::make_tuple(cls,
                               py::make_tuple(self.x(), self.y(), self.z()));
     });

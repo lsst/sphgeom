@@ -37,10 +37,12 @@ import typing
 
 from ._sphgeom import (
     Angle,
+    AngleInterval,
     Box,
     Circle,
     ConvexPolygon,
     LonLat,
+    NormalizedAngleInterval,
     Region,
     UnitVector3d,
 )
@@ -72,7 +74,7 @@ def _isAttributeSafeToTransfer(name: str, value: typing.Any) -> bool:
     return True
 
 
-def _continueClass(cls):
+def _continueClass(cls: type) -> type:
     orig = getattr(sys.modules[cls.__module__], cls.__name__)
     for name in dir(cls):
         # Common descriptors like classmethod and staticmethod can only be
@@ -106,7 +108,7 @@ def _inf_to_lon(lat: float) -> float:
 
 
 @_continueClass
-class Region:
+class Region:  # type: ignore[no-redef]
     """A minimal interface for 2-dimensional regions on the unit sphere."""
 
     @classmethod
@@ -135,8 +137,8 @@ class Region:
 
         Units are degrees in all coordinates.
         """
-        shape, *coordinates = pos.split()
-        coordinates = tuple(float(c) for c in coordinates)
+        shape, *_coordinates = pos.split()
+        coordinates = tuple(float(c) for c in _coordinates)
         n_floats = len(coordinates)
         if shape == "CIRCLE":
             if n_floats != 3:
@@ -182,26 +184,26 @@ class Region:
 
 
 @_continueClass
-class Circle:  # noqa: F811
+class Circle:  # type: ignore[no-redef] # noqa: F811
     """A circular region on the unit sphere that contains its boundary."""
 
     def to_ivoa_pos(self) -> str:
         # Docstring inherited.
-        center = LonLat(self.getCenter())
+        center = LonLat(self.getCenter())  # type: ignore[attr-defined]
         lon = center.getLon().asDegrees()
         lat = center.getLat().asDegrees()
-        rad = self.getOpeningAngle().asDegrees()
+        rad = self.getOpeningAngle().asDegrees()  # type: ignore[attr-defined]
         return f"CIRCLE {lon} {lat} {rad}"
 
 
 @_continueClass
-class Box:  # noqa: F811
+class Box:  # type: ignore[no-redef] # noqa: F811
     """A rectangle in spherical coordinate space that contains its boundary."""
 
     def to_ivoa_pos(self) -> str:
         # Docstring inherited.
-        lon_range = self.getLon()
-        lat_range = self.getLat()
+        lon_range: NormalizedAngleInterval = self.getLon()  # type: ignore[attr-defined]
+        lat_range: AngleInterval = self.getLat()  # type: ignore[attr-defined]
 
         lon1 = lon_range.getA().asDegrees()
         lon2 = lon_range.getB().asDegrees()
@@ -214,12 +216,12 @@ class Box:  # noqa: F811
 
 
 @_continueClass
-class ConvexPolygon:  # noqa: F811
+class ConvexPolygon:  # type: ignore[no-redef] # noqa: F811
     """A rectangle in spherical coordinate space that contains its boundary."""
 
     def to_ivoa_pos(self) -> str:
         # Docstring inherited.
-        coords = (LonLat(v) for v in self.getVertices())
+        coords = (LonLat(v) for v in self.getVertices())  # type: ignore[attr-defined]
         coord_strings = [f"{c.getLon().asDegrees()} {c.getLat().asDegrees()}" for c in coords]
 
         return f"POLYGON {' '.join(coord_strings)}"

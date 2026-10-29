@@ -32,7 +32,6 @@
 
 #include "lsst/sphgeom/Ellipse.h"
 
-#include <charconv>
 #include <cmath>
 #include <ostream>
 #include <stdexcept>
@@ -44,6 +43,7 @@
 #include "lsst/sphgeom/ConvexPolygon.h"
 #include "lsst/sphgeom/LonLat.h"
 #include "lsst/sphgeom/codec.h"
+#include "lsst/sphgeom/floatFormat.h"
 
 
 namespace lsst {
@@ -471,11 +471,9 @@ std::string Ellipse::toIvoaStcsBody(std::string const & frame) const {
         out.push_back(' ');
         out.append(frame);
     }
-    char buf[32];
     for (double v : {lon, lat, alpha, beta, pa}) {
         out.push_back(' ');
-        auto r = std::to_chars(buf, buf + sizeof(buf), v);
-        out.append(buf, r.ptr - buf);
+        appendShortestDouble(out, v);
     }
     return out;
 }

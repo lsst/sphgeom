@@ -291,6 +291,8 @@ public:
 
     bool contains(UnitVector3d const &v) const override;
 
+    // The inherited contains(Region const &) always returns false, because
+    // the relate() overloads below mask out CONTAINS.
     using Region::contains;
 
     Relationship relate(Region const & r) const override {

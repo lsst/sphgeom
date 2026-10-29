@@ -120,7 +120,7 @@ void defineClass(py::classh<Matrix3d> &cls) {
                         self(1, 1), self(1, 2), self(2, 0), self(2, 1),
                         self(2, 2));
     });
-    cls.def("__reduce__", [cls](Matrix3d const &self) {
+    cls.def("__reduce__", [cls](Matrix3d const &self) -> py::tuple {
         auto args = py::make_tuple(self(0, 0), self(0, 1), self(0, 2),
                                    self(1, 0), self(1, 1), self(1, 2),
                                    self(2, 0), self(2, 1), self(2, 2));

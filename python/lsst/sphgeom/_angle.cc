@@ -94,7 +94,7 @@ void defineClass(py::classh<Angle> &cls) {
         return py::str("Angle({!r})").format(self.asRadians());
     });
 
-    cls.def("__reduce__", [cls](Angle const &self) {
+    cls.def("__reduce__", [cls](Angle const &self) -> py::tuple {
         return py::make_tuple(cls, py::make_tuple(self.asRadians()));
     });
 }

@@ -32,7 +32,6 @@
 
 #include "lsst/sphgeom/Circle.h"
 
-#include <charconv>
 #include <ostream>
 #include <stdexcept>
 #include <string>
@@ -43,6 +42,7 @@
 #include "lsst/sphgeom/Ellipse.h"
 #include "lsst/sphgeom/LonLat.h"
 #include "lsst/sphgeom/codec.h"
+#include "lsst/sphgeom/floatFormat.h"
 
 
 namespace lsst {
@@ -406,11 +406,9 @@ std::string Circle::toIvoaStcsBody(std::string const & frame) const {
         out.push_back(' ');
         out.append(frame);
     }
-    char buf[32];
     for (double v : {lon, lat, rad}) {
         out.push_back(' ');
-        auto r = std::to_chars(buf, buf + sizeof(buf), v);
-        out.append(buf, r.ptr - buf);
+        appendShortestDouble(out, v);
     }
     return out;
 }

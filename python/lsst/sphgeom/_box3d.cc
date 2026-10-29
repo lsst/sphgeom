@@ -162,7 +162,7 @@ void defineClass(py::classh<Box3d> &cls) {
                        "      {!r})")
                 .format(self.x(), self.y(), self.z());
     });
-    cls.def("__reduce__", [cls](Box3d const &self) {
+    cls.def("__reduce__", [cls](Box3d const &self) -> py::tuple {
         return py::make_tuple(cls,
                               py::make_tuple(self.x(), self.y(), self.z()));
     });

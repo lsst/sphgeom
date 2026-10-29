@@ -55,6 +55,10 @@ bool Region::contains(double lon, double lat) const {
     return contains(UnitVector3d(LonLat::fromRadians(lon, lat)));
 }
 
+bool Region::contains(Region const & r) const {
+    return (relate(r) & CONTAINS) != 0;
+}
+
 TriState
 Region::overlaps(Region const& other) const {
     // Default implementation just uses `relate`, and it returns unknown state

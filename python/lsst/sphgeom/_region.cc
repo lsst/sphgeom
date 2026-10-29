@@ -59,6 +59,8 @@ void defineClass(py::classh<Region> &cls) {
     cls.def("getBoundingCircle", &Region::getBoundingCircle);
     cls.def("contains", py::overload_cast<UnitVector3d const &>(&Region::contains, py::const_),
             "unitVector"_a);
+    cls.def("contains", py::overload_cast<Region const &>(&Region::contains, py::const_),
+            "region"_a);
     cls.def("contains", py::vectorize((bool (Region::*)(double, double, double) const)&Region::contains),
             "x"_a, "y"_a, "z"_a);
     cls.def("contains", py::vectorize((bool (Region::*)(double, double) const)&Region::contains),

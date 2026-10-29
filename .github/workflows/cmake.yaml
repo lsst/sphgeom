@@ -30,7 +30,7 @@ jobs:
           pip install \
             gcovr \
             numpy \
-            pybind11[global] \
+            'pybind11[global]' \
             pytest \
             pytest-cov \
             pyyaml \
@@ -44,7 +44,7 @@ jobs:
             -B ${{github.workspace}}/build
 
       - name: CMake build
-        run: cmake --build ${{github.workspace}}/build --parallel `nproc`
+        run: cmake --build ${{github.workspace}}/build --parallel "$(nproc)"
 
       - name: CMake test
         working-directory: ${{github.workspace}}/build

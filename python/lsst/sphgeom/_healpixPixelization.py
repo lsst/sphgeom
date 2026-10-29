@@ -58,10 +58,10 @@ class HealpixPixelization(PixelizationABC):
         self._nside_highres = self._nside * (2 ** (self._bit_shift // 2))
 
     @property
-    def nside(self):
+    def nside(self) -> int:
         return self._nside
 
-    def getLevel(self):
+    def getLevel(self) -> int:
         return self._level
 
     level = property(getLevel)
@@ -69,7 +69,7 @@ class HealpixPixelization(PixelizationABC):
     def universe(self) -> RangeSet:
         return RangeSet(0, self._npix)
 
-    def pixel(self, i) -> Region:
+    def pixel(self, i: int) -> Region:
         # This is arbitrarily returning 4 points on a side
         # to approximate the pixel shape.
         varr = hpg.angle_to_vector(*hpg.boundaries(self._nside, i, step=4))
@@ -81,7 +81,7 @@ class HealpixPixelization(PixelizationABC):
     def toString(self, i: int) -> str:
         return str(i)
 
-    def envelope(self, region: Region, maxRanges: int = 0):
+    def envelope(self, region: Region, maxRanges: int = 0) -> RangeSet:
         if maxRanges > 0:
             # If this is important, the rangeset can be consolidated.
             raise NotImplementedError("HealpixPixelization: maxRanges not implemented")
@@ -95,7 +95,7 @@ class HealpixPixelization(PixelizationABC):
 
         return RangeSet(pixels)
 
-    def interior(self, region: Region, maxRanges: int = 0):
+    def interior(self, region: Region, maxRanges: int = 0) -> RangeSet:
         if maxRanges > 0:
             # If this is important, the rangeset can be consolidated.
             raise NotImplementedError("HealpixPixelization: maxRanges not implemented")
@@ -113,7 +113,7 @@ class HealpixPixelization(PixelizationABC):
 
         return RangeSet(pixels)
 
-    def _interior_pixels_from_region(self, nside: int, region: Region):
+    def _interior_pixels_from_region(self, nside: int, region: Region) -> np.ndarray:
         """Get interior pixels from a region.
 
         Parameters
@@ -190,14 +190,15 @@ class HealpixPixelization(PixelizationABC):
         else:
             raise ValueError("Invalid region.")
 
-        return pixels
+        return pixels  # type: ignore[possibly-undefined]
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, HealpixPixelization):
             return self._level == other._level
+        return NotImplemented
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"HealpixPixelization({self._level})"
 
-    def __reduce__(self):
+    def __reduce__(self) -> tuple:
         return (self.__class__, (self._level,))

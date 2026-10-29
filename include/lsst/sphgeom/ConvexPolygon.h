@@ -127,7 +127,6 @@ public:
     /// `contains` returns true if the intersection of this convex polygon and x
     /// is equal to x.
     bool contains(UnitVector3d const & v) const override;
-    bool contains(Region const & r) const;
     ///@}
 
     using Region::contains;
@@ -184,7 +183,7 @@ private:
     ConvexPolygon() : _vertices() {}
 
     /// Polymorphic STC-S body builder; floating-point coordinates are
-    /// formatted with `std::to_chars` (shortest round-trip) so every
+    /// formatted with `appendShortestDouble` (shortest round-trip) so every
     /// emitted number parses back to the exact same `double` it was
     /// emitted from.  Called via `Region::toIvoaStcs`.
     std::string toIvoaStcsBody(std::string const & frame = "") const override;

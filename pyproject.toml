@@ -32,7 +32,7 @@ classifiers = [
 ]
 keywords = ["lsst"]
 dependencies = [
-   "numpy >=1.18",
+   "numpy >=2",
    "hpgeom >=0.8.0"
 ]
 dynamic = ["version"]
@@ -51,6 +51,9 @@ where = ["python"]
 
 [tool.setuptools]
 zip-safe = false
+
+[tool.setuptools.package-data]
+"lsst.sphgeom" = ["py.typed", "*.pyi"]
 
 [tool.setuptools.dynamic]
 version = { attr = "lsst_versions.get_lsst_version" }

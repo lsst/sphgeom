@@ -29,6 +29,8 @@
 """lsst.sphgeom
 """
 
+from typing import TypeAlias
+
 from ._continue_class import *
 from ._healpixPixelization import *
 from ._sphgeom import *
@@ -38,3 +40,5 @@ from .pixelization_abc import *
 from .version import *
 
 PixelizationABC.register(Pixelization)
+
+AnyVector3d: TypeAlias = Vector3d | UnitVector3d
